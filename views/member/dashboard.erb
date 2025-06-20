@@ -1,7 +1,7 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
-            <h1><i class="fas fa-tasks"></i> <%= current_member.name %>'s Kanban Board</h1>
+            <h1><i class="fas fa-tasks"></i> <%= current_member.name %>'s Chores</h1>
             <% if admin_logged_in? %>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTaskModal">
                     <i class="fas fa-plus"></i> Add New Task
@@ -11,94 +11,67 @@
     </div>
 </div>
 
-<!-- Quick Stats -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card stats-card">
-            <div class="card-body text-center">
-                <i class="fas fa-list fa-2x mb-2"></i>
-                <h4><%= @tasks.where(status: 'todo').count %></h4>
-                <p class="mb-0">To Do</p>
+<!-- Chores Board -->
+<div class="row gap-3">
+    <div class="col">
+        <div class="kanban-column">
+            <h5 class="text-center mb-3">
+                <i class="fas fa-inbox text-secondary"></i> Unassigned
+            </h5>
+            <div id="unassigned-column" class="task-list" data-status="unassigned">
+                <% @unassigned_tasks.each do |task| %>
+                    <%= erb :'common/task_card', locals: { task: task } %>
+                <% end %>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stats-card">
-            <div class="card-body text-center">
-                <i class="fas fa-spinner fa-2x mb-2"></i>
-                <h4><%= @tasks.where(status: 'in_progress').count %></h4>
-                <p class="mb-0">In Progress</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card stats-card">
-            <div class="card-body text-center">
-                <i class="fas fa-check-circle fa-2x mb-2"></i>
-                <h4><%= @tasks.where(status: 'done').count %></h4>
-                <p class="mb-0">Completed</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card stats-card">
-            <div class="card-body text-center">
-                <i class="fas fa-times-circle fa-2x mb-2"></i>
-                <h4><%= @tasks.where(status: 'skipped').count %></h4>
-                <p class="mb-0">Skipped</p>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Kanban Board -->
-<div class="row">
-    <div class="col-md-3">
+    <div class="col">
         <div class="kanban-column">
             <h5 class="text-center mb-3">
                 <i class="fas fa-list text-primary"></i> To Do
             </h5>
             <div id="todo-column" class="task-list" data-status="todo">
-                <% @tasks.select { |t| t.status == 'todo' }.each do |task| %>
+                <% @member_tasks.select { |t| t.status == 'todo' }.each do |task| %>
                     <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col">
         <div class="kanban-column">
             <h5 class="text-center mb-3">
                 <i class="fas fa-spinner text-warning"></i> In Progress
             </h5>
             <div id="in-progress-column" class="task-list" data-status="in_progress">
-                <% @tasks.select { |t| t.status == 'in_progress' }.each do |task| %>
+                <% @member_tasks.select { |t| t.status == 'in_progress' }.each do |task| %>
                     <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col">
         <div class="kanban-column">
             <h5 class="text-center mb-3">
                 <i class="fas fa-check-circle text-success"></i> Done
             </h5>
             <div id="done-column" class="task-list" data-status="done">
-                <% @tasks.select { |t| t.status == 'done' }.each do |task| %>
+                <% @member_tasks.select { |t| t.status == 'done' }.each do |task| %>
                     <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col">
         <div class="kanban-column">
             <h5 class="text-center mb-3">
                 <i class="fas fa-times-circle text-danger"></i> Skipped
             </h5>
             <div id="skipped-column" class="task-list" data-status="skipped">
-                <% @tasks.select { |t| t.status == 'skipped' }.each do |task| %>
+                <% @member_tasks.select { |t| t.status == 'skipped' }.each do |task| %>
                     <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>

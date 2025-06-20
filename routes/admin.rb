@@ -28,8 +28,9 @@ namespace '/admin' do
   end
 
   get '/dashboard' do
-    @members = Member.where(active: true)
-    @tasks_by_member = Task.includes(:member).order(:created_at).group_by(&:member)
+    @members = Member.where(active: true).order(:name)
+    @tasks_by_member = Task.includes(:member).order(:created_at).group_by(&:member_id)
+    @tasks_by_status = Task.order(:created_at).group_by(&:status)
     erb :'admin/dashboard'
   end
 
@@ -39,6 +40,7 @@ namespace '/admin' do
       title: params[:title],
       description: params[:description],
       difficulty: params[:difficulty],
+      recurrence: params[:recurrence],
       category: params[:category],
       member_id: params[:member_id],
       due_date: params[:due_date],

@@ -1,6 +1,16 @@
-# Household Chore Management
+# Household Management System
 
-A simple and elegant household chore management application built with Ruby and Sinatra. It provides a visual interface for family members to see and complete their assigned tasks, and a separate administrative area for managing the household.
+A simple web application for managing household tasks and activities. Built with Ruby, Sinatra, and SQLite.
+
+## Features
+
+- **Admin Dashboard**: Create and manage tasks, view member statistics, and generate reports
+- **Member Dashboard**: View and manage assigned tasks with a simple interface
+- **Task Management**: Create, assign, and track task completion
+- **Chores Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done).
+- **Points System**: Tasks earn points based on difficulty
+- **Recurring Tasks**: Support for daily and weekly recurring tasks
+- **Member Profiles**: Customizable avatars and names
 
 ## Core Features
 
@@ -101,7 +111,7 @@ The application follows a modular structure for better organization and maintain
 
 ## Features
 
-### 🎯 Kanban Board Interface
+### 🎯 Chores Board Interface
 - **Drag & Drop**: Move tasks between columns (To Do → In Progress → Done/Skipped)
 - **Visual Task Management**: Color-coded difficulty levels and user assignments
 - **Real-time Updates**: AJAX-powered status changes without page reloads
@@ -159,13 +169,13 @@ bundle exec puma -p 4567
 ### Option 3: Systemd Service (Recommended)
 1. Create service file:
    ```bash
-   sudo nano /etc/systemd/system/household-chores.service
+   sudo nano /etc/systemd/system/household.service
    ```
 
 2. Add content:
    ```ini
    [Unit]
-   Description=Household Chores App
+   Description=Household App
    After=network.target
 
    [Service]
@@ -182,8 +192,8 @@ bundle exec puma -p 4567
 
 3. Enable and start:
    ```bash
-   sudo systemctl enable household-chores
-   sudo systemctl start household-chores
+   sudo systemctl enable household
+   sudo systemctl start household
    ```
 
 ## Usage Guide
@@ -195,7 +205,7 @@ bundle exec puma -p 4567
 4. **Assign Rewards**: Use the reward suggestions to motivate children
 
 ### For Children (Users)
-1. **View Tasks**: See your assigned tasks on the Kanban board
+1. **View Tasks**: See your assigned tasks on the chores board
 2. **Start Tasks**: Click "Start" to move tasks to "In Progress"
 3. **Complete Tasks**: Click "Complete" when finished to earn points
 4. **Skip Tasks**: If needed, provide a reason when skipping
@@ -251,7 +261,7 @@ PORT=4567
 
 ### Logs
 - **Development**: Check console output
-- **Production**: Check systemd logs: `sudo journalctl -u household-chores`
+- **Production**: Check systemd logs: `sudo journalctl -u household`
 
 ## Security Notes
 

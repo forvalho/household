@@ -30,6 +30,8 @@ RSpec.configure do |config|
 
   # Configure Capybara
   Capybara.app = Sinatra::Application
+  Capybara.default_driver = :rack_test
+  Capybara.javascript_driver = :selenium_chrome_headless
 
   # Configure DatabaseCleaner
   config.before(:suite) do

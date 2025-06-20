@@ -1,65 +1,155 @@
 <div class="task-card difficulty-<%= task.difficulty %>" data-task-id="<%= task.id %>" data-status="<%= task.status %>">
-    <div class="d-flex justify-content-between align-items-start mb-2">
-        <h6 class="mb-0 fw-bold"><%= task.title %></h6>
-        <span class="badge points-badge"><%= task.points_value %> pts</span>
-    </div>
-
-    <% if task.description.present? %>
-        <p class="small text-muted mb-2"><%= task.description %></p>
-    <% end %>
-
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="user-avatar">
-            <%= task.member.name.first.upcase %>
+    <div class="card-body d-flex flex-column">
+        <!-- Top Section: Title & Points -->
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="mb-0 fw-bold"><%= task.title %></h6>
+            <span class="badge points-badge"><%= task.points_value %> pts</span>
         </div>
-        <small class="text-muted">
-            <i class="fas fa-calendar"></i>
-            <%= format_date(task.created_at) %>
-        </small>
-    </div>
 
-    <% if task.category.present? %>
-        <div class="mb-2">
-            <span class="badge bg-secondary"><%= task.category %></span>
-        </div>
-    <% end %>
-
-    <% if task.due_date.present? %>
-        <div class="mb-2">
-            <small class="text-muted">
-                <i class="fas fa-clock"></i> Due: <%= format_date(task.due_date) %>
-            </small>
-        </div>
-    <% end %>
-
-    <div class="d-flex gap-1">
-        <% if task.status == 'todo' %>
-            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeTaskModal" data-task-id="<%= task.id %>">
-                <i class="fas fa-play"></i> Start
-            </button>
-        <% elsif task.status == 'in_progress' %>
-            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeTaskModal" data-task-id="<%= task.id %>">
-                <i class="fas fa-check"></i> Complete
-            </button>
-            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#skipTaskModal" data-task-id="<%= task.id %>">
-                <i class="fas fa-times"></i> Skip
-            </button>
-        <% elsif task.status == 'done' %>
-            <span class="badge bg-success">
-                <i class="fas fa-check-circle"></i> Completed
-            </span>
-        <% elsif task.status == 'skipped' %>
-            <span class="badge bg-warning text-dark">
-                <i class="fas fa-times-circle"></i> Skipped
-            </span>
+        <!-- Optional Description -->
+        <% if task.description.present? %>
+            <p class="small text-muted mb-auto"><%= task.description %></p>
+        <% else %>
+            <div class="flex-grow-1"></div> <!-- Spacer to push content down -->
         <% end %>
-    </div>
 
-    <% if member_selected? && task.member_id == current_member.id && task.status != 'done' %>
-        <div class="mt-2 d-grid">
-            <form action="/tasks/<%= task.id %>/complete" method="post">
-                 <button type="submit" class="btn btn-sm btn-success w-100">Complete</button>
-            </form>
+        <!-- Bottom Section: Actions & Tags -->
+        <div>
+            <!-- Actions: Assignee & Move To -->
+            <div class="task-actions-container mb-2">
+                <!-- Assignee Dropdown -->
+                <div class="assignee-selector dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <% if task.member %>
+                            <% if task.member.avatar_url.present? %>
+                                <img src="<%= task.member.avatar_url %>" class="user-avatar" alt="<%= task.member.name %>">
+                            <% else %>
+                                <div class="user-avatar" title="<%= task.member.name %>"><%= task.member.name.first.upcase %></div>
+                            <% end %>
+                            <span class="ms-2"><%= task.member.name %></span>
+                        <% else %>
+                            <i class="fas fa-user-slash"></i>
+                            <span class="ms-2">Unassigned</span>
+                        <% end %>
+                    </button>
+                    <ul class="dropdown-menu assignee-dropdown-menu">
+                        <% can_assign = admin_logged_in? %>
+                        <li>
+                            <form action="/tasks/<%= task.id %>/assignee" method="post" class="assignee-form">
+                                <input type="hidden" name="_method" value="patch">
+                                <input type="hidden" name="member_id" value="">
+                                <button type="submit" class="dropdown-item" <%= 'disabled' unless can_assign %>>
+                                    <i class="fas fa-user-slash me-2"></i>Unassigned
+                                </button>
+                            </form>
+                        </li>
+                        <% Member.all.order(:name).each do |member| %>
+                            <li>
+                                <form action="/tasks/<%= task.id %>/assignee" method="post" class="assignee-form">
+                                    <input type="hidden" name="_method" value="patch">
+                                    <input type="hidden" name="member_id" value="<%= member.id %>">
+                                    <button type="submit" class="dropdown-item <%= 'active' if task.member_id == member.id %>" <%= 'disabled' unless can_assign %>>
+                                        <% if member.avatar_url.present? %>
+                                            <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
+                                        <% else %>
+                                            <div class="user-avatar me-2"><%= member.name.first.upcase %></div>
+                                        <% end %>
+                                        <%= member.name %>
+                                        <% if task.member_id == member.id %>
+                                            <i class="fas fa-check ms-auto"></i>
+                                        <% end %>
+                                    </button>
+                                </form>
+                            </li>
+                        <% end %>
+                    </ul>
+                </div>
+
+                <!-- Action Dropdown -->
+                <%
+                  can_change_status = admin_logged_in? || (member_selected? && task.member_id == current_member.id)
+                  valid_statuses = {
+                    'unassigned' => [],
+                    'todo' => ['in_progress', 'skipped'],
+                    'in_progress' => ['done', 'skipped'],
+                    'done' => [],
+                    'skipped' => ['todo']
+                  }
+                  available_actions = valid_statuses[task.status] || []
+                %>
+                <div class="action-dropdown dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-caret-square-down me-1"></i> Move to...
+                    </button>
+                    <ul class="dropdown-menu">
+                        <!-- To Do -->
+                        <li>
+                            <form action="/tasks/<%= task.id %>/status" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="put"><input type="hidden" name="status" value="todo">
+                                <button type="submit" class="dropdown-item" <%= 'disabled' if !can_change_status || !available_actions.include?('todo') %>>
+                                    <i class="fas fa-list fa-fw me-2 text-primary"></i> To Do
+                                </button>
+                            </form>
+                        </li>
+                        <!-- In Progress -->
+                        <li>
+                            <form action="/tasks/<%= task.id %>/status" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="put"><input type="hidden" name="status" value="in_progress">
+                                <button type="submit" class="dropdown-item" <%= 'disabled' if !can_change_status || !available_actions.include?('in_progress') %>>
+                                    <i class="fas fa-spinner fa-fw me-2 text-warning"></i> In Progress
+                                </button>
+                            </form>
+                        </li>
+                        <!-- Done -->
+                        <li>
+                            <form action="/tasks/<%= task.id %>/complete" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item" <%= 'disabled' if !can_change_status || !available_actions.include?('done') %>>
+                                    <i class="fas fa-check-circle fa-fw me-2 text-success"></i> Done
+                                </button>
+                            </form>
+                        </li>
+                        <!-- Skipped -->
+                        <li>
+                            <form action="/tasks/<%= task.id %>/status" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="put"><input type="hidden" name="status" value="skipped">
+                                <button type="submit" class="dropdown-item" <%= 'disabled' if !can_change_status || !available_actions.include?('skipped') %>>
+                                    <i class="fas fa-times-circle fa-fw me-2 text-danger"></i> Skipped
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tags: Category & Due Date -->
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <% if task.category.present? %>
+                        <span class="badge bg-secondary"><%= task.category %></span>
+                    <% end %>
+                </div>
+                <div>
+                    <% if task.due_date %>
+                        <%
+                          due_date_class = 'text-muted'
+                          if task.due_date < Date.today
+                            due_date_class = 'text-danger fw-bold'
+                          elsif task.due_date == Date.today
+                            due_date_class = 'text-primary fw-bold'
+                          end
+                        %>
+                        <small class="<%= due_date_class %>">
+                            <i class="fas fa-clock"></i> <%= format_date(task.due_date) %>
+                        </small>
+                    <% end %>
+                </div>
+            </div>
+
+            <% if task.recurrence != 'none' && task.completed_today? %>
+                <div class="alert alert-success py-1 px-2 small mt-2">
+                    <i class="fas fa-check-circle"></i> Completed for today!
+                </div>
+            <% end %>
         </div>
-    <% end %>
+    </div>
 </div>

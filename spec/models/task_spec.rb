@@ -18,6 +18,11 @@ RSpec.describe Task, type: :model do
         task = Task.new(title: 'Test', member: member, status: 'invalid_status')
         expect(task).not_to be_valid
     end
+
+    it 'is invalid with a bad recurrence' do
+      task = Task.new(title: 'Test', member_id: member.id, recurrence: 'invalid_recurrence')
+      expect(task).not_to be_valid
+    end
   end
 
   describe 'associations' do

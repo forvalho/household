@@ -6,7 +6,8 @@ end
 
 get '/dashboard' do
   redirect '/' unless member_selected?
-  @tasks = current_member.tasks.includes(:member).order(:created_at)
+  @member_tasks = Task.where(member: current_member).includes(:member).order(:created_at)
+  @unassigned_tasks = Task.where(member_id: nil, status: 'unassigned').order(:created_at)
   erb :'member/dashboard'
 end
 

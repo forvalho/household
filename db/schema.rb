@@ -15,8 +15,9 @@ ActiveRecord::Schema.define do
   create_table :tasks, if_not_exists: true do |t|
     t.string :title, null: false
     t.text :description
-    t.string :status, default: 'todo'
+    t.string :status, default: 'unassigned'
     t.string :difficulty, default: 'medium'
+    t.string :recurrence, default: 'none', null: false
     t.string :category
     t.integer :member_id
     t.date :due_date
