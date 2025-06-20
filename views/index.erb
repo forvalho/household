@@ -60,18 +60,31 @@
     .admin-login a:hover {
         color: #343a40;
     }
-    .page-title {
+    .welcome-message {
         position: absolute;
         top: 40px;
-        width: 100%;
+        left: 50%;
+        transform: translateX(-50%);
         text-align: center;
         font-size: 2.5rem;
         color: #343a40;
         font-weight: 700;
+        margin-bottom: 2rem;
+    }
+    .welcome-subtitle {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        font-size: 1.2rem;
+        color: #6c757d;
+        font-weight: 400;
     }
 </style>
 
-<h1 class="page-title">Who's doing chores?</h1>
+<div class="welcome-message">Welcome to Household Chores!</div>
+<div class="welcome-subtitle">Choose your profile to get started</div>
 
 <div class="profile-container">
     <% @members.each do |member| %>
