@@ -28,20 +28,20 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <h5>To Do</h5>
-                                <% @tasks_by_member[member].select { |t| t.status == 'todo' }.each do |task| %>
-                                    <%= erb :_task_card, locals: { task: task } %>
+                                <% @tasks_by_member[member]&.select { |t| t.status == 'todo' }&.each do |task| %>
+                                    <%= erb :'common/task_card', locals: { task: task } %>
                                 <% end %>
                             </div>
                             <div class="col-md-4">
                                 <h5>In Progress</h5>
-                                <% @tasks_by_member[member].select { |t| t.status == 'in_progress' }.each do |task| %>
-                                    <%= erb :_task_card, locals: { task: task } %>
+                                <% @tasks_by_member[member]&.select { |t| t.status == 'in_progress' }&.each do |task| %>
+                                    <%= erb :'common/task_card', locals: { task: task } %>
                                 <% end %>
                             </div>
                             <div class="col-md-4">
                                 <h5>Done / Skipped</h5>
-                                <% @tasks_by_member[member].select { |t| ['done', 'skipped'].include?(t.status) }.each do |task| %>
-                                    <%= erb :_task_card, locals: { task: task } %>
+                                <% @tasks_by_member[member]&.select { |t| ['done', 'skipped'].include?(t.status) }.each do |task| %>
+                                    <%= erb :'common/task_card', locals: { task: task } %>
                                 <% end %>
                             </div>
                         </div>

@@ -59,8 +59,8 @@
                 <i class="fas fa-list text-primary"></i> To Do
             </h5>
             <div id="todo-column" class="task-list" data-status="todo">
-                <% @tasks.where(status: 'todo').each do |task| %>
-                    <%= erb :_task_card, locals: { task: task } %>
+                <% @tasks.select { |t| t.status == 'todo' }.each do |task| %>
+                    <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>
@@ -72,8 +72,8 @@
                 <i class="fas fa-spinner text-warning"></i> In Progress
             </h5>
             <div id="in-progress-column" class="task-list" data-status="in_progress">
-                <% @tasks.where(status: 'in_progress').each do |task| %>
-                    <%= erb :_task_card, locals: { task: task } %>
+                <% @tasks.select { |t| t.status == 'in_progress' }.each do |task| %>
+                    <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>
@@ -85,8 +85,8 @@
                 <i class="fas fa-check-circle text-success"></i> Done
             </h5>
             <div id="done-column" class="task-list" data-status="done">
-                <% @tasks.where(status: 'done').each do |task| %>
-                    <%= erb :_task_card, locals: { task: task } %>
+                <% @tasks.select { |t| t.status == 'done' }.each do |task| %>
+                    <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>
@@ -98,8 +98,8 @@
                 <i class="fas fa-times-circle text-danger"></i> Skipped
             </h5>
             <div id="skipped-column" class="task-list" data-status="skipped">
-                <% @tasks.where(status: 'skipped').each do |task| %>
-                    <%= erb :_task_card, locals: { task: task } %>
+                <% @tasks.select { |t| t.status == 'skipped' }.each do |task| %>
+                    <%= erb :'common/task_card', locals: { task: task } %>
                 <% end %>
             </div>
         </div>

@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="avatar-selector-container d-none" id="avatarSelector">
-                        <%= erb :_avatar_selector, locals: { seed_name: @member.name, avatar_url: @member.avatar_url } %>
+                        <%= erb :'common/avatar_selector', locals: { seed_name: @member.name, avatar_url: @member.avatar_url } %>
                     </div>
 
                     <hr class="my-4">

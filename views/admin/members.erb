@@ -83,7 +83,7 @@
                     </div>
                     <div class="avatar-selector-container" id="newAvatarSelector">
                         <label class="form-label">Avatar</label>
-                        <%= erb :_avatar_selector, locals: { seed_name: '', avatar_url: '' } %>
+                        <%= erb :'common/avatar_selector', locals: { seed_name: '', avatar_url: '' } %>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -125,7 +125,7 @@
                     </div>
 
                     <div class="avatar-selector-container d-none" id="editAvatarSelector" data-seed-name="">
-                        <%= erb :_avatar_selector, locals: { seed_name: "", avatar_url: "" } %>
+                        <%= erb :'common/avatar_selector', locals: { seed_name: "", avatar_url: "" } %>
                     </div>
                 </div>
                 <div class="modal-footer">
