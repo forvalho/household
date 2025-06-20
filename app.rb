@@ -1,6 +1,5 @@
 require 'sinatra'
 require 'sinatra/activerecord'
-require 'sinatra/flash'
 require 'bcrypt'
 require 'json'
 require 'date'
@@ -8,9 +7,8 @@ require 'date'
 # Database configuration
 set :database, { adapter: 'sqlite3', database: 'household.db' }
 
-# Enable sessions and flash messages
+# Enable sessions
 enable :sessions
-register Sinatra::Flash
 
 # Models
 class User < ActiveRecord::Base
@@ -137,6 +135,15 @@ helpers do
   def calculate_user_skips(user, start_date = 30.days.ago)
     user.task_skips.where('skipped_at >= ?', start_date).count
   end
+
+  # Flash message helpers
+  def flash_message
+    session.delete(:flash) if session[:flash]
+  end
+
+  def set_flash(type, message)
+    session[:flash] = { type: type, message: message }
+  end
 end
 
 # Routes
@@ -153,17 +160,17 @@ post '/login' do
   user = User.find_by(username: params[:username])
   if user && BCrypt::Password.new(user.password_digest) == params[:password]
     session[:user_id] = user.id
-    flash[:success] = "Welcome back, #{user.name}!"
+    set_flash('success', "Welcome back, #{user.name}!")
     redirect '/dashboard'
   else
-    flash[:error] = 'Invalid username or password'
+    set_flash('error', 'Invalid username or password')
     redirect '/login'
   end
 end
 
 get '/logout' do
   session.clear
-  flash[:success] = 'You have been logged out'
+  set_flash('success', 'You have been logged out')
   redirect '/login'
 end
 
@@ -192,9 +199,9 @@ post '/tasks' do
   )
 
   if task.save
-    flash[:success] = 'Task created successfully!'
+    set_flash('success', 'Task created successfully!')
   else
-    flash[:error] = 'Error creating task'
+    set_flash('error', 'Error creating task')
   end
 
   redirect '/dashboard'
@@ -207,7 +214,7 @@ put '/tasks/:id/status' do
 
   # Check permissions
   unless current_user.is_admin? || task.user_id == current_user.id
-    flash[:error] = 'You can only move your own tasks'
+    set_flash('error', 'You can only move your own tasks')
     redirect '/dashboard'
   end
 
@@ -223,7 +230,7 @@ post '/tasks/:id/complete' do
   task = Task.find(params[:id])
 
   unless task.user_id == current_user.id
-    flash[:error] = 'You can only complete your own tasks'
+    set_flash('error', 'You can only complete your own tasks')
     redirect '/dashboard'
   end
 
@@ -236,7 +243,7 @@ post '/tasks/:id/complete' do
 
   task.update(status: 'done')
 
-  flash[:success] = "Task completed! +#{task.points_value} points"
+  set_flash('success', "Task completed! +#{task.points_value} points")
   redirect '/dashboard'
 end
 
@@ -246,7 +253,7 @@ post '/tasks/:id/skip' do
   task = Task.find(params[:id])
 
   unless task.user_id == current_user.id
-    flash[:error] = 'You can only skip your own tasks'
+    set_flash('error', 'You can only skip your own tasks')
     redirect '/dashboard'
   end
 
@@ -259,7 +266,7 @@ post '/tasks/:id/skip' do
 
   task.update(status: 'skipped')
 
-  flash[:warning] = 'Task skipped with reason recorded'
+  set_flash('warning', 'Task skipped with reason recorded')
   redirect '/dashboard'
 end
 
@@ -283,9 +290,9 @@ post '/users' do
   )
 
   if user.save
-    flash[:success] = 'User created successfully!'
+    set_flash('success', 'User created successfully!')
   else
-    flash[:error] = 'Error creating user'
+    set_flash('error', 'Error creating user')
   end
 
   redirect '/users'
