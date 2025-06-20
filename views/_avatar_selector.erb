@@ -1,0 +1,150 @@
+<!-- Hidden input to store the final avatar URL -->
+<input type="hidden" class="avatar-url-input" name="avatar_url" value="<%= locals[:avatar_url] || '' %>">
+
+<div class="avatar-creator-grid">
+    <!-- Left Panel: Style List -->
+    <div class="style-list-container">
+        <h5 class="mb-3">Style</h5>
+        <ul class="style-list">
+            <% AVATAR_STYLES.each_with_index do |style, i| %>
+                <%
+                    # Generate a more interesting seed for each preview
+                    preview_seed = locals[:seed_name] ? Digest::MD5.hexdigest(locals[:seed_name])[i*2, 2] : "style-#{i}"
+                %>
+                <li class="style-list-item" data-style="<%= style %>">
+                    <img src="https://api.dicebear.com/8.x/<%= style %>/svg?seed=<%= preview_seed %>&radius=50" alt="<%= style %> preview">
+                    <span><%= style.gsub('-', ' ').capitalize %></span>
+                </li>
+            <% end %>
+        </ul>
+    </div>
+
+    <!-- Right Panel: Preview and Controls -->
+    <div class="preview-pane">
+        <h5>Avatar Preview</h5>
+        <img class="main-preview-img" src="" alt="Main Avatar Preview">
+
+        <div class="controls-pane">
+            <div class="text-center">
+                <label class="form-label mb-1">Background</label>
+                <div class="color-grid">
+                    <% AVATAR_BACKGROUND_COLORS.each do |color| %>
+                        <div class="color-swatch" data-color="<%= color %>" style="background-color: <%= color %>;"></div>
+                    <% end %>
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-center">
+                 <label class="form-label mb-1">Randomize</label>
+                 <div class="d-flex align-items-center" style="gap: 1.25rem; font-size: 1.2rem;">
+                    <i class="fas fa-dice randomize-btn" title="Randomize Avatar"></i>
+                    <i class="fas fa-palette randomize-color-btn" title="Randomize Color"></i>
+                 </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary cancel-avatar-changes-btn mt-2">
+            Cancel
+        </button>
+    </div>
+</div>
+
+<script>
+// Make this function globally available to be called from other scripts.
+window.initializeAvatarSelector = function(container, existingUrl, seedName) {
+    if (!container || container.dataset.initialized === 'true') {
+        return;
+    }
+
+    // --- Element References ---
+    const previewImg = container.querySelector('.main-preview-img');
+    const urlInput = container.querySelector('.avatar-url-input');
+    const styleListItems = container.querySelectorAll('.style-list-item');
+    const randomizeBtn = container.querySelector('.randomize-btn');
+    const randomizeColorBtn = container.querySelector('.randomize-color-btn');
+    const colorSwatches = container.querySelectorAll('.color-swatch');
+    const BG_COLORS = JSON.parse('<%= AVATAR_BACKGROUND_COLORS.to_json %>');
+
+    // --- State ---
+    let currentStyle = 'initials';
+    let currentSeed = seedName || 'default';
+    let currentBgColor = '#ffffff';
+
+    // --- Functions ---
+    function generateAvatarUrl() {
+        let url = `https://api.dicebear.com/8.x/${currentStyle}/svg?seed=${encodeURIComponent(currentSeed)}`;
+        if (currentBgColor && currentBgColor !== '#ffffff') {
+            url += `&backgroundColor=${currentBgColor.substring(1)}`;
+        }
+        url += '&radius=50' // Ensure rounded avatars
+        return url;
+    }
+
+    function updateAvatar() {
+        const newUrl = generateAvatarUrl();
+        previewImg.src = newUrl;
+        urlInput.value = newUrl;
+    }
+
+    function setActiveStyle(styleName) {
+        styleListItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.style === styleName);
+        });
+    }
+
+    function setActiveColor(color) {
+        colorSwatches.forEach(swatch => {
+            swatch.classList.toggle('active', swatch.dataset.color === color);
+        });
+    }
+
+    // --- Event Listeners ---
+    styleListItems.forEach(item => {
+        item.addEventListener('click', function() {
+            currentStyle = this.dataset.style;
+            setActiveStyle(currentStyle);
+            updateAvatar();
+        });
+    });
+
+    randomizeBtn.addEventListener('click', function() {
+        currentSeed = Math.random().toString(36).substring(2, 12);
+        updateAvatar();
+    });
+
+    randomizeColorBtn.addEventListener('click', function() {
+        currentBgColor = BG_COLORS[Math.floor(Math.random() * BG_COLORS.length)];
+        setActiveColor(currentBgColor);
+        updateAvatar();
+    });
+
+    colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', function() {
+            currentBgColor = this.dataset.color;
+            setActiveColor(currentBgColor);
+            updateAvatar();
+        });
+    });
+
+    // --- Initialization ---
+    urlInput.value = existingUrl; // Start with the initial URL
+    if (existingUrl) {
+        try {
+            const url = new URL(existingUrl);
+            const pathParts = url.pathname.split('/');
+            currentStyle = pathParts[pathParts.length - 2] || 'initials';
+            currentSeed = url.searchParams.get('seed') || currentSeed;
+            const bgColorParam = url.searchParams.get('backgroundColor');
+            if (bgColorParam) {
+                currentBgColor = `#${bgColorParam}`;
+            }
+        } catch (e) {
+            console.error('Could not parse existing avatar URL:', e);
+        }
+    }
+
+    setActiveStyle(currentStyle);
+    setActiveColor(currentBgColor);
+    updateAvatar();
+
+    container.dataset.initialized = 'true';
+};
+</script>

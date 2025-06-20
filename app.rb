@@ -4,6 +4,22 @@ require 'sinatra/namespace'
 require 'bcrypt'
 require 'json'
 require 'date'
+require 'digest/md5'
+
+AVATAR_STYLES = [
+  "adventurer", "adventurer-neutral", "avataaars", "avataaars-neutral", "big-ears",
+  "big-ears-neutral", "big-smile", "bottts", "bottts-neutral", "croodles",
+  "croodles-neutral", "fun-emoji", "icons", "identicon", "initials", "lorelei",
+  "lorelei-neutral", "micah", "miniavs", "open-peeps", "personas", "pixel-art",
+  "pixel-art-neutral", "shapes", "thumbs"
+].freeze
+
+AVATAR_BACKGROUND_COLORS = [
+  '#ffffff', '#e0e0e0', '#616161', '#212121',
+  '#f44336', '#e91e63', '#9c27b0', '#673ab7',
+  '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4',
+  '#4caf50', '#8bc34a', '#ffeb3b', '#ff9800'
+].freeze
 
 # Database configuration
 set :database, { adapter: 'sqlite3', database: 'household.db' }
@@ -55,20 +71,20 @@ end
 
 # --- Database Schema ---
 ActiveRecord::Schema.define do
-  create_table :admins, force: true do |t|
+  create_table :admins, if_not_exists: true do |t|
     t.string :username, null: false
     t.string :password_digest, null: false
     t.timestamps
   end
 
-  create_table :members, force: true do |t|
+  create_table :members, if_not_exists: true do |t|
     t.string :name, null: false
     t.string :avatar_url
     t.boolean :active, default: true
     t.timestamps
   end
 
-  create_table :tasks, force: true do |t|
+  create_table :tasks, if_not_exists: true do |t|
     t.string :title, null: false
     t.text :description
     t.string :status, default: 'todo'
@@ -80,7 +96,7 @@ ActiveRecord::Schema.define do
     t.timestamps
   end
 
-  create_table :task_completions, force: true do |t|
+  create_table :task_completions, if_not_exists: true do |t|
     t.integer :task_id, null: false
     t.integer :member_id, null: false
     t.datetime :completed_at, null: false
@@ -88,7 +104,7 @@ ActiveRecord::Schema.define do
     t.timestamps
   end
 
-  create_table :task_skips, force: true do |t|
+  create_table :task_skips, if_not_exists: true do |t|
     t.integer :task_id, null: false
     t.integer :member_id, null: false
     t.datetime :skipped_at, null: false
@@ -123,7 +139,7 @@ helpers do
 
   # Flash message helpers
   def flash_message
-    session.delete(:flash) if session[:flash]
+    session.delete(:flash)
   end
 
   def set_flash(type, message)
@@ -154,6 +170,13 @@ helpers do
     return 0 if total_tasks == 0
     (completed_tasks.to_f / total_tasks * 100).round(1)
   end
+
+  # Helper to find a member or halt
+  def find_member_or_halt(id)
+    member = Member.find_by(id: id)
+    halt 404, "Member not found" unless member
+    member
+  end
 end
 
 # --- Routes ---
@@ -168,7 +191,7 @@ end
 namespace '/admin' do
   # Admin Authentication
   get '/login' do
-    erb :login
+    erb :login, layout: false
   end
 
   post '/login' do
@@ -237,6 +260,18 @@ namespace '/admin' do
     redirect '/admin/members'
   end
 
+  post '/members/:id' do
+    @member = find_member_or_halt(params[:id])
+    if @member.update(name: params[:name], avatar_url: params[:avatar_url])
+      set_flash('success', 'Member updated successfully!')
+      redirect '/admin/members'
+    else
+      set_flash('error', 'Error updating member: ' + @member.errors.full_messages.join(', '))
+      # We can't re-render a modal, so we redirect back with an error
+      redirect '/admin/members'
+    end
+  end
+
   # Admin Management
   get '/admins' do
     @admins = Admin.all
@@ -282,11 +317,7 @@ get '/members/:id/select' do
 end
 
 get '/dashboard' do
-  # An admin can view the main dashboard, a member sees their own.
-  if !member_selected?
-    redirect '/'
-  end
-
+  redirect '/' unless member_selected?
   @tasks = current_member.tasks.includes(:member).order(:created_at)
   erb :dashboard
 end
@@ -398,6 +429,26 @@ get '/reports' do
   end
 
   erb :reports
+end
+
+# --- Member-facing routes ---
+
+get '/profile/edit' do
+  redirect '/' unless member_selected?
+  @member = current_member
+  erb :edit_profile
+end
+
+post '/profile' do
+  redirect '/' unless member_selected?
+  @member = current_member
+  if @member.update(name: params[:name], avatar_url: params[:avatar_url])
+    set_flash('success', 'Profile updated successfully!')
+    redirect '/dashboard'
+  else
+    set_flash('error', 'Error updating profile: ' + @member.errors.full_messages.join(', '))
+    erb :edit_profile
+  end
 end
 
 # --- Seed Data ---

@@ -1,0 +1,9 @@
+# Ignore database files
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore gems and environment files
+/vendor/
+.bundle/
+.env*

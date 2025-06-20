@@ -1,0 +1,71 @@
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg mt-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-user-edit"></i> Edit Your Profile</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="/profile">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="<%= @member.name %>" required>
+                    </div>
+
+                    <div id="avatarPreviewContainer" data-original-url="<%= @member.avatar_url %>">
+                        <label class="form-label">Current Avatar</label>
+                        <div>
+                            <img src="<%= @member.avatar_url %>" alt="Current Avatar" class="me-3" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            <button type="button" class="btn btn-secondary show-avatar-selector-btn">
+                                <i class="fas fa-sync-alt"></i> Change
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="avatar-selector-container d-none" id="avatarSelector">
+                        <%= erb :_avatar_selector, locals: { seed_name: @member.name, avatar_url: @member.avatar_url } %>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-end">
+                        <a href="/dashboard" class="btn btn-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const showBtn = document.querySelector('.show-avatar-selector-btn');
+    const previewContainer = document.getElementById('avatarPreviewContainer');
+    const selectorContainer = document.getElementById('avatarSelector');
+    const cancelBtn = selectorContainer.querySelector('.cancel-avatar-changes-btn');
+
+    showBtn.addEventListener('click', function() {
+        // This is the lazy-loading part.
+        if (selectorContainer.dataset.initialized !== 'true') {
+             const originalUrl = previewContainer.dataset.originalUrl;
+             const memberName = document.getElementById('name').value;
+             window.initializeAvatarSelector(selectorContainer, originalUrl, memberName);
+        }
+
+        previewContainer.classList.add('d-none');
+        selectorContainer.classList.remove('d-none');
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        const originalUrl = previewContainer.dataset.originalUrl;
+        const urlInput = selectorContainer.querySelector('.avatar-url-input');
+
+        urlInput.value = originalUrl;
+
+        selectorContainer.classList.add('d-none');
+        previewContainer.classList.remove('d-none');
+    });
+});
+</script>
