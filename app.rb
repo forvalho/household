@@ -92,8 +92,35 @@ end
 # Homepage (Profile selection)
 get '/' do
   session.clear
-  @members = Member.where(active: true)
+  @members = Member.where(active: true).order(:name)
   erb :index
+end
+
+# Leaderboard page
+get '/leaderboard' do
+  @period = params[:period] || '30'
+  @start_date = @period.to_i.days.ago
+  @members = Member.where(active: true)
+
+  @leaderboard_stats = @members.map do |member|
+    {
+      member: member,
+      points: calculate_member_points(member, @start_date),
+      medals: calculate_member_medals(member, @start_date),
+      completions: member.task_completions.where('completed_at >= ?', @start_date).count
+    }
+  end
+
+  # Calculate Performance Score
+  max_points = @leaderboard_stats.map { |s| s[:points] }.max.to_f
+  @leaderboard_stats.each do |stat|
+    stat[:performance_score] = max_points > 0 ? ((stat[:points] / max_points) * 100).round : 0
+  end
+
+  # Sort by points descending, then by completion rate
+  @leaderboard_stats.sort_by! { |stat| [-stat[:points], -stat[:performance_score]] }
+
+  erb :leaderboard
 end
 
 # Load schema first, then seed data

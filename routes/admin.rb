@@ -90,10 +90,16 @@ namespace '/admin' do
       {
         member: member,
         points: calculate_member_points(member, @start_date),
+        medals: calculate_member_medals(member, @start_date),
         skips: calculate_member_skips(member, @start_date),
-        completions: member.task_completions.where('completed_at >= ?', @start_date).count,
-        completion_rate: calculate_completion_rate(member, @start_date)
+        completions: member.task_completions.where('completed_at >= ?', @start_date).count
       }
+    end
+
+    # Calculate Performance Score relative to the top performer
+    max_points = @member_stats.map { |s| s[:points] }.max.to_f
+    @member_stats.each do |stat|
+      stat[:performance_score] = max_points > 0 ? ((stat[:points] / max_points) * 100).round : 0
     end
 
     erb :'admin/reports', layout: :'admin/layout'

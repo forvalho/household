@@ -1,0 +1,62 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-trophy"></i> Leaderboard</h1>
+            <form class="d-flex" action="/leaderboard" method="get">
+                <select class="form-select" name="period" onchange="this.form.submit()">
+                    <option value="7" <%= 'selected' if @period == '7' %>>Last 7 Days</option>
+                    <option value="30" <%= 'selected' if @period == '30' %>>Last 30 Days</option>
+                    <option value="90" <%= 'selected' if @period == '90' %>>Last 90 Days</option>
+                </select>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover leaderboard-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">Rank</th>
+                        <th>Member</th>
+                        <th class="text-center">Points</th>
+                        <th class="text-center">Medals</th>
+                        <th class="text-center">Tasks Done</th>
+                        <th class="text-center">Performance Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% @leaderboard_stats.each_with_index do |stat, index| %>
+                        <tr>
+                            <td class="text-center">
+                                <span class="rank-badge"><%= index + 1 %></span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <% if stat[:member].avatar_url.present? %>
+                                        <img src="<%= stat[:member].avatar_url %>" class="user-avatar me-3" alt="<%= stat[:member].name %>">
+                                    <% else %>
+                                        <div class="user-avatar me-3"><%= stat[:member].name.first.upcase %></div>
+                                    <% end %>
+                                    <strong><%= stat[:member].name %></strong>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary fs-6"><%= stat[:points] %></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="me-2" title="Gold"><i class="fas fa-medal medal-gold"></i> <%= stat[:medals][:gold] %></span>
+                                <span class="me-2" title="Silver"><i class="fas fa-medal medal-silver"></i> <%= stat[:medals][:silver] %></span>
+                                <span title="Bronze"><i class="fas fa-medal medal-bronze"></i> <%= stat[:medals][:bronze] %></span>
+                            </td>
+                            <td class="text-center"><%= stat[:completions] %></td>
+                            <td class="text-center"><%= stat[:performance_score] %>%</td>
+                        </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

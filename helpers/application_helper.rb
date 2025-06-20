@@ -1,7 +1,8 @@
 module ApplicationHelper
   # Flash message helpers
-  def set_flash(type, message)
-    session[:flash] = { type: type, message: message }
+  def set_flash(key, message)
+    session[:flash] ||= {}
+    session[:flash][key] = message
   end
 
   def get_flash
@@ -44,5 +45,9 @@ module ApplicationHelper
     member.task_completions.joins(:task)
            .where('task_completions.completed_at >= ?', Date.today.beginning_of_day)
            .sum('tasks.points')
+  end
+
+  def pluralize(count, singular, plural = nil)
+    "#{count} #{count == 1 ? singular : (plural || singular + 's')}"
   end
 end

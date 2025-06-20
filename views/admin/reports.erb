@@ -45,9 +45,9 @@
     <div class="col-md-3">
         <div class="card stats-card">
             <div class="card-body text-center">
-                <i class="fas fa-percentage fa-2x mb-2"></i>
-                <h4><%= (@member_stats.sum { |stat| stat[:completion_rate] } / @member_stats.length).round(1) %>%</h4>
-                <p class="mb-0">Average Completion Rate</p>
+                <i class="fas fa-bullseye fa-2x mb-2"></i>
+                <h4><%= @member_stats.map { |s| s[:points] }.max || 0 %></h4>
+                <p class="mb-0">Top Score</p>
             </div>
         </div>
     </div>
@@ -69,9 +69,10 @@
                             <tr>
                                 <th>Member</th>
                                 <th>Points Earned</th>
+                                <th>Medals Earned</th>
                                 <th>Tasks Completed</th>
                                 <th>Tasks Skipped</th>
-                                <th>Completion Rate</th>
+                                <th>Performance Score</th>
                                 <th>Performance</th>
                             </tr>
                         </thead>
@@ -92,6 +93,11 @@
                                         <span class="badge bg-primary fs-6"><%= stat[:points] %></span>
                                     </td>
                                     <td>
+                                        <span class="me-2" title="Gold"><i class="fas fa-medal medal-gold"></i> <%= stat[:medals][:gold] %></span>
+                                        <span class="me-2" title="Silver"><i class="fas fa-medal medal-silver"></i> <%= stat[:medals][:silver] %></span>
+                                        <span title="Bronze"><i class="fas fa-medal medal-bronze"></i> <%= stat[:medals][:bronze] %></span>
+                                    </td>
+                                    <td>
                                         <span class="badge bg-success"><%= stat[:completions] %></span>
                                     </td>
                                     <td>
@@ -99,22 +105,22 @@
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar <%= stat[:completion_rate] >= 80 ? 'bg-success' : stat[:completion_rate] >= 60 ? 'bg-warning' : 'bg-danger' %>"
-                                                 style="width: <%= stat[:completion_rate] %>%">
-                                                <%= stat[:completion_rate] %>%
+                                            <div class="progress-bar"
+                                                 style="width: <%= stat[:performance_score] %>%">
+                                                <%= stat[:performance_score] %>%
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <% if stat[:completion_rate] >= 90 %>
+                                        <% if stat[:performance_score] >= 90 %>
                                             <span class="badge bg-success">
                                                 <i class="fas fa-trophy"></i> Excellent
                                             </span>
-                                        <% elsif stat[:completion_rate] >= 75 %>
+                                        <% elsif stat[:performance_score] >= 75 %>
                                             <span class="badge bg-primary">
                                                 <i class="fas fa-star"></i> Good
                                             </span>
-                                        <% elsif stat[:completion_rate] >= 50 %>
+                                        <% elsif stat[:performance_score] >= 50 %>
                                             <span class="badge bg-warning text-dark">
                                                 <i class="fas fa-exclamation-triangle"></i> Needs Improvement
                                             </span>

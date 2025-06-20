@@ -4,9 +4,9 @@ RSpec.describe 'Task Coverage', type: :request do
   let(:admin) { Admin.create!(username: 'admin', password: 'password') }
   let(:member) { Member.create!(name: 'Test Member') }
   let(:other_member) { Member.create!(name: 'Other Member') }
-  let!(:task) { Task.create!(title: 'Test Task', member: member, status: 'todo') }
-  let!(:other_task) { Task.create!(title: 'Other member task', member: other_member, status: 'todo') }
-  let!(:unassigned_task) { Task.create!(title: 'Unassigned Task', status: 'unassigned') }
+  let!(:task) { Task.create!(title: 'Test Task', member: member, status: 'todo', difficulty: 'bronze') }
+  let!(:other_task) { Task.create!(title: 'Other member task', member: other_member, status: 'todo', difficulty: 'bronze') }
+  let!(:unassigned_task) { Task.create!(title: 'Unassigned Task', status: 'unassigned', difficulty: 'bronze') }
 
   def login_admin
     post '/admin/login', username: admin.username, password: 'password'
@@ -112,14 +112,14 @@ RSpec.describe 'Task Coverage', type: :request do
       end
 
       it "completes a daily recurring task" do
-        daily_task = Task.create!(title: 'Daily Task', member: member, status: 'todo', recurrence: 'daily', due_date: Date.today)
+        daily_task = Task.create!(title: 'Daily Task', member: member, status: 'todo', recurrence: 'daily', due_date: Date.today, difficulty: 'bronze')
         post "/tasks/#{daily_task.id}/complete"
         expect(daily_task.reload.status).to eq('todo')
         expect(daily_task.due_date).to eq(Date.today + 1.day)
       end
 
       it "completes a weekly recurring task" do
-        weekly_task = Task.create!(title: 'Weekly Task', member: member, status: 'todo', recurrence: 'weekly', due_date: Date.today)
+        weekly_task = Task.create!(title: 'Weekly Task', member: member, status: 'todo', recurrence: 'weekly', due_date: Date.today, difficulty: 'bronze')
         post "/tasks/#{weekly_task.id}/complete"
         expect(weekly_task.reload.status).to eq('todo')
         expect(weekly_task.due_date).to be > Date.today + 6.days
@@ -134,14 +134,14 @@ RSpec.describe 'Task Coverage', type: :request do
       end
 
       it "completes a daily recurring task with no initial due date" do
-        daily_task = Task.create!(title: 'Daily Task', member: member, status: 'todo', recurrence: 'daily', due_date: nil)
+        daily_task = Task.create!(title: 'Daily Task', member: member, status: 'todo', recurrence: 'daily', due_date: nil, difficulty: 'bronze')
         post "/tasks/#{daily_task.id}/complete"
         expect(daily_task.reload.status).to eq('todo')
         expect(daily_task.due_date).to eq(Date.today + 1.day)
       end
 
       it "completes a weekly recurring task with no initial due date" do
-        weekly_task = Task.create!(title: 'Weekly Task', member: member, status: 'todo', recurrence: 'weekly', due_date: nil)
+        weekly_task = Task.create!(title: 'Weekly Task', member: member, status: 'todo', recurrence: 'weekly', due_date: nil, difficulty: 'bronze')
         post "/tasks/#{weekly_task.id}/complete"
         expect(weekly_task.reload.status).to eq('todo')
         expect(weekly_task.due_date).to be > Date.today + 6.days

@@ -10,43 +10,40 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <% if member_selected? %>
-        <!-- Member Layout with Top Navigation -->
-        <nav class="navbar navbar-expand-lg admin-header">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="/">Household</a>
+    <nav class="navbar navbar-expand-lg admin-header mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">Household</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
                 <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="/profile/edit">Edit Profile</a>
-                    <a class="nav-link" href="/">Switch User</a>
+                    <% if member_selected? %>
+                        <a class="nav-link" href="/member/dashboard">Dashboard</a>
+                        <a class="nav-link" href="/leaderboard">Leaderboard</a>
+                        <a class="nav-link" href="/profile/edit">Edit Profile</a>
+                        <a class="nav-link" href="/">Switch User</a>
+                    <% else %>
+                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="/leaderboard">Leaderboard</a>
+                        <a class="nav-link" href="/admin/login">Admin Login</a>
+                    <% end %>
                 </div>
             </div>
-        </nav>
-
-        <div class="container-fluid mt-4">
-            <% flash = flash_message %>
-            <% if flash %>
-                <div class="flash-message alert alert-<%= flash[:type] %> alert-dismissible fade show" role="alert">
-                    <%= flash[:message] %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <% end %>
-
-            <%= yield %>
         </div>
-    <% else %>
-        <!-- Public Layout (no navigation) -->
-        <div class="container-fluid mt-4">
-            <% flash = flash_message %>
-            <% if flash %>
-                <div class="flash-message alert alert-<%= flash[:type] %> alert-dismissible fade show" role="alert">
-                    <%= flash[:message] %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <% end %>
+    </nav>
 
-            <%= yield %>
-        </div>
-    <% end %>
+    <div class="container-fluid">
+        <% flash = flash_message %>
+        <% if flash %>
+            <div class="flash-message alert alert-<%= flash[:type] %> alert-dismissible fade show" role="alert">
+                <%= flash[:message] %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% end %>
+
+        <%= yield %>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>

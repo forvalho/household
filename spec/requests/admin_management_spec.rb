@@ -78,9 +78,8 @@ RSpec.describe 'Admin Management', type: :request do
         post '/tasks', {
           title: 'New Task',
           description: 'Task description',
-          difficulty: 'medium',
-          member_id: member.id,
-          points: 2
+          difficulty: 'silver',
+          member_id: member.id
         }
       }.to change(Task, :count).by(1)
 

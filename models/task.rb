@@ -5,16 +5,20 @@ class Task < ActiveRecord::Base
 
   validates :title, presence: true
   validates :status, inclusion: { in: %w[unassigned todo in_progress done skipped], message: "%{value} is not a valid status" }
-  validates :difficulty, inclusion: { in: %w[easy medium hard] }
+  validates :difficulty, inclusion: { in: %w[bronze silver gold] }
   validates :recurrence, inclusion: { in: %w[none daily weekly], message: "%{value} is not a valid recurrence" }
 
   def points_value
     case difficulty
-    when 'easy' then 1
-    when 'medium' then 2
-    when 'hard' then 3
-    else 1
+    when 'bronze' then 1
+    when 'silver' then 3
+    when 'gold' then 5
+    else 0
     end
+  end
+
+  def medal
+    difficulty
   end
 
   # A task is considered completed for the day if a completion record exists for it today.

@@ -4,7 +4,7 @@ RSpec.describe 'Task Assignment', type: :feature do
   let!(:admin) { Admin.create!(username: 'admin', password: 'admin123') }
   let!(:member1) { Member.create!(name: 'Alice', avatar_url: 'https://api.dicebear.com/8.x/initials/svg?seed=Alice') }
   let!(:member2) { Member.create!(name: 'Bob', avatar_url: 'https://api.dicebear.com/8.x/initials/svg?seed=Bob') }
-  let!(:task) { Task.create!(title: 'Test Task', recurrence: 'none', status: 'unassigned') }
+  let!(:task) { Task.create!(title: 'Test Task', recurrence: 'none', status: 'unassigned', difficulty: 'bronze') }
 
   def login_as_admin
     visit '/admin/login'
