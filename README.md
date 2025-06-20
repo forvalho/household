@@ -1,4 +1,4 @@
-# Household Management System
+# Household
 
 A simple web application for managing household tasks and activities. Built with Ruby, Sinatra, and SQLite.
 
@@ -7,21 +7,21 @@ A simple web application for managing household tasks and activities. Built with
 - **Admin Dashboard**: Create and manage tasks, view member statistics, and generate reports
 - **Member Dashboard**: View and manage assigned tasks with a simple interface
 - **Task Management**: Create, assign, and track task completion
-- **Tasks Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done).
+- **Tasks Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done)
 - **Points System**: Tasks earn points based on difficulty
 - **Recurring Tasks**: Support for daily and weekly recurring tasks
 - **Member Profiles**: Customizable avatars and names
 
 ## Core Features
 
-- **Profile-Based Login**: A visual, avatar-based login screen for family members.
+- **Profile-Based Login**: A visual, avatar-based login screen for family members
 - **Role-Based Access**:
-    - **Members**: Can view their dashboard and complete assigned tasks.
-    - **Admins**: Can manage members, tasks, admins, and view reports.
-- **Customizable Avatars**: Users can personalize their avatars using the DiceBear API, choosing from dozens of styles and custom background colors.
-- **Task Kanban Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done).
-- **Admin Dashboard**: A central place for admins to oversee all tasks assigned to all members.
-- **RSpec Test Suite**: A solid testing foundation to ensure application stability.
+    - **Members**: Can view their dashboard and complete assigned tasks
+    - **Admins**: Can manage members, tasks, admins, and view reports
+- **Customizable Avatars**: Users can personalize their avatars using the DiceBear API, choosing from dozens of styles and custom background colors
+- **Tasks Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done)
+- **Admin Dashboard**: A central place for admins to oversee all tasks assigned to all members with a modern sidebar layout
+- **RSpec Test Suite**: A solid testing foundation to ensure application stability
 
 ## Technology Stack
 
@@ -75,6 +75,8 @@ bundle exec rspec
 ```
 Coverage reports are generated in the `coverage/` directory.
 
+**Current Status**: Test suite is being refined. Coverage is approximately 73% with ongoing improvements to ensure all features are properly tested.
+
 ## Project Structure
 
 The application follows a modular structure for better organization and maintainability:
@@ -102,9 +104,11 @@ The application follows a modular structure for better organization and maintain
 │   ├── features/
 │   ├── models/
 │   └── requests/
+├── public/
+│   └── styles.css      # Consolidated CSS styles
 └── views/              # ERB templates
-    ├── admin/          # Views for the admin section
-    ├── common/         # Shared partials (_avatar_selector, _task_card)
+    ├── admin/          # Views for the admin section (with sidebar layout)
+    ├── common/         # Shared partials (avatar_selector, task_card)
     ├── member/         # Views for the member section
     └── layout.erb      # Main application layout
 ```
@@ -112,14 +116,16 @@ The application follows a modular structure for better organization and maintain
 ## Features
 
 ### 🎯 Tasks Board Interface
-- **Drag & Drop**: Move tasks between columns (To Do → In Progress → Done/Skipped)
+- **Modern UI**: Clean, responsive design with Bootstrap 5
+- **Always-Visible Actions**: Assign and Move buttons are always shown, with unavailable options disabled
 - **Visual Task Management**: Color-coded difficulty levels and user assignments
-- **Real-time Updates**: AJAX-powered status changes without page reloads
+- **Compact Cards**: Optimized task cards for better information density
 
 ### 👥 User Management
 - **Role-based Access**: Admin and regular user roles
-- **Family Profiles**: Add household members with ages and preferences
+- **Family Profiles**: Add household members with customizable avatars
 - **Secure Authentication**: BCrypt password hashing
+- **Modern Admin Interface**: Sidebar navigation for better organization
 
 ### 📊 Comprehensive Reporting
 - **Points System**: Tasks earn points based on difficulty (Easy=1, Medium=2, Hard=3)
@@ -138,6 +144,7 @@ The application follows a modular structure for better organization and maintain
 ✅ **Low Memory**: SQLite database, efficient queries
 ✅ **Responsive**: Works on tablets, phones, and old computers
 ✅ **Offline Capable**: No external API dependencies
+✅ **Optimized CSS**: Consolidated styles for faster loading
 
 ## Deployment on Raspberry Pi
 
@@ -199,22 +206,37 @@ bundle exec puma -p 4567
 ## Usage Guide
 
 ### For Parents (Admins)
-1. **Add Family Members**: Go to Users page and add household members
+1. **Add Family Members**: Go to Members page and add household members
 2. **Create Tasks**: Use the "Add New Task" button on the dashboard
 3. **Monitor Progress**: Check the Reports page for performance metrics
 4. **Assign Rewards**: Use the reward suggestions to motivate children
 
 ### For Children (Users)
 1. **View Tasks**: See your assigned tasks on the tasks board
-2. **Start Tasks**: Click "Start" to move tasks to "In Progress"
-3. **Complete Tasks**: Click "Complete" when finished to earn points
-4. **Skip Tasks**: If needed, provide a reason when skipping
+2. **Start Tasks**: Use "Move to..." dropdown to move tasks to "In Progress"
+3. **Complete Tasks**: Use "Move to..." dropdown to mark tasks as "Done" and earn points
+4. **Skip Tasks**: If needed, use "Move to..." dropdown to skip tasks
 
 ### Task Workflow
-1. **To Do** → Tasks waiting to be started
-2. **In Progress** → Tasks currently being worked on
-3. **Done** → Completed tasks (earn points)
-4. **Skipped** → Tasks that couldn't be completed (with reasons)
+1. **Unassigned** → Tasks waiting to be assigned
+2. **To Do** → Tasks waiting to be started
+3. **In Progress** → Tasks currently being worked on
+4. **Done** → Completed tasks (earn points)
+5. **Skipped** → Tasks that couldn't be completed
+
+## Recent Updates
+
+### UI/UX Improvements
+- **Simplified Naming**: Application name changed from "Household Chores" to "Household"
+- **Modern Admin Layout**: New sidebar navigation for admin area
+- **Always-Visible Actions**: Assign and Move buttons are always shown with proper disabled states
+- **Consolidated CSS**: All styles moved to `public/styles.css` for better maintainability
+- **Improved Task Cards**: More compact design with better information density
+
+### Navigation Updates
+- **Admin Menu**: Simplified to "Tasks", "Members", "Admins", "Reports"
+- **Member Interface**: "Kanban Board" renamed to "Tasks Board"
+- **Consistent Branding**: "Household" branding throughout the application
 
 ## Future Enhancements
 
@@ -250,7 +272,7 @@ PORT=4567
 ### Customization
 - **Points System**: Modify point values in `app.rb` (Task model)
 - **Reward Thresholds**: Adjust reward suggestions in `reports.erb`
-- **UI Colors**: Customize CSS in `layout.erb`
+- **UI Colors**: Customize CSS in `public/styles.css`
 
 ## Troubleshooting
 

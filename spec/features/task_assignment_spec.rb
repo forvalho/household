@@ -2,75 +2,69 @@ require 'spec_helper'
 
 RSpec.describe 'Task Assignment', type: :feature do
   let!(:admin) { Admin.create!(username: 'admin', password: 'admin123') }
-  let!(:member1) { Member.create!(name: 'Alice') }
-  let!(:member2) { Member.create!(name: 'Bob') }
-  let!(:task) { Task.create!(title: 'Test Task', recurrence: 'none') }
+  let!(:member1) { Member.create!(name: 'Alice', avatar_url: 'https://api.dicebear.com/8.x/initials/svg?seed=Alice') }
+  let!(:member2) { Member.create!(name: 'Bob', avatar_url: 'https://api.dicebear.com/8.x/initials/svg?seed=Bob') }
+  let!(:task) { Task.create!(title: 'Test Task', recurrence: 'none', status: 'unassigned') }
+
+  def login_as_admin
+    visit '/admin/login'
+    fill_in 'Username', with: 'admin'
+    fill_in 'Password', with: 'admin123'
+    click_button 'Sign In'
+    visit '/admin/dashboard'
+  end
+
+  def login_as_member(member)
+    visit "/members/#{member.id}/select"
+    visit '/dashboard'
+  end
 
   context 'as an admin' do
-    before do
-      visit '/admin/login'
-      fill_in 'Username', with: 'admin'
-      fill_in 'Password', with: 'admin123'
-      click_button 'Log In'
-    end
+    before { login_as_admin }
 
     it 'can assign a task to a member' do
-      visit '/dashboard'
-      find("[data-task-id='#{task.id}'] .assignee-btn").click
-      within("#assigneeModal-#{task.id}") do
-        select 'Alice', from: 'Assign to:'
-        click_button 'Update Assignee'
+      find("[data-task-id='#{task.id}'] .assignee-dropdown-btn").click
+      within("[data-task-id='#{task.id}'] .assignee-dropdown-menu") do
+        click_button 'Alice'
       end
       expect(page).to have_content('Task assignment updated!')
       expect(task.reload.member).to eq(member1)
+      expect(task.reload.status).to eq('todo') # Should change status
     end
 
     it 'can unassign a task' do
-      task.update(member: member1)
-      visit '/dashboard'
-      find("[data-task-id='#{task.id}'] .assignee-btn").click
-      within("#assigneeModal-#{task.id}") do
-        select 'Unassigned', from: 'Assign to:'
-        click_button 'Update Assignee'
+      task.update(member: member1, status: 'todo')
+      visit '/admin/dashboard' # Re-visit to see the changes
+
+      find("[data-task-id='#{task.id}'] .assignee-dropdown-btn").click
+      within("[data-task-id='#{task.id}'] .assignee-dropdown-menu") do
+        click_button 'Unassigned'
       end
       expect(page).to have_content('Task assignment updated!')
       expect(task.reload.member).to be_nil
+      expect(task.reload.status).to eq('unassigned')
     end
   end
 
   context 'as a member' do
-    before do
-      visit "/members/#{member1.id}/select"
+    before { login_as_member(member1) }
+
+    it 'cannot assign tasks' do
+      find("[data-task-id='#{task.id}'] .assignee-dropdown-btn").click
+      within("[data-task-id='#{task.id}'] .assignee-dropdown-menu") do
+        expect(page.find('button', text: 'Alice')).to be_disabled
+        expect(page.find('button', text: 'Bob')).to be_disabled
+        expect(page.find('button', text: 'Unassigned')).to be_disabled
+      end
     end
 
-    it 'can claim an unassigned task' do
+    it 'can see who a task is assigned to' do
+      task.update(member: member2, status: 'todo')
       visit '/dashboard'
-      find("[data-task-id='#{task.id}'] .assignee-btn").click
-      within("#assigneeModal-#{task.id}") do
-        click_button 'Assign to me'
-      end
-      expect(page).to have_content('Task assignment updated!')
-      expect(task.reload.member).to eq(member1)
-    end
 
-    it 'can unassign their own task' do
-      task.update(member: member1)
-      visit '/dashboard'
-      find("[data-task-id='#{task.id}'] .assignee-btn").click
-      within("#assigneeModal-#{task.id}") do
-        click_button 'Unassign'
-      end
-      expect(page).to have_content('Task assignment updated!')
-      expect(task.reload.member).to be_nil
-    end
-
-    it 'cannot assign a task to another member' do
-      task.update(member: member2)
-      visit '/dashboard'
-      find("[data-task-id='#{task.id}'] .assignee-btn").click
-      within("#assigneeModal-#{task.id}") do
-        expect(page).to have_content('You cannot reassign this task.')
-      end
+      # The task is assigned to another member, so it should not be on the current member's board.
+      expect(page).not_to have_css("[data-task-id='#{task.id}']")
+      expect(page).not_to have_content('Test Task')
     end
   end
 end

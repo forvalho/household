@@ -22,7 +22,7 @@ RSpec.describe 'Admin Member Management', type: :request do
       with_admin_session
       get '/admin/members'
       expect(last_response).to be_ok
-      expect(last_response.body).to include('Member Management')
+      expect(last_response.body).to include('Members')
     end
   end
 

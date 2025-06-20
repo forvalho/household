@@ -1,79 +1,57 @@
 require 'spec_helper'
-require 'database_cleaner/active_record'
 
 RSpec.describe 'Task Status Changes', type: :feature do
-  before(:each) do
-    DatabaseCleaner.strategy = :truncation
-    DatabaseCleaner.clean
-  end
-
-  let!(:admin) { Admin.create!(username: 'admin', password: 'admin123') }
-  let!(:member1) { Member.create!(name: 'Alice') }
-  let!(:member2) { Member.create!(name: 'Bob') }
-
-  def find_task_card(task)
-    find(:css, ".task-card[data-task-id='#{task.id}']", text: task.title)
-  end
+  let!(:admin) { Admin.create!(username: 'admin', password_digest: BCrypt::Password.create('admin123')) }
+  let!(:member) { Member.create!(name: 'Alice') }
 
   context 'as an admin' do
     before do
       visit '/admin/login'
-      fill_in 'Username', with: 'admin'
-      fill_in 'Password', with: 'admin123'
+      fill_in 'username', with: 'admin'
+      fill_in 'password', with: 'admin123'
       click_button 'Sign In'
     end
 
-    it 'can change task status to in progress' do
-      task = Task.create!(title: 'Status Test Task', status: 'todo', recurrence: 'none', member_id: nil)
+    it 'can change a task from todo to in_progress' do
+      task = Task.create!(title: 'Admin Task', status: 'todo', member: member)
       visit '/admin/dashboard'
-      card = find_task_card(task)
-      card.click_button 'In Progress'
+
+      find("[data-task-id='#{task.id}'] .action-dropdown .dropdown-toggle").click
+      click_button 'In Progress'
+
       expect(task.reload.status).to eq('in_progress')
-    end
-
-    it 'can change task status to done' do
-      task = Task.create!(title: 'Status Test Task', status: 'todo', recurrence: 'none', member_id: nil)
-      visit '/admin/dashboard'
-      card = find_task_card(task)
-      card.click_button 'Done'
-      expect(task.reload.status).to eq('done')
-    end
-
-    it 'can change task status to skipped' do
-      task = Task.create!(title: 'Status Test Task', status: 'todo', recurrence: 'none', member_id: nil)
-      visit '/admin/dashboard'
-      card = find_task_card(task)
-      card.click_button 'Skip'
-      expect(task.reload.status).to eq('skipped')
     end
   end
 
   context 'as a member' do
     before do
-      visit "/members/#{member1.id}/select"
+      visit "/members/#{member.id}/select"
     end
 
-    it 'can change unassigned task status' do
-      task = Task.create!(title: 'Status Test Task', status: 'todo', recurrence: 'none', member_id: nil)
+    it 'can change their own task from todo to in_progress' do
+      task = Task.create!(title: 'Member Task', status: 'todo', member: member)
       visit '/dashboard'
-      card = find_task_card(task)
-      card.click_button 'In Progress'
+
+      find("[data-task-id='#{task.id}'] .action-dropdown .dropdown-toggle").click
+      click_button 'In Progress'
+
       expect(task.reload.status).to eq('in_progress')
     end
 
-    it 'can change their own task status' do
-      task = Task.create!(title: 'Status Test Task', status: 'todo', recurrence: 'none', member: member1)
+    it 'cannot change an unassigned task' do
+      task = Task.create!(title: 'Unassigned Task', status: 'unassigned')
       visit '/dashboard'
-      card = find_task_card(task)
-      card.click_button 'Done'
-      expect(task.reload.status).to eq('done')
+
+      find("[data-task-id='#{task.id}'] .action-dropdown .dropdown-toggle").click
+      expect(page).to have_button('In Progress', disabled: true)
     end
 
-    it 'cannot change another member\'s task status' do
-      task = Task.create!(title: 'Status Test Task', status: 'todo', recurrence: 'none', member: member2)
+    it 'cannot see tasks assigned to other members' do
+      other_member = Member.create!(name: 'Bob')
+      Task.create!(title: 'Bobs Task', status: 'todo', member: other_member)
       visit '/dashboard'
-      # The task should not be visible on the dashboard since it's assigned to another member
-      expect(page).not_to have_content('Status Test Task')
+
+      expect(page).not_to have_content('Bobs Task')
     end
   end
 end

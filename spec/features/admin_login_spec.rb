@@ -16,7 +16,7 @@ RSpec.describe 'Admin Login', type: :feature do
     click_button 'Sign In'
 
     expect(page).to have_current_path('/admin/dashboard')
-    expect(page).to have_content('Admin Dashboard')
+    expect(page).to have_content('Tasks')
     expect(page).to have_content('Welcome back, Admin!')
   end
 
