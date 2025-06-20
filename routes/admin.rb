@@ -34,27 +34,6 @@ namespace '/admin' do
     erb :'admin/dashboard', layout: :'admin/layout'
   end
 
-  # Task Management (for Admins)
-  post '/tasks' do
-    task = Task.new(
-      title: params[:title],
-      description: params[:description],
-      difficulty: params[:difficulty],
-      recurrence: params[:recurrence],
-      category: params[:category],
-      member_id: params[:member_id],
-      due_date: params[:due_date],
-      points: params[:points] || 1
-    )
-
-    if task.save
-      set_flash('success', 'Task created successfully!')
-    else
-      set_flash('error', 'Error creating task')
-    end
-    redirect back
-  end
-
   # Member Management (for Admins)
   get '/members' do
     @members = Member.all

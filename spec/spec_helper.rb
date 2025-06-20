@@ -29,7 +29,7 @@ RSpec.configure do |config|
   end
 
   # Configure Capybara
-  Capybara.app = Sinatra::Application
+  Capybara.app = app
   Capybara.default_driver = :rack_test
   Capybara.javascript_driver = :selenium_chrome_headless
 

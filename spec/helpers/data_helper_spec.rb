@@ -17,6 +17,52 @@ RSpec.describe DataHelper, type: :helper do
   let(:member) { Member.create!(name: 'Test Member') }
   let(:start_date) { 30.days.ago.to_date }
 
+  describe '#calculate_member_points' do
+    it 'returns 0 when no completions in period' do
+      expect(helper.calculate_member_points(member, start_date)).to eq(0)
+    end
+
+    it 'calculates points from completions in period' do
+      task1 = Task.create!(title: 'Easy Task', member: member, points: 1)
+      task2 = Task.create!(title: 'Hard Task', member: member, points: 3)
+
+      TaskCompletion.create!(task: task1, member: member, completed_at: 15.days.ago)
+      TaskCompletion.create!(task: task2, member: member, completed_at: 10.days.ago)
+
+      expect(helper.calculate_member_points(member, start_date)).to eq(4)
+    end
+
+    it 'excludes completions outside the period' do
+      task = Task.create!(title: 'Old Task', member: member, points: 2)
+      TaskCompletion.create!(task: task, member: member, completed_at: 40.days.ago)
+
+      expect(helper.calculate_member_points(member, start_date)).to eq(0)
+    end
+  end
+
+  describe '#calculate_member_skips' do
+    it 'returns 0 when no skips in period' do
+      expect(helper.calculate_member_skips(member, start_date)).to eq(0)
+    end
+
+    it 'counts skips in period' do
+      task1 = Task.create!(title: 'Task 1', member: member)
+      task2 = Task.create!(title: 'Task 2', member: member)
+
+      TaskSkip.create!(task: task1, member: member, skipped_at: 15.days.ago, reason: 'Too busy')
+      TaskSkip.create!(task: task2, member: member, skipped_at: 10.days.ago, reason: 'Not feeling well')
+
+      expect(helper.calculate_member_skips(member, start_date)).to eq(2)
+    end
+
+    it 'excludes skips outside the period' do
+      task = Task.create!(title: 'Old Task', member: member)
+      TaskSkip.create!(task: task, member: member, skipped_at: 40.days.ago, reason: 'Old skip')
+
+      expect(helper.calculate_member_skips(member, start_date)).to eq(0)
+    end
+  end
+
   describe '#calculate_completion_rate' do
     it 'returns 0 if there are no tasks' do
       expect(helper.calculate_completion_rate(member, start_date)).to eq(0)

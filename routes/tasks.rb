@@ -27,7 +27,7 @@ put '/tasks/:id/status' do
   task = Task.find(params[:id])
 
   # Allow admin or the assigned member to move tasks
-  unless admin_logged_in? || (member_selected? && (task.member_id.nil? || task.member_id == current_member.id))
+  unless admin_logged_in? || (member_selected? && (task.member_id == current_member.id || task.member_id.nil?))
     if request.content_type == 'application/json'
       halt 403, { success: false, message: 'Permission denied' }.to_json
     else
@@ -55,7 +55,7 @@ post '/tasks/:id/complete' do
   if task.member_id.nil? || task.member_id == current_member.id
     TaskCompletion.create!(task: task, member: current_member, completed_at: Time.now, notes: params[:notes])
 
-    updates = { member: current_member } # Claim the task if it was unassigned
+    updates = { member_id: current_member.id } # Claim the task if it was unassigned
 
     case task.recurrence
     when 'daily'
@@ -88,7 +88,7 @@ post '/tasks/:id/skip' do
 
   unless task.member_id == current_member.id
     set_flash('error', 'You can only skip your own tasks')
-    redirect '/dashboard'
+    return redirect '/dashboard'
   end
 
   TaskSkip.create!(task: task, member: current_member, skipped_at: Time.now, reason: params[:reason])
@@ -131,6 +131,7 @@ patch '/tasks/:id/assignee' do
       update_logic.call(new_member_id)
     else
       set_flash('error', 'You do not have permission to assign this task.')
+      redirect '/dashboard' and return
     end
   else
     set_flash('error', 'You must be logged in.')
