@@ -78,13 +78,13 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/dashboard">
-                <i class="fas fa-home"></i> Household Chores
-            </a>
+    <% if logged_in? %>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/dashboard">
+                    <i class="fas fa-home"></i> Household Chores
+                </a>
 
-            <% if logged_in? %>
                 <div class="navbar-nav ms-auto">
                     <span class="navbar-text me-3">
                         Welcome, <%= current_user.name %>!
@@ -104,9 +104,9 @@
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
-            <% end %>
-        </div>
-    </nav>
+            </div>
+        </nav>
+    <% end %>
 
     <div class="container-fluid mt-3">
         <% flash = flash_message %>

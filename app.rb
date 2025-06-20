@@ -70,6 +70,7 @@ ActiveRecord::Schema.define do
     t.string :role, default: 'user'
     t.string :name
     t.integer :age
+    t.string :avatar_url
     t.boolean :active, default: true
     t.timestamps
   end
@@ -126,6 +127,14 @@ helpers do
     date.strftime('%B %d, %Y') if date
   end
 
+  def completed_today(user)
+    user.task_completions.where('completed_at >= ?', Date.today.beginning_of_day).count
+  end
+
+  def outstanding_tasks(user)
+    user.tasks.where(status: ['todo', 'in_progress']).count
+  end
+
   def calculate_user_points(user, start_date = 30.days.ago)
     completions = user.task_completions.joins(:task)
                       .where('completed_at >= ?', start_date)
@@ -148,7 +157,8 @@ end
 
 # Routes
 get '/' do
-  redirect '/dashboard'
+  @users = User.where(active: true)
+  erb :index
 end
 
 # Authentication
@@ -286,6 +296,7 @@ post '/users' do
     name: params[:name],
     age: params[:age],
     role: params[:role] || 'user',
+    avatar_url: params[:avatar_url],
     password_digest: BCrypt::Password.create(params[:password])
   )
 
@@ -362,7 +373,14 @@ if User.count == 0
     email: 'admin@household.com',
     name: 'Administrator',
     role: 'admin',
+    avatar_url: 'https://i.pravatar.cc/150?u=admin',
     password_digest: BCrypt::Password.create('admin123')
   )
   puts "Created admin user: admin/admin123"
+end
+
+get '/users/:id/dashboard' do
+  user = User.find(params[:id])
+  session[:user_id] = user.id
+  redirect '/dashboard'
 end
