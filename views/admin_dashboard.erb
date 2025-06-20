@@ -1,0 +1,107 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+                <i class="fas fa-plus"></i> Add New Task
+            </button>
+        </div>
+        <p class="text-muted">Overview of all household members and their tasks.</p>
+    </div>
+</div>
+
+<div class="accordion" id="membersAccordion">
+    <% @members.each_with_index do |member, index| %>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-<%= member.id %>">
+                <button class="accordion-button <%= index == 0 ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= member.id %>">
+                    <img src="<%= member.avatar_url || "https://i.pravatar.cc/150?u=#{member.name.gsub(' ', '')}" %>" class="user-avatar me-3" style="width: 40px; height: 40px;">
+                    <strong class="me-3"><%= member.name %></strong>
+                    <span class="badge bg-primary me-2"><%= @tasks_by_member[member]&.count || 0 %> total</span>
+                    <span class="badge bg-warning text-dark me-2"><%= @tasks_by_member[member]&.count { |t| t.status == 'todo' } || 0 %> todo</span>
+                    <span class="badge bg-info me-2"><%= @tasks_by_member[member]&.count { |t| t.status == 'in_progress' } || 0 %> in progress</span>
+                </button>
+            </h2>
+            <div id="collapse-<%= member.id %>" class="accordion-collapse collapse <%= index == 0 ? 'show' : '' %>" data-bs-parent="#membersAccordion">
+                <div class="accordion-body">
+                    <% if @tasks_by_member[member].present? %>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h5>To Do</h5>
+                                <% @tasks_by_member[member].select { |t| t.status == 'todo' }.each do |task| %>
+                                    <%= erb :_task_card, locals: { task: task } %>
+                                <% end %>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>In Progress</h5>
+                                <% @tasks_by_member[member].select { |t| t.status == 'in_progress' }.each do |task| %>
+                                    <%= erb :_task_card, locals: { task: task } %>
+                                <% end %>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Done / Skipped</h5>
+                                <% @tasks_by_member[member].select { |t| ['done', 'skipped'].include?(t.status) }.each do |task| %>
+                                    <%= erb :_task_card, locals: { task: task } %>
+                                <% end %>
+                            </div>
+                        </div>
+                    <% else %>
+                        <p class="text-center text-muted">No tasks assigned to <%= member.name %>.</p>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    <% end %>
+</div>
+
+
+<!-- New Task Modal -->
+<div class="modal fade" id="newTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/admin/tasks">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Task Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="member_id" class="form-label">Assign To</label>
+                                <select class="form-select" id="member_id" name="member_id" required>
+                                    <option value="">Select Member</option>
+                                    <% @members.each do |member| %>
+                                        <option value="<%= member.id %>"><%= member.name %></option>
+                                    <% end %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="difficulty" class="form-label">Difficulty</label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="easy">Easy (1 point)</option>
+                                    <option value="medium" selected>Medium (2 points)</option>
+                                    <option value="hard">Hard (3 points)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

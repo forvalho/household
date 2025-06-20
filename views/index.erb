@@ -74,19 +74,19 @@
 <h1 class="page-title">Who's doing chores?</h1>
 
 <div class="profile-container">
-    <% @users.each do |user| %>
-        <a href="/users/<%= user.id %>/dashboard" class="profile-card">
-            <img src="<%= user.avatar_url || "https://i.pravatar.cc/150?u=#{user.username}" %>" alt="<%= user.name %>" class="profile-avatar">
-            <div class="profile-name"><%= user.name %></div>
+    <% @members.each do |member| %>
+        <a href="/members/<%= member.id %>/select" class="profile-card">
+            <img src="<%= member.avatar_url || "https://i.pravatar.cc/150?u=#{member.name.gsub(' ', '')}" %>" alt="<%= member.name %>" class="profile-avatar">
+            <div class="profile-name"><%= member.name %></div>
             <div class="profile-summary">
-                <%= completed_today(user) %> done / <%= outstanding_tasks(user) %> open
+                <%= completed_today(member) %> done / <%= outstanding_tasks(member) %> open
             </div>
         </a>
     <% end %>
 </div>
 
 <div class="admin-login">
-    <a href="/login" data-bs-toggle="tooltip" title="Admin Login">
+    <a href="/admin/login" data-bs-toggle="tooltip" title="Admin Login">
         <i class="fas fa-user-shield"></i>
     </a>
 </div>

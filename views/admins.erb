@@ -1,0 +1,87 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-user-shield"></i> Admin Management</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAdminModal">
+                <i class="fas fa-plus"></i> Add New Admin
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Current Admins
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Username</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% @admins.each do |admin| %>
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user-shield"></i>
+                                        <strong><%= admin.username %></strong>
+                                    </td>
+                                    <td><%= admin.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+                                    <td>
+                                        <% if admin.id != current_admin.id %>
+                                            <button class="btn btn-sm btn-outline-danger" disabled title="Delete coming soon">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        <% else %>
+                                            <span class="badge bg-secondary">Current</span>
+                                        <% end %>
+                                    </td>
+                                </tr>
+                            <% end %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Admin Modal -->
+<div class="modal fade" id="newAdminModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i> Add New Admin
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/admin/admins">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

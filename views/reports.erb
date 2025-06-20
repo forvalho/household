@@ -19,7 +19,7 @@
         <div class="card stats-card">
             <div class="card-body text-center">
                 <i class="fas fa-star fa-2x mb-2"></i>
-                <h4><%= @user_stats.sum { |stat| stat[:points] } %></h4>
+                <h4><%= @member_stats.sum { |stat| stat[:points] } %></h4>
                 <p class="mb-0">Total Points Earned</p>
             </div>
         </div>
@@ -28,7 +28,7 @@
         <div class="card stats-card">
             <div class="card-body text-center">
                 <i class="fas fa-check-circle fa-2x mb-2"></i>
-                <h4><%= @user_stats.sum { |stat| stat[:completions] } %></h4>
+                <h4><%= @member_stats.sum { |stat| stat[:completions] } %></h4>
                 <p class="mb-0">Total Tasks Completed</p>
             </div>
         </div>
@@ -37,7 +37,7 @@
         <div class="card stats-card">
             <div class="card-body text-center">
                 <i class="fas fa-times-circle fa-2x mb-2"></i>
-                <h4><%= @user_stats.sum { |stat| stat[:skips] } %></h4>
+                <h4><%= @member_stats.sum { |stat| stat[:skips] } %></h4>
                 <p class="mb-0">Total Tasks Skipped</p>
             </div>
         </div>
@@ -46,14 +46,14 @@
         <div class="card stats-card">
             <div class="card-body text-center">
                 <i class="fas fa-percentage fa-2x mb-2"></i>
-                <h4><%= (@user_stats.sum { |stat| stat[:completion_rate] } / @user_stats.length).round(1) %>%</h4>
+                <h4><%= (@member_stats.sum { |stat| stat[:completion_rate] } / @member_stats.length).round(1) %>%</h4>
                 <p class="mb-0">Average Completion Rate</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Individual User Stats -->
+<!-- Individual Member Stats -->
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -67,7 +67,7 @@
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th>User</th>
+                                <th>Member</th>
                                 <th>Points Earned</th>
                                 <th>Tasks Completed</th>
                                 <th>Tasks Skipped</th>
@@ -76,17 +76,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% @user_stats.each do |stat| %>
+                            <% @member_stats.each do |stat| %>
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="user-avatar me-2">
-                                                <%= stat[:user].name.first.upcase %>
+                                                <%= stat[:member].name.first.upcase %>
                                             </div>
                                             <div>
-                                                <strong><%= stat[:user].name %></strong>
-                                                <br>
-                                                <small class="text-muted"><%= stat[:user].role %></small>
+                                                <strong><%= stat[:member].name %></strong>
                                             </div>
                                         </div>
                                     </td>
@@ -147,12 +145,12 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <% @user_stats.each do |stat| %>
+                    <% @member_stats.each do |stat| %>
                         <div class="col-md-6 col-lg-4 mb-3">
                             <div class="card h-100">
                                 <div class="card-body">
                                     <h6 class="card-title">
-                                        <i class="fas fa-user"></i> <%= stat[:user].name %>
+                                        <i class="fas fa-user"></i> <%= stat[:member].name %>
                                     </h6>
 
                                     <% if stat[:points] >= 50 %>
@@ -241,9 +239,9 @@ const pointsCtx = document.getElementById('pointsChart').getContext('2d');
 const pointsChart = new Chart(pointsCtx, {
     type: 'doughnut',
     data: {
-        labels: <%= @user_stats.map { |stat| stat[:user].name }.to_json %>,
+        labels: <%= @member_stats.map { |stat| stat[:member].name }.to_json %>,
         datasets: [{
-            data: <%= @user_stats.map { |stat| stat[:points] }.to_json %>,
+            data: <%= @member_stats.map { |stat| stat[:points] }.to_json %>,
             backgroundColor: [
                 '#FF6384',
                 '#36A2EB',
@@ -269,11 +267,11 @@ const completionCtx = document.getElementById('completionChart').getContext('2d'
 const completionChart = new Chart(completionCtx, {
     type: 'bar',
     data: {
-        labels: <%= @user_stats.map { |stat| stat[:user].name }.to_json %>,
+        labels: <%= @member_stats.map { |stat| stat[:member].name }.to_json %>,
         datasets: [{
             label: 'Completion Rate (%)',
-            data: <%= @user_stats.map { |stat| stat[:completion_rate] }.to_json %>,
-            backgroundColor: <%= @user_stats.map { |stat|
+            data: <%= @member_stats.map { |stat| stat[:completion_rate] }.to_json %>,
+            backgroundColor: <%= @member_stats.map { |stat|
                 stat[:completion_rate] >= 80 ? '#28a745' :
                 stat[:completion_rate] >= 60 ? '#ffc107' : '#dc3545'
             }.to_json %>,
