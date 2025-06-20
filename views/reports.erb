@@ -1,0 +1,299 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-chart-bar"></i> Household Reports</h1>
+            <div class="d-flex gap-2">
+                <select class="form-select" id="periodSelect" onchange="updatePeriod(this.value)">
+                    <option value="7" <%= 'selected' if @period == '7' %>>Last 7 days</option>
+                    <option value="30" <%= 'selected' if @period == '30' %>>Last 30 days</option>
+                    <option value="90" <%= 'selected' if @period == '90' %>>Last 90 days</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-star fa-2x mb-2"></i>
+                <h4><%= @user_stats.sum { |stat| stat[:points] } %></h4>
+                <p class="mb-0">Total Points Earned</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h4><%= @user_stats.sum { |stat| stat[:completions] } %></h4>
+                <p class="mb-0">Total Tasks Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-times-circle fa-2x mb-2"></i>
+                <h4><%= @user_stats.sum { |stat| stat[:skips] } %></h4>
+                <p class="mb-0">Total Tasks Skipped</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-percentage fa-2x mb-2"></i>
+                <h4><%= (@user_stats.sum { |stat| stat[:completion_rate] } / @user_stats.length).round(1) %>%</h4>
+                <p class="mb-0">Average Completion Rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Individual User Stats -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users"></i> Individual Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>User</th>
+                                <th>Points Earned</th>
+                                <th>Tasks Completed</th>
+                                <th>Tasks Skipped</th>
+                                <th>Completion Rate</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% @user_stats.each do |stat| %>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-2">
+                                                <%= stat[:user].name.first.upcase %>
+                                            </div>
+                                            <div>
+                                                <strong><%= stat[:user].name %></strong>
+                                                <br>
+                                                <small class="text-muted"><%= stat[:user].role %></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary fs-6"><%= stat[:points] %></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success"><%= stat[:completions] %></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark"><%= stat[:skips] %></span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar <%= stat[:completion_rate] >= 80 ? 'bg-success' : stat[:completion_rate] >= 60 ? 'bg-warning' : 'bg-danger' %>"
+                                                 style="width: <%= stat[:completion_rate] %>%">
+                                                <%= stat[:completion_rate] %>%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <% if stat[:completion_rate] >= 90 %>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-trophy"></i> Excellent
+                                            </span>
+                                        <% elsif stat[:completion_rate] >= 75 %>
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-star"></i> Good
+                                            </span>
+                                        <% elsif stat[:completion_rate] >= 50 %>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle"></i> Needs Improvement
+                                            </span>
+                                        <% else %>
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle"></i> Poor
+                                            </span>
+                                        <% end %>
+                                    </td>
+                                </tr>
+                            <% end %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reward Suggestions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-gift"></i> Reward Suggestions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <% @user_stats.each do |stat| %>
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user"></i> <%= stat[:user].name %>
+                                    </h6>
+
+                                    <% if stat[:points] >= 50 %>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-trophy"></i>
+                                            <strong>Excellent work!</strong> Consider a special reward like:
+                                            <ul class="mb-0 mt-2">
+                                                <li>Extra screen time</li>
+                                                <li>Choose dinner</li>
+                                                <li>Special outing</li>
+                                            </ul>
+                                        </div>
+                                    <% elsif stat[:points] >= 30 %>
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-star"></i>
+                                            <strong>Great progress!</strong> Reward suggestions:
+                                            <ul class="mb-0 mt-2">
+                                                <li>Small treat</li>
+                                                <li>Extra play time</li>
+                                                <li>Choose a movie</li>
+                                            </ul>
+                                        </div>
+                                    <% elsif stat[:points] >= 15 %>
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            <strong>Good effort!</strong> Keep it up for bigger rewards!
+                                        </div>
+                                    <% else %>
+                                        <div class="alert alert-secondary">
+                                            <i class="fas fa-encouragement"></i>
+                                            <strong>Getting started!</strong> Complete more tasks to earn rewards.
+                                        </div>
+                                    <% end %>
+
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <strong>Current points:</strong> <%= stat[:points] %>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Points Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="pointsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Completion Rates
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="completionChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function updatePeriod(period) {
+    window.location.href = `/reports?period=${period}`;
+}
+
+// Points Distribution Chart
+const pointsCtx = document.getElementById('pointsChart').getContext('2d');
+const pointsChart = new Chart(pointsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: <%= @user_stats.map { |stat| stat[:user].name }.to_json %>,
+        datasets: [{
+            data: <%= @user_stats.map { |stat| stat[:points] }.to_json %>,
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Completion Rates Chart
+const completionCtx = document.getElementById('completionChart').getContext('2d');
+const completionChart = new Chart(completionCtx, {
+    type: 'bar',
+    data: {
+        labels: <%= @user_stats.map { |stat| stat[:user].name }.to_json %>,
+        datasets: [{
+            label: 'Completion Rate (%)',
+            data: <%= @user_stats.map { |stat| stat[:completion_rate] }.to_json %>,
+            backgroundColor: <%= @user_stats.map { |stat|
+                stat[:completion_rate] >= 80 ? '#28a745' :
+                stat[:completion_rate] >= 60 ? '#ffc107' : '#dc3545'
+            }.to_json %>,
+            borderColor: '#333',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>

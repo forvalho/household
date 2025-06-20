@@ -1,0 +1,57 @@
+<div class="task-card difficulty-<%= task.difficulty %>" data-task-id="<%= task.id %>" data-status="<%= task.status %>">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <h6 class="mb-0 fw-bold"><%= task.title %></h6>
+        <span class="badge points-badge"><%= task.points_value %> pts</span>
+    </div>
+
+    <% if task.description.present? %>
+        <p class="small text-muted mb-2"><%= task.description %></p>
+    <% end %>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="user-avatar">
+            <%= task.user.name.first.upcase %>
+        </div>
+        <small class="text-muted">
+            <i class="fas fa-calendar"></i>
+            <%= format_date(task.created_at) %>
+        </small>
+    </div>
+
+    <% if task.category.present? %>
+        <div class="mb-2">
+            <span class="badge bg-secondary"><%= task.category %></span>
+        </div>
+    <% end %>
+
+    <% if task.due_date.present? %>
+        <div class="mb-2">
+            <small class="text-muted">
+                <i class="fas fa-clock"></i> Due: <%= format_date(task.due_date) %>
+            </small>
+        </div>
+    <% end %>
+
+    <div class="d-flex gap-1">
+        <% if task.status == 'todo' %>
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeTaskModal" data-task-id="<%= task.id %>">
+                <i class="fas fa-play"></i> Start
+            </button>
+        <% elsif task.status == 'in_progress' %>
+            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeTaskModal" data-task-id="<%= task.id %>">
+                <i class="fas fa-check"></i> Complete
+            </button>
+            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#skipTaskModal" data-task-id="<%= task.id %>">
+                <i class="fas fa-times"></i> Skip
+            </button>
+        <% elsif task.status == 'done' %>
+            <span class="badge bg-success">
+                <i class="fas fa-check-circle"></i> Completed
+            </span>
+        <% elsif task.status == 'skipped' %>
+            <span class="badge bg-warning text-dark">
+                <i class="fas fa-times-circle"></i> Skipped
+            </span>
+        <% end %>
+    </div>
+</div>
