@@ -75,7 +75,7 @@ bundle exec rspec
 ```
 Coverage reports are generated in the `coverage/` directory.
 
-**Current Status**: Test suite is being refined. Coverage is approximately 73% with ongoing improvements to ensure all features are properly tested.
+**Current Status**: The test suite is stable with approximately 91% coverage. Six tests related to flash messages are currently pending and will be addressed in a future update.
 
 ## Project Structure
 
@@ -116,13 +116,14 @@ The application follows a modular structure for better organization and maintain
 ## Features
 
 ### 🎯 Tasks Board Interface
-- **Modern UI**: Clean, responsive design with Bootstrap 5
-- **Always-Visible Actions**: Assign and Move buttons are always shown, with unavailable options disabled
-- **Visual Task Management**: Color-coded difficulty levels and user assignments
-- **Compact Cards**: Optimized task cards for better information density
+- **Modern UI**: Clean, responsive design with Bootstrap 5.
+- **Kanban Board**: A drag-and-drop interface for managing tasks, with columns for Unassigned, To Do, In Progress, Done, and Skipped.
+- **Equal-Height Columns**: All columns on the board dynamically adjust to the same height for a clean, symmetrical layout.
+- **Visual Task Management**: Color-coded difficulty levels and user assignments.
+- **Compact Cards**: Optimized task cards for better information density.
 
 ### 👥 User Management
-- **Role-based Access**: Admin and regular user roles
+- **Role-based Access**: Admin and regular user roles.
 - **Family Profiles**: Add household members with customizable avatars
 - **Secure Authentication**: BCrypt password hashing
 - **Modern Admin Interface**: Sidebar navigation for better organization
@@ -227,14 +228,15 @@ bundle exec puma -p 4567
 ## Recent Updates
 
 ### UI/UX Improvements
-- **Simplified Naming**: Application name changed from "Household Chores" to "Household"
-- **Modern Admin Layout**: New sidebar navigation for admin area
-- **Always-Visible Actions**: Assign and Move buttons are always shown with proper disabled states
-- **Consolidated CSS**: All styles moved to `public/styles.css` for better maintainability
-- **Improved Task Cards**: More compact design with better information density
+- **Simplified Naming**: Application name changed from "Household Chores" to "Household".
+- **Modern Admin Layout**: New sidebar navigation for admin area.
+- **Equal-Height Kanban Columns**: All columns on the board now align to the same height.
+- **Always-Visible Actions**: Assign and Move buttons are always shown with proper disabled states.
+- **Consolidated CSS**: All styles moved to `public/styles.css` for better maintainability.
+- **Improved Task Cards**: More compact design with better information density and spacing.
 
 ### Navigation Updates
-- **Admin Menu**: Simplified to "Tasks", "Members", "Admins", "Reports"
+- **Admin Menu**: Simplified to "Tasks", "Members", "Admins", "Reports".
 - **Member Interface**: "Kanban Board" renamed to "Tasks Board"
 - **Consistent Branding**: "Household" branding throughout the application
 

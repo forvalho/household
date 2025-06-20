@@ -31,12 +31,17 @@
                         <% end %>
                     </button>
                     <ul class="dropdown-menu assignee-dropdown-menu">
-                        <% can_assign = admin_logged_in? %>
+                        <%
+                          # An admin can always assign.
+                          # A member can assign an unassigned task to themselves, or unassign themselves.
+                          can_assign_unassigned = member_selected? && task.member_id.nil?
+                          can_unassign_self = member_selected? && task.member_id == current_member.id
+                        %>
                         <li>
                             <form action="/tasks/<%= task.id %>/assignee" method="post" class="assignee-form">
                                 <input type="hidden" name="_method" value="patch">
                                 <input type="hidden" name="member_id" value="">
-                                <button type="submit" class="dropdown-item" <%= 'disabled' unless can_assign %>>
+                                <button type="submit" class="dropdown-item" <%= 'disabled' unless admin_logged_in? || can_unassign_self %>>
                                     <i class="fas fa-user-slash me-2"></i>Unassigned
                                 </button>
                             </form>
@@ -46,7 +51,7 @@
                                 <form action="/tasks/<%= task.id %>/assignee" method="post" class="assignee-form">
                                     <input type="hidden" name="_method" value="patch">
                                     <input type="hidden" name="member_id" value="<%= member.id %>">
-                                    <button type="submit" class="dropdown-item <%= 'active' if task.member_id == member.id %>" <%= 'disabled' unless can_assign %>>
+                                    <button type="submit" class="dropdown-item <%= 'active' if task.member_id == member.id %>" <%= 'disabled' unless admin_logged_in? || (can_assign_unassigned && member.id == current_member.id) %>>
                                         <% if member.avatar_url.present? %>
                                             <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
                                         <% else %>

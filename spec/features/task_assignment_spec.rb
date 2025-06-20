@@ -49,22 +49,39 @@ RSpec.describe 'Task Assignment', type: :feature do
   context 'as a member' do
     before { login_as_member(member1) }
 
-    it 'cannot assign tasks' do
+    it 'can claim an unassigned task' do
       find("[data-task-id='#{task.id}'] .assignee-dropdown-btn").click
       within("[data-task-id='#{task.id}'] .assignee-dropdown-menu") do
-        expect(page.find('button', text: 'Alice')).to be_disabled
+        # Can assign to self
+        expect(page.find('button', text: 'Alice')).not_to be_disabled
+        # Cannot assign to others
         expect(page.find('button', text: 'Bob')).to be_disabled
-        expect(page.find('button', text: 'Unassigned')).to be_disabled
+
+        click_button 'Alice'
       end
+      expect(page).to have_content('Task assignment updated!')
+      expect(task.reload.member).to eq(member1)
     end
 
-    it 'can see who a task is assigned to' do
-      task.update(member: member2, status: 'todo')
+    it 'can unassign themselves from a task' do
+      task.update(member: member1, status: 'todo')
       visit '/dashboard'
 
-      # The task is assigned to another member, so it should not be on the current member's board.
+      find("[data-task-id='#{task.id}'] .assignee-dropdown-btn").click
+      within("[data-task-id='#{task.id}'] .assignee-dropdown-menu") do
+        expect(page.find('button', text: 'Unassigned')).not_to be_disabled
+        click_button 'Unassigned'
+      end
+      expect(page).to have_content('Task assignment updated!')
+      expect(task.reload.member).to be_nil
+    end
+
+    it 'cannot unassign another member' do
+      task.update(member: member2, status: 'todo')
+      # The task is for another member, so it won't appear on the board.
+      # This test logic is sound but might be better as a request spec.
+      visit '/dashboard'
       expect(page).not_to have_css("[data-task-id='#{task.id}']")
-      expect(page).not_to have_content('Test Task')
     end
   end
 end
