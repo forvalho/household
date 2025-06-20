@@ -8,10 +8,10 @@
 
         <!-- Optional Description -->
         <% if task.description.present? %>
-            <p class="small text-muted mb-auto"><%= task.description %></p>
-        <% else %>
-            <div class="flex-grow-1"></div> <!-- Spacer to push content down -->
+            <p class="small text-muted mb-2"><%= task.description %></p>
         <% end %>
+
+        <div class="flex-grow-1"></div> <!-- Spacer -->
 
         <!-- Bottom Section: Actions & Tags -->
         <div>
@@ -122,27 +122,16 @@
             </div>
 
             <!-- Tags: Category & Due Date -->
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <% if task.category.present? %>
-                        <span class="badge bg-secondary"><%= task.category %></span>
-                    <% end %>
-                </div>
-                <div>
-                    <% if task.due_date %>
-                        <%
-                          due_date_class = 'text-muted'
-                          if task.due_date < Date.today
-                            due_date_class = 'text-danger fw-bold'
-                          elsif task.due_date == Date.today
-                            due_date_class = 'text-primary fw-bold'
-                          end
-                        %>
-                        <small class="<%= due_date_class %>">
-                            <i class="fas fa-clock"></i> <%= format_date(task.due_date) %>
-                        </small>
-                    <% end %>
-                </div>
+            <div class="task-tags">
+                <% if task.category.present? %>
+                    <span class="badge bg-secondary"><%= task.category %></span>
+                <% end %>
+                <% if task.due_date %>
+                    <span class="badge <%= task.due_date < Date.today ? 'bg-danger' : 'bg-info' %>">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        <%= task.due_date.strftime('%b %-d') %>
+                    </span>
+                <% end %>
             </div>
 
             <% if task.recurrence != 'none' && task.completed_today? %>

@@ -10,7 +10,7 @@ RSpec.describe 'Member Dashboard', type: :feature do
   end
 
   it 'displays the member dashboard' do
-    expect(page).to have_content("Test Member's Chores")
+    expect(page).to have_content("Test Member's Tasks")
     expect(page).to have_content('Unassigned')
     expect(page).to have_content('To Do')
     expect(page).to have_content('In Progress')

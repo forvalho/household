@@ -31,7 +31,7 @@ namespace '/admin' do
     @members = Member.where(active: true).order(:name)
     @tasks_by_member = Task.includes(:member).order(:created_at).group_by(&:member_id)
     @tasks_by_status = Task.order(:created_at).group_by(&:status)
-    erb :'admin/dashboard'
+    erb :'admin/dashboard', layout: :'admin/layout'
   end
 
   # Task Management (for Admins)
@@ -58,7 +58,7 @@ namespace '/admin' do
   # Member Management (for Admins)
   get '/members' do
     @members = Member.all
-    erb :'admin/members'
+    erb :'admin/members', layout: :'admin/layout'
   end
 
   post '/members' do
@@ -86,7 +86,7 @@ namespace '/admin' do
   # Admin Management
   get '/admins' do
     @admins = Admin.all
-    erb :'admin/admins'
+    erb :'admin/admins', layout: :'admin/layout'
   end
 
   post '/admins' do
@@ -117,6 +117,6 @@ namespace '/admin' do
       }
     end
 
-    erb :'admin/reports'
+    erb :'admin/reports', layout: :'admin/layout'
   end
 end

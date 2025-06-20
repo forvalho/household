@@ -1,7 +1,14 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
-            <h1><i class="fas fa-tasks"></i> <%= current_member.name %>'s Chores</h1>
+            <div class="d-flex align-items-center">
+              <% if current_member.avatar_url.present? %>
+                  <img src="<%= current_member.avatar_url %>" class="title-avatar me-3" alt="<%= current_member.name %>">
+              <% else %>
+                  <div class="title-avatar me-3"><%= current_member.name.first.upcase %></div>
+              <% end %>
+              <h1 class="mb-0"><%= current_member.name %>'s Tasks</h1>
+            </div>
             <% if admin_logged_in? %>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTaskModal">
                     <i class="fas fa-plus"></i> Add New Task
@@ -11,7 +18,7 @@
     </div>
 </div>
 
-<!-- Chores Board -->
+<!-- Tasks Board -->
 <div class="row gap-3">
     <div class="col">
         <div class="kanban-column">

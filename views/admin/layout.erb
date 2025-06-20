@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Household</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <!-- Admin Layout with Left Sidebar -->
+    <div class="admin-layout">
+        <!-- Top Header -->
+        <nav class="navbar navbar-expand-lg admin-header">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="/">Household</a>
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="/admin/logout">Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content with Sidebar -->
+        <div class="admin-content-wrapper">
+            <!-- Left Sidebar -->
+            <nav class="admin-sidebar">
+                <ul class="sidebar-nav">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link <%= 'active' if request.path_info == '/admin/dashboard' %>" href="/admin/dashboard">
+                            <i class="fas fa-tasks"></i> Tasks
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link <%= 'active' if request.path_info == '/admin/members' %>" href="/admin/members">
+                            <i class="fas fa-users"></i> Members
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link <%= 'active' if request.path_info == '/admin/admins' %>" href="/admin/admins">
+                            <i class="fas fa-user-shield"></i> Admins
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link <%= 'active' if request.path_info == '/admin/reports' %>" href="/admin/reports">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="admin-main-content">
+                <div class="container-fluid">
+                    <% flash = flash_message %>
+                    <% if flash %>
+                        <div class="flash-message alert alert-<%= flash[:type] %> alert-dismissible fade show" role="alert">
+                            <%= flash[:message] %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% end %>
+
+                    <%= yield %>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-hide flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            var flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    new bootstrap.Alert(message).close();
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
