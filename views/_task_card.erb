@@ -54,4 +54,12 @@
             </span>
         <% end %>
     </div>
+
+    <% if member_selected? && task.member_id == current_member.id && task.status != 'done' %>
+        <div class="mt-2 d-grid">
+            <form action="/tasks/<%= task.id %>/complete" method="post">
+                 <button type="submit" class="btn btn-sm btn-success w-100">Complete</button>
+            </form>
+        </div>
+    <% end %>
 </div>

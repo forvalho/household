@@ -12,3 +12,12 @@ group :development do
   gem 'rerun', '~> 0.14'
   gem 'pry', '~> 0.14'
 end
+
+group :test do
+  gem 'rspec', '~> 3.10'
+  gem 'rack-test', '~> 1.1'
+  gem 'capybara', '~> 3.35'
+  gem 'selenium-webdriver', '~> 4.0'
+  gem 'simplecov', '~> 0.21.2', require: false
+  gem 'database_cleaner-active_record', '~> 2.0'
+end

@@ -38,10 +38,26 @@
         .form-label {
             color: #adb5bd;
         }
+        .flash-message {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            min-width: 300px;
+        }
     </style>
 </head>
 <body>
     <div class="login-card text-center">
+        <% flash = flash_message %>
+        <% if flash %>
+            <div class="alert alert-<%= flash[:type] %> alert-dismissible fade show" role="alert">
+                <i class="fas fa-<%= flash[:type] == 'success' ? 'check-circle' : 'exclamation-circle' %>"></i> <%= flash[:message] %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% end %>
+
         <div class="mb-4">
             <i class="fas fa-home fa-3x text-primary"></i>
             <h2 class="mt-3">Household Chores</h2>

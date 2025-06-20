@@ -22,7 +22,13 @@ AVATAR_BACKGROUND_COLORS = [
 ].freeze
 
 # Database configuration
-set :database, { adapter: 'sqlite3', database: 'household.db' }
+configure :development do
+  set :database, { adapter: 'sqlite3', database: 'household.db' }
+end
+
+configure :test do
+  set :database, { adapter: 'sqlite3', database: 'household_test.db' }
+end
 
 # Enable sessions
 enable :sessions
@@ -147,6 +153,10 @@ helpers do
   end
 
   # Data helpers
+  def format_date(date)
+    date.strftime('%b %d, %Y')
+  end
+
   def completed_today(member)
     member.task_completions.where('completed_at >= ?', Date.today.beginning_of_day).count
   end
