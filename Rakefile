@@ -12,57 +12,6 @@ task :environment do
 end
 
 namespace :db do
-  desc "Migrate string categories to a separate Category model"
-  task :migrate_categories => :environment do
-    puts "Starting category migration..."
-    all_category_names = (Task.distinct.pluck(:category) + TaskTemplate.distinct.pluck(:category)).compact.uniq.sort
-
-    if all_category_names.empty?
-      puts "✅ No categories to migrate."
-    else
-      puts "Found #{all_category_names.count} unique categories to migrate: #{all_category_names.join(', ')}"
-      all_category_names.each { |name| Category.find_or_create_by!(name: name) }
-      puts "✅ Created Category records."
-
-      category_map = Category.all.index_by(&:name)
-      puts "Updating tasks and task_templates with new category_id..."
-      category_map.each do |name, category|
-        Task.where(category: name).update_all(category_id: category.id)
-        TaskTemplate.where(category: name).update_all(category_id: category.id)
-      end
-      puts "✅ Data migration complete. You should now remove the old 'category' columns from your schema."
-    end
-  end
-
-  desc "Backfill task_template_id for existing tasks based on title"
-  task :backfill_task_template_ids => :environment do
-    puts "Starting to backfill task_template_id for existing tasks..."
-
-    tasks_to_update = Task.where(task_template_id: nil)
-
-    if tasks_to_update.empty?
-      puts "✅ No tasks to update. All tasks seem to be correctly associated."
-    else
-      puts "Found #{tasks_to_update.count} tasks with missing template associations."
-      tasks_grouped_by_title = tasks_to_update.group_by(&:title)
-      templates_cache = TaskTemplate.all.index_by(&:title)
-      updated_count = 0
-
-      tasks_grouped_by_title.each do |title, tasks|
-        template = templates_cache[title]
-        if template
-          task_ids = tasks.map(&:id)
-          puts "-> Linking #{tasks.count} tasks with title '#{title}' to template ID #{template.id}."
-          Task.where(id: task_ids).update_all(task_template_id: template.id)
-          updated_count += tasks.count
-        else
-          puts "-> ⚠️ No matching template found for tasks with title '#{title}'. These will remain custom tasks."
-        end
-      end
-      puts "\n✅ Backfill complete! Successfully updated #{updated_count} tasks."
-    end
-  end
-
   desc "Seed the database with all sample data"
   task :seed => ['db:seed:admins', 'db:seed:members', 'db:seed:tasks'] do
     puts "✅ All seeding complete!"
@@ -129,6 +78,131 @@ namespace :db do
         puts " -> Created/updated task template: #{template.title}"
       end
       puts "✅ Task template seeding complete!"
+    end
+  end
+
+  namespace :data do
+    desc "Run all data migrations in db/data/"
+    task :migrate => :environment do
+      data_files = Dir[File.join(__dir__, 'db', 'data', '*.rb')].sort
+
+      # Extract version from filename (e.g., 20240611235000 from 20240611235000_migrate_category_data.rb)
+      def extract_version(filename)
+        File.basename(filename)[/^\d{14}/]
+      end
+
+      run_versions = ActiveRecord::Base.connection.select_values("SELECT version FROM data_migrations")
+
+      if data_files.empty?
+        puts "✅ No data migration files found in db/data/"
+      else
+        puts "Found #{data_files.count} data migration files:"
+        data_files.each { |file| puts "  - #{File.basename(file)}" }
+        puts ""
+
+        pending_migrations = data_files.reject { |file| run_versions.include?(extract_version(file)) }
+
+        if pending_migrations.empty?
+          puts "✅ All data migrations have already been run!"
+        else
+          puts "Running #{pending_migrations.count} pending migrations:"
+          pending_migrations.each { |file| puts "  - #{File.basename(file)}" }
+          puts ""
+
+          pending_migrations.each do |file|
+            version = extract_version(file)
+            puts "Running data migration: #{File.basename(file)}"
+            require file
+            ActiveRecord::Base.connection.execute("INSERT INTO data_migrations (version) VALUES ('#{version}')")
+            puts "✅ Completed: #{File.basename(file)}"
+            puts ""
+          end
+          puts "🎉 All pending data migrations complete!"
+        end
+      end
+    end
+
+    desc "List all available data migrations"
+    task :list => :environment do
+      data_files = Dir[File.join(__dir__, 'db', 'data', '*.rb')].sort
+      def extract_version(filename)
+        File.basename(filename)[/^\d{14}/]
+      end
+      run_versions = ActiveRecord::Base.connection.select_values("SELECT version FROM data_migrations")
+
+      if data_files.empty?
+        puts "No data migration files found in db/data/"
+      else
+        puts "Available data migrations:"
+        data_files.each_with_index do |file, index|
+          version = extract_version(file)
+          status = run_versions.include?(version) ? "✅ RUN" : "⏳ PENDING"
+          puts "  #{index + 1}. #{File.basename(file)} (#{status})"
+        end
+        puts ""
+        puts "Run migrations: #{run_versions.count}/#{data_files.count}"
+      end
+    end
+
+    desc "Run a specific data migration by filename"
+    task :run, [:filename] => :environment do |t, args|
+      if args[:filename].nil?
+        puts "❌ Please specify a filename: rake db:data:run[filename.rb]"
+        exit 1
+      end
+      file_path = File.join(__dir__, 'db', 'data', args[:filename])
+      def extract_version(filename)
+        File.basename(filename)[/^\d{14}/]
+      end
+      run_versions = ActiveRecord::Base.connection.select_values("SELECT version FROM data_migrations")
+      version = extract_version(args[:filename])
+      if File.exist?(file_path)
+        if run_versions.include?(version)
+          puts "⚠️  Migration #{args[:filename]} (#{version}) has already been run!"
+          puts "Use 'rake db:data:reset' to clear tracking and run again."
+        else
+          puts "Running data migration: #{args[:filename]}"
+          require file_path
+          ActiveRecord::Base.connection.execute("INSERT INTO data_migrations (version) VALUES ('#{version}')")
+          puts "✅ Completed: #{args[:filename]}"
+        end
+      else
+        puts "❌ Data migration file not found: #{file_path}"
+        puts "Available files:"
+        Dir[File.join(__dir__, 'db', 'data', '*.rb')].sort.each do |file|
+          puts "  - #{File.basename(file)}"
+        end
+        exit 1
+      end
+    end
+
+    desc "Reset data migration tracking (for development/testing)"
+    task :reset => :environment do
+      count = ActiveRecord::Base.connection.execute("DELETE FROM data_migrations")
+      puts "✅ Data migration tracking reset. All migrations will be treated as pending."
+    end
+
+    desc "Show status of all data migrations"
+    task :status => :environment do
+      data_files = Dir[File.join(__dir__, 'db', 'data', '*.rb')].sort
+      def extract_version(filename)
+        File.basename(filename)[/^\d{14}/]
+      end
+      run_versions = ActiveRecord::Base.connection.select_values("SELECT version FROM data_migrations")
+      if data_files.empty?
+        puts "No data migration files found in db/data/"
+      else
+        puts "Data Migration Status:"
+        puts "=" * 50
+        data_files.each do |file|
+          version = extract_version(file)
+          status = run_versions.include?(version) ? "✅ RUN" : "⏳ PENDING"
+          puts "#{status} #{File.basename(file)} (#{version})"
+        end
+        puts "=" * 50
+        puts "Run: #{run_versions.count}/#{data_files.count}"
+        puts "Pending: #{data_files.count - run_versions.count}/#{data_files.count}"
+      end
     end
   end
 end

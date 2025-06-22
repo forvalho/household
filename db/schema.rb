@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_06_11_230103) do
+ActiveRecord::Schema[8.0].define(version: 2024_06_12_000000) do
   create_table "admins", force: :cascade do |t|
     t.string "username", null: false
     t.string "password_digest", null: false
@@ -22,6 +22,11 @@ ActiveRecord::Schema[8.0].define(version: 2024_06_11_230103) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "data_migrations", force: :cascade do |t|
+    t.string "version", null: false
+    t.index ["version"], name: "index_data_migrations_on_version", unique: true
   end
 
   create_table "members", force: :cascade do |t|
