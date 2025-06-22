@@ -1,42 +1,66 @@
+require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
+Dir[File.join(__dir__, 'models', '*.rb')].sort.each { |file| require file }
+
+task :environment do
+  require_relative 'app'
+
+  # Explicitly load all models, helpers, and routes
+  ['models', 'helpers', 'routes'].each do |dir|
+    Dir[File.join(__dir__, dir, '**', '*.rb')].sort.each { |file| require file }
+  end
+end
 
 namespace :db do
+  desc "Migrate string categories to a separate Category model"
+  task :migrate_categories => :environment do
+    puts "Starting category migration..."
+    all_category_names = (Task.distinct.pluck(:category) + TaskTemplate.distinct.pluck(:category)).compact.uniq.sort
+
+    if all_category_names.empty?
+      puts "✅ No categories to migrate."
+    else
+      puts "Found #{all_category_names.count} unique categories to migrate: #{all_category_names.join(', ')}"
+      all_category_names.each { |name| Category.find_or_create_by!(name: name) }
+      puts "✅ Created Category records."
+
+      category_map = Category.all.index_by(&:name)
+      puts "Updating tasks and task_templates with new category_id..."
+      category_map.each do |name, category|
+        Task.where(category: name).update_all(category_id: category.id)
+        TaskTemplate.where(category: name).update_all(category_id: category.id)
+      end
+      puts "✅ Data migration complete. You should now remove the old 'category' columns from your schema."
+    end
+  end
+
   desc "Backfill task_template_id for existing tasks based on title"
   task :backfill_task_template_ids => :environment do
-    require_relative 'app'
     puts "Starting to backfill task_template_id for existing tasks..."
 
-    # Find all tasks that don't have a template linked yet
     tasks_to_update = Task.where(task_template_id: nil)
 
     if tasks_to_update.empty?
       puts "✅ No tasks to update. All tasks seem to be correctly associated."
-      next
-    end
+    else
+      puts "Found #{tasks_to_update.count} tasks with missing template associations."
+      tasks_grouped_by_title = tasks_to_update.group_by(&:title)
+      templates_cache = TaskTemplate.all.index_by(&:title)
+      updated_count = 0
 
-    puts "Found #{tasks_to_update.count} tasks with missing template associations."
-
-    # Group tasks by title to reduce database queries
-    tasks_grouped_by_title = tasks_to_update.group_by(&:title)
-    templates_cache = TaskTemplate.all.index_by(&:title)
-
-    updated_count = 0
-
-    tasks_grouped_by_title.each do |title, tasks|
-      template = templates_cache[title]
-
-      if template
-        task_ids = tasks.map(&:id)
-        puts "-> Linking #{tasks.count} tasks with title '#{title}' to template ID #{template.id}."
-        Task.where(id: task_ids).update_all(task_template_id: template.id)
-        updated_count += tasks.count
-      else
-        puts "-> ⚠️ No matching template found for tasks with title '#{title}'. These will remain custom tasks."
+      tasks_grouped_by_title.each do |title, tasks|
+        template = templates_cache[title]
+        if template
+          task_ids = tasks.map(&:id)
+          puts "-> Linking #{tasks.count} tasks with title '#{title}' to template ID #{template.id}."
+          Task.where(id: task_ids).update_all(task_template_id: template.id)
+          updated_count += tasks.count
+        else
+          puts "-> ⚠️ No matching template found for tasks with title '#{title}'. These will remain custom tasks."
+        end
       end
+      puts "\n✅ Backfill complete! Successfully updated #{updated_count} tasks."
     end
-
-    puts "\n✅ Backfill complete!"
-    puts "Successfully updated #{updated_count} tasks."
   end
 
   desc "Seed the database with all sample data"
@@ -46,25 +70,18 @@ namespace :db do
 
   namespace :seed do
     desc "Seed admin users"
-    task :admins do
-      require_relative 'app'
+    task :admins => :environment do
       puts "Seeding admins..."
-
-      # Upsert Admin
       Admin.find_or_create_by!(username: 'admin') do |admin|
         admin.password_digest = BCrypt::Password.create('admin123')
         puts " -> Created admin user: admin/admin123"
       end
-
       puts "✅ Admin seeding complete!"
     end
 
     desc "Seed household members"
-    task :members do
-      require_relative 'app'
+    task :members => :environment do
       puts "Seeding members..."
-
-      # Upsert Members
       [
         { name: 'Dad', avatar_url: 'https://i.pravatar.cc/150?u=dad' },
         { name: 'Mom', avatar_url: 'https://i.pravatar.cc/150?u=mom' },
@@ -76,28 +93,33 @@ namespace :db do
           puts " -> Created member: #{member.name}"
         end
       end
-
       puts "✅ Member seeding complete!"
     end
 
     desc "Seed sample task templates"
-    task :tasks do
-      require_relative 'app'
+    task :tasks => :environment do
       puts "Seeding task templates..."
 
-      # Upsert Task Templates
+      # Create categories first
+      categories = {
+        'General' => Category.find_or_create_by!(name: 'General'),
+        'Kitchen' => Category.find_or_create_by!(name: 'Kitchen'),
+        'Laundry' => Category.find_or_create_by!(name: 'Laundry'),
+        'Yard' => Category.find_or_create_by!(name: 'Yard')
+      }
+
       [
-        { title: 'Generic Task', difficulty: 'bronze', category: 'General', description: 'A customizable task for any household chore' },
-        { title: 'Fill and start dishwasher', difficulty: 'silver', category: 'Kitchen' },
-        { title: 'Empty dishwasher', difficulty: 'bronze', category: 'Kitchen' },
-        { title: 'Collect dirty laundry', difficulty: 'bronze', category: 'Laundry' },
-        { title: 'Wash laundry', difficulty: 'bronze', category: 'Laundry' },
-        { title: 'Hang laundry', difficulty: 'bronze', category: 'Laundry' },
-        { title: 'Fold laundry', difficulty: 'silver', category: 'Laundry' },
-        { title: 'Put away laundry', difficulty: 'silver', category: 'Laundry' },
-        { title: 'Gardening', difficulty: 'gold', category: 'Yard' },
-        { title: 'Water backyard', difficulty: 'bronze', category: 'Yard' },
-        { title: 'Water frontyard', difficulty: 'bronze', category: 'Yard' },
+        { title: 'Generic Task', difficulty: 'bronze', category: categories['General'], description: 'A customizable task for any household chore' },
+        { title: 'Fill and start dishwasher', difficulty: 'silver', category: categories['Kitchen'] },
+        { title: 'Empty dishwasher', difficulty: 'bronze', category: categories['Kitchen'] },
+        { title: 'Collect dirty laundry', difficulty: 'bronze', category: categories['Laundry'] },
+        { title: 'Wash laundry', difficulty: 'bronze', category: categories['Laundry'] },
+        { title: 'Hang laundry', difficulty: 'bronze', category: categories['Laundry'] },
+        { title: 'Fold laundry', difficulty: 'silver', category: categories['Laundry'] },
+        { title: 'Put away laundry', difficulty: 'silver', category: categories['Laundry'] },
+        { title: 'Gardening', difficulty: 'gold', category: categories['Yard'] },
+        { title: 'Water backyard', difficulty: 'bronze', category: categories['Yard'] },
+        { title: 'Water frontyard', difficulty: 'bronze', category: categories['Yard'] },
       ].each do |attrs|
         template = TaskTemplate.find_or_initialize_by(title: attrs[:title])
         template.difficulty = attrs[:difficulty]
@@ -106,8 +128,11 @@ namespace :db do
         template.save!
         puts " -> Created/updated task template: #{template.title}"
       end
-
       puts "✅ Task template seeding complete!"
     end
   end
 end
+
+# All other tasks will inherit from the default Rake tasks
+# provided by sinatra-activerecord.
+# To see a list of all available tasks, run `bundle exec rake -T`

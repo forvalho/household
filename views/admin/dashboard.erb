@@ -27,7 +27,7 @@
                                             data-task-id="<%= task.id %>"
                                             data-task-title="<%= task.title %>"
                                             data-task-difficulty="<%= task.difficulty %>"
-                                            data-task-category="<%= task.category %>"
+                                            data-task-category-id="<%= task.category_id %>"
                                             data-task-description="<%= task.description %>">
                                         <i class="fas fa-save"></i>
                                     </button>
@@ -224,17 +224,11 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="template-category" class="form-label">Category</label>
-                                <select class="form-select" id="template-category" name="category" required>
-                                    <option value="General">General</option>
-                                    <option value="Kitchen">Kitchen</option>
-                                    <option value="Laundry">Laundry</option>
-                                    <option value="Yard">Yard</option>
-                                    <option value="Bathroom">Bathroom</option>
-                                    <option value="Bedroom">Bedroom</option>
-                                    <option value="Living Room">Living Room</option>
-                                    <option value="Office">Office</option>
-                                    <option value="Garage">Garage</option>
+                                <label for="template-category-id" class="form-label">Category</label>
+                                <select class="form-select" id="template-category-id" name="category_id" required>
+                                    <% Category.all.order(:name).each do |category| %>
+                                        <option value="<%= category.id %>"><%= category.name %></option>
+                                    <% end %>
                                 </select>
                             </div>
                         </div>
@@ -261,13 +255,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const taskId = button.getAttribute('data-task-id');
             const taskTitle = button.getAttribute('data-task-title');
             const taskDifficulty = button.getAttribute('data-task-difficulty');
-            const taskCategory = button.getAttribute('data-task-category');
+            const taskCategoryId = button.getAttribute('data-task-category-id');
             const taskDescription = button.getAttribute('data-task-description');
 
             document.getElementById('convert-task-id').value = taskId;
             document.getElementById('template-title').value = taskTitle;
             document.getElementById('template-difficulty').value = taskDifficulty;
-            document.getElementById('template-category').value = taskCategory;
+            document.getElementById('template-category-id').value = taskCategoryId;
             document.getElementById('template-description').value = taskDescription || '';
         });
     }

@@ -276,71 +276,53 @@
     </div>
 </div>
 
-<!-- Generic Task Modal -->
+<!-- Generic Task Modal (for creating custom tasks) -->
 <div class="modal fade" id="genericTaskModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-plus"></i> Create Custom Task
+                    <i class="fas fa-edit"></i> Create Custom Task
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="/custom-tasks">
+            <form id="customTaskForm" method="POST" action="/custom-tasks">
                 <div class="modal-body">
-                    <p class="text-muted mb-3">Create a custom task with your own title and difficulty level.</p>
+                    <p class="text-muted">Create a one-off task with a custom title and difficulty.</p>
 
                     <div class="mb-3">
-                        <label for="custom_title" class="form-label">Task Title</label>
-                        <input type="text" class="form-control" id="custom_title" name="title" required placeholder="e.g., Clean garage, Organize closet">
+                        <label for="custom-task-title" class="form-label">Task Title</label>
+                        <input type="text" class="form-control" id="custom-task-title" name="title" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label d-block">Difficulty</label>
-                        <div class="difficulty-radio-group">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="difficulty" id="difficulty_bronze" value="bronze" checked>
-                                <label class="form-check-label" for="difficulty_bronze">
-                                    <i class="fas fa-medal medal-bronze fa-2x"></i>
-                                    <div>Bronze</div>
-                                    <small class="text-muted">(1 point)</small>
-                                </label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="difficulty" id="difficulty_silver" value="silver">
-                                <label class="form-check-label" for="difficulty_silver">
-                                    <i class="fas fa-medal medal-silver fa-2x"></i>
-                                    <div>Silver</div>
-                                    <small class="text-muted">(3 points)</small>
-                                </label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="difficulty" id="difficulty_gold" value="gold">
-                                <label class="form-check-label" for="difficulty_gold">
-                                    <i class="fas fa-medal medal-gold fa-2x"></i>
-                                    <div>Gold</div>
-                                    <small class="text-muted">(5 points)</small>
-                                </label>
-                            </div>
+                        <label class="form-label">Difficulty</label>
+                        <div class="btn-group w-100" role="group" aria-label="Difficulty selection">
+                            <input type="radio" class="btn-check" name="difficulty" id="custom-task-difficulty-bronze" value="bronze" checked>
+                            <label class="btn btn-outline-secondary difficulty-bronze" for="custom-task-difficulty-bronze">
+                                <i class="fas fa-medal"></i> Bronze (1 pt)
+                            </label>
+
+                            <input type="radio" class="btn-check" name="difficulty" id="custom-task-difficulty-silver" value="silver">
+                            <label class="btn btn-outline-secondary difficulty-silver" for="custom-task-difficulty-silver">
+                                <i class="fas fa-medal"></i> Silver (3 pts)
+                            </label>
+
+                            <input type="radio" class="btn-check" name="difficulty" id="custom-task-difficulty-gold" value="gold">
+                            <label class="btn btn-outline-secondary difficulty-gold" for="custom-task-difficulty-gold">
+                                <i class="fas fa-medal"></i> Gold (5 pts)
+                            </label>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="custom_category" class="form-label">Category</label>
-                        <select class="form-select" id="custom_category" name="category" required>
-                            <option value="General" selected>General</option>
-                            <option value="Kitchen">Kitchen</option>
-                            <option value="Laundry">Laundry</option>
-                            <option value="Yard">Yard</option>
-                            <option value="Bathroom">Bathroom</option>
-                            <option value="Bedroom">Bedroom</option>
-                            <option value="Living Room">Living Room</option>
-                            <option value="Office">Office</option>
-                            <option value="Garage">Garage</option>
+                        <label for="custom-task-category-id" class="form-label">Category</label>
+                        <select class="form-select" id="custom-task-category-id" name="category_id" required>
+                            <% Category.all.order(:name).each do |category| %>
+                                <option value="<%= category.id %>"><%= category.name %></option>
+                            <% end %>
                         </select>
                     </div>
-
-                    <input type="hidden" name="member_id" value="<%= current_member.id %>">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -389,7 +371,7 @@
                 // Reset form when modal opens
                 document.getElementById('custom-task-title').value = '';
                 document.getElementById('custom-task-difficulty-bronze').checked = true;
-                document.getElementById('custom-task-category').value = 'General';
+                document.getElementById('custom-task-category-id').value = 'General';
             });
         }
     });

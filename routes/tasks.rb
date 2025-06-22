@@ -2,7 +2,7 @@
 get '/task-templates' do
   require_admin_login
   @templates = TaskTemplate.all.order(:category, :title)
-  erb :'admin/task_templates'
+  erb :'admin/task_templates', layout: :'admin/layout'
 end
 
 post '/task-templates' do
@@ -26,7 +26,6 @@ end
 put '/task-templates/:id' do
   require_admin_login
   template = TaskTemplate.find(params[:id])
-
   if template.update(
     title: params[:title],
     description: params[:description],
@@ -35,7 +34,7 @@ put '/task-templates/:id' do
   )
     set_flash('success', 'Task template updated successfully!')
   else
-    set_flash('error', 'Error updating task template')
+    set_flash('error', 'Error updating template: ' + template.errors.full_messages.join(', '))
   end
   redirect '/task-templates'
 end

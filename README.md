@@ -220,15 +220,48 @@ bundle exec puma -p 4567
    sudo systemctl start household
    ```
 
+## Database Management & Migrations
+
+- **Migrations First**: All database changes are managed via ActiveRecord migrations in `db/migrate/`. Never edit `db/schema.rb` directly—this file is auto-generated after migrations run.
+- **Setup/Reset**:
+  - To create or reset the database, use:
+    ```bash
+    RACK_ENV=development bundle exec rake db:drop db:create db:migrate
+    RACK_ENV=development bundle exec rake db:seed
+    ```
+    For test or production, set `RACK_ENV` accordingly.
+- **Resilient Migrations**: Migrations are written to be idempotent and safe to run multiple times or in production. They check for table/column existence before making changes.
+- **Seeding**: All seed data is managed in `db/seeds.rb`. Run:
+    ```bash
+    bundle exec rake db:seed
+    ```
+    to populate the database with default admins, members, categories, and task templates.
+
 ## Development
 
 ### Database Migrations
 
-The application uses a simple schema file approach. To modify the database structure:
+- **Never edit `db/schema.rb` directly.**
+- To modify the database structure:
+  1. Create a new migration in `db/migrate/` (see existing files for examples).
+  2. Run:
+     ```bash
+     bundle exec rake db:migrate
+     ```
+  3. (Optional) Seed data with:
+     ```bash
+     bundle exec rake db:seed
+     ```
+- The `db/schema.rb` file is auto-generated after migrations and is for reference only.
 
-1. Edit `db/schema.rb`
-2. Delete the existing database file (`db/test.sqlite3`)
-3. Restart the application to recreate the database
+### Seeding
+
+- All seed logic is in `db/seeds.rb`.
+- To seed the database:
+  ```bash
+  bundle exec rake db:seed
+  ```
+- This will create default admins, members, categories, and task templates.
 
 ### Adding New Features
 

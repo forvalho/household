@@ -2,6 +2,7 @@ class Task < ActiveRecord::Base
   belongs_to :member
   has_many :task_completions
   belongs_to :task_template, optional: true
+  belongs_to :category
 
   validates :title, presence: true
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }

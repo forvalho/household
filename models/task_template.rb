@@ -1,5 +1,7 @@
 class TaskTemplate < ActiveRecord::Base
   has_many :tasks
+  belongs_to :category
+
   validates :title, presence: true
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }
   validates :category, presence: true
