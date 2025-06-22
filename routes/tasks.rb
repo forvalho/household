@@ -137,7 +137,8 @@ put '/tasks/:id/status' do
 
   # Allow admin or the assigned member to move tasks
   unless admin_logged_in? || (member_selected? && task.member_id == current_member.id)
-    if request.content_type == 'application/json'
+    if request.xhr? || request.accept?('application/json')
+      content_type :json
       halt 403, { success: false, message: 'Permission denied' }.to_json
     else
       set_flash('error', 'Permission denied')
@@ -201,7 +202,32 @@ patch '/tasks/:id/assignee' do
   redirect '/dashboard'
 end
 
-# Create a custom task (from Generic Task modal)
+# Convert a task to a template
+post '/tasks/convert-to-template' do
+  require_admin_login
+
+  task = Task.find(params[:task_id])
+
+  # Create a new template from the task
+  template = TaskTemplate.new(
+    title: params[:title],
+    description: params[:description],
+    difficulty: params[:difficulty],
+    category: params[:category]
+  )
+
+  if template.save
+    # Link the original task to the new template
+    task.update(task_template_id: template.id)
+    set_flash('success', "Task '#{task.title}' converted to template successfully!")
+  else
+    set_flash('error', 'Error creating template: ' + template.errors.full_messages.join(', '))
+  end
+
+  redirect '/dashboard'
+end
+
+# Custom task creation
 post '/custom-tasks' do
   redirect '/' unless member_selected?
 

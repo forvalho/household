@@ -1,6 +1,7 @@
 class Task < ActiveRecord::Base
   belongs_to :member
   has_many :task_completions
+  belongs_to :task_template, optional: true
 
   validates :title, presence: true
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }
@@ -28,5 +29,9 @@ class Task < ActiveRecord::Base
 
   def set_default_status
     self.status = 'todo' if self.status.nil?
+  end
+
+  def custom_task?
+    task_template_id.nil?
   end
 end

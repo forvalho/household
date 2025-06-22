@@ -1,6 +1,45 @@
 <div class="container-fluid mt-4">
     <h1 class="page-title mb-4"><i class="fas fa-tasks"></i> Tasks</h1>
 
+    <!-- Custom Tasks Section (Admin Only) -->
+    <% custom_tasks = @tasks_by_member.values.flatten.select(&:custom_task?) %>
+    <% if custom_tasks.any? %>
+        <div class="alert alert-info mb-4">
+            <h5><i class="fas fa-lightbulb"></i> Custom Tasks Available for Conversion</h5>
+            <p class="mb-2">The following custom tasks can be converted to reusable templates:</p>
+            <div class="row">
+                <% custom_tasks.each do |task| %>
+                    <div class="col-md-4 mb-2">
+                        <div class="card border-info">
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title mb-1"><%= task.title %></h6>
+                                        <small class="text-muted">
+                                            Assigned to: <%= task.member&.name || 'Unassigned' %> |
+                                            <%= task.difficulty.capitalize %> |
+                                            <%= task.category %>
+                                        </small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-info" type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#convertToTemplateModal"
+                                            data-task-id="<%= task.id %>"
+                                            data-task-title="<%= task.title %>"
+                                            data-task-difficulty="<%= task.difficulty %>"
+                                            data-task-category="<%= task.category %>"
+                                            data-task-description="<%= task.description %>">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+    <% end %>
+
     <!-- Accordion for Member Tasks -->
     <div class="accordion" id="taskManagerAccordion">
         <!-- Unassigned Tasks Section -->
@@ -56,33 +95,33 @@
                                         <div class="task-card-wrapper mb-3">
                                             <%= erb :'common/task_card', locals: { task: task } %>
                                         </div>
-                                <% end %>
-                            </div>
-                            <div class="col-md-4">
+                                    <% end %>
+                                </div>
+                                <div class="col-md-4">
                                     <h5 class="kanban-title">In Progress</h5>
                                     <% member_tasks.select { |t| t.status == 'in_progress' }.each do |task| %>
                                         <div class="task-card-wrapper mb-3">
                                             <%= erb :'common/task_card', locals: { task: task } %>
                                         </div>
-                                <% end %>
-                            </div>
-                            <div class="col-md-4">
+                                    <% end %>
+                                </div>
+                                <div class="col-md-4">
                                     <h5 class="kanban-title">Done / Skipped</h5>
                                     <% member_tasks.select { |t| ['done', 'skipped'].include?(t.status) }.each do |task| %>
                                         <div class="task-card-wrapper mb-3">
                                             <%= erb :'common/task_card', locals: { task: task } %>
                                         </div>
-                                <% end %>
+                                    <% end %>
+                                </div>
                             </div>
-                        </div>
-                    <% else %>
-                        <p class="text-center text-muted">No tasks assigned to <%= member.name %>.</p>
-                    <% end %>
+                        <% else %>
+                            <p class="text-center text-muted">No tasks assigned to <%= member.name %>.</p>
+                        <% end %>
+                    </div>
                 </div>
             </div>
-        </div>
-    <% end %>
-</div>
+        <% end %>
+    </div>
 </div>
 
 <!-- New Task Modal -->
@@ -143,3 +182,94 @@
         </div>
     </div>
 </div>
+
+<!-- Convert to Template Modal -->
+<div class="modal fade" id="convertToTemplateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-save"></i> Convert Task to Template
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/tasks/convert-to-template">
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        This will create a reusable template from the selected task. You can modify the details below before creating the template.
+                    </p>
+
+                    <input type="hidden" id="convert-task-id" name="task_id">
+
+                    <div class="mb-3">
+                        <label for="template-title" class="form-label">Template Title</label>
+                        <input type="text" class="form-control" id="template-title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="template-description" class="form-label">Description (optional)</label>
+                        <textarea class="form-control" id="template-description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="template-difficulty" class="form-label">Difficulty</label>
+                                <select class="form-select" id="template-difficulty" name="difficulty">
+                                    <option value="bronze">Bronze (1 point)</option>
+                                    <option value="silver">Silver (3 points)</option>
+                                    <option value="gold">Gold (5 points)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="template-category" class="form-label">Category</label>
+                                <select class="form-select" id="template-category" name="category" required>
+                                    <option value="General">General</option>
+                                    <option value="Kitchen">Kitchen</option>
+                                    <option value="Laundry">Laundry</option>
+                                    <option value="Yard">Yard</option>
+                                    <option value="Bathroom">Bathroom</option>
+                                    <option value="Bedroom">Bedroom</option>
+                                    <option value="Living Room">Living Room</option>
+                                    <option value="Office">Office</option>
+                                    <option value="Garage">Garage</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Template
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// JavaScript to populate the convert to template modal
+document.addEventListener('DOMContentLoaded', function() {
+    const convertModal = document.getElementById('convertToTemplateModal');
+    if (convertModal) {
+        convertModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const taskId = button.getAttribute('data-task-id');
+            const taskTitle = button.getAttribute('data-task-title');
+            const taskDifficulty = button.getAttribute('data-task-difficulty');
+            const taskCategory = button.getAttribute('data-task-category');
+            const taskDescription = button.getAttribute('data-task-description');
+
+            document.getElementById('convert-task-id').value = taskId;
+            document.getElementById('template-title').value = taskTitle;
+            document.getElementById('template-difficulty').value = taskDifficulty;
+            document.getElementById('template-category').value = taskCategory;
+            document.getElementById('template-description').value = taskDescription || '';
+        });
+    }
+});
+</script>

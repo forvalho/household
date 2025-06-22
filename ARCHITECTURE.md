@@ -122,3 +122,22 @@ Routes are organized into separate files by feature:
 - **API endpoints**: JSON API for potential mobile app integration
 - **Real-time updates**: WebSocket integration for live task updates
 - **Backup strategy**: Database backup and recovery procedures
+
+## Decision Record: Database Deletion Policy
+
+**Date:** 2025-06-22
+
+**Decision:**
+- Never delete the production database (or any other database) without explicit user confirmation.
+- All destructive actions involving data loss must be confirmed by the user, regardless of environment.
+- This policy is in place to protect user data and prevent accidental loss.
+
+**Rationale:**
+- Deleting a database is irreversible and can result in permanent data loss.
+- User trust and data integrity are paramount.
+- This policy applies to all environments: production, development, test, and any others.
+
+**Action:**
+- All future code, scripts, and assistant actions must prompt for confirmation before any destructive database operation.
+
+---

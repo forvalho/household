@@ -380,4 +380,17 @@
             });
         });
     });
+
+    // JavaScript for the custom task modal
+    document.addEventListener('DOMContentLoaded', function() {
+        const customTaskModal = document.getElementById('genericTaskModal');
+        if (customTaskModal) {
+            customTaskModal.addEventListener('show.bs.modal', function() {
+                // Reset form when modal opens
+                document.getElementById('custom-task-title').value = '';
+                document.getElementById('custom-task-difficulty-bronze').checked = true;
+                document.getElementById('custom-task-category').value = 'General';
+            });
+        }
+    });
 </script>

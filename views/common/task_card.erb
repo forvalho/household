@@ -1,22 +1,44 @@
 <div class="task-card difficulty-<%= task.medal %>" data-task-id="<%= task.id %>" data-status="<%= task.status %>" data-testid="task-card-<%= task.id %>">
     <div class="card-body d-flex flex-column">
         <!-- Top Section: Title & Points -->
-    <div class="d-flex justify-content-between align-items-start mb-2">
-        <h6 class="mb-0 fw-bold"><%= task.title %></h6>
-            <span class="medal-badge" title="<%= pluralize(task.points_value, 'point') %>">
-                <i class="fas fa-medal medal-<%= task.medal %>"></i>
-            </span>
-    </div>
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="mb-0 fw-bold"><%= task.title %></h6>
+            <div class="d-flex align-items-center">
+                <% if task.custom_task? %>
+                    <span class="badge bg-info me-2" title="Custom task">
+                        <i class="fas fa-edit"></i> Custom
+                    </span>
+                <% end %>
+                <span class="medal-badge" title="<%= pluralize(task.points_value, 'point') %>">
+                    <i class="fas fa-medal medal-<%= task.medal %>"></i>
+                </span>
+            </div>
+        </div>
 
         <!-- Optional Description -->
-    <% if task.description.present? %>
-        <p class="small text-muted mb-2"><%= task.description %></p>
-    <% end %>
+        <% if task.description.present? %>
+            <p class="small text-muted mb-2"><%= task.description %></p>
+        <% end %>
 
         <!-- Bottom Section: Actions & Tags -->
         <div class="mt-auto">
             <!-- Actions: Assignee & Move To -->
             <div class="task-actions-container mb-2">
+                <% if admin_logged_in? && task.custom_task? %>
+                    <!-- Convert to Template Button for Custom Tasks (Admin Only) -->
+                    <button class="btn btn-sm btn-outline-info" type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#convertToTemplateModal"
+                            data-task-id="<%= task.id %>"
+                            data-task-title="<%= task.title %>"
+                            data-task-difficulty="<%= task.difficulty %>"
+                            data-task-category="<%= task.category %>"
+                            data-task-description="<%= task.description %>">
+                        <i class="fas fa-save"></i>
+                        <span class="ms-1">Convert to Template</span>
+                    </button>
+                <% end %>
+
                 <!-- Assignee Dropdown -->
                 <div class="assignee-selector dropdown" data-testid="assignee-dropdown-<%= task.id %>">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -112,21 +134,21 @@
                             </form>
                         </li>
                     </ul>
-        </div>
-    </div>
+                </div>
+            </div>
 
             <!-- Tags: Category & Due Date -->
             <div class="task-tags">
-    <% if task.category.present? %>
-            <span class="badge bg-secondary"><%= task.category %></span>
-    <% end %>
+                <% if task.category.present? %>
+                    <span class="badge bg-secondary"><%= task.category %></span>
+                <% end %>
                 <% if task.due_date %>
                     <span class="badge <%= task.due_date < Date.today ? 'bg-danger' : 'bg-info' %>">
                         <i class="fas fa-calendar-alt me-1"></i>
                         <%= task.due_date.strftime('%b %-d') %>
-            </span>
-        <% end %>
-    </div>
+                    </span>
+                <% end %>
+            </div>
         </div>
     </div>
 </div>

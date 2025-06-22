@@ -1,4 +1,44 @@
+require 'sinatra/activerecord/rake'
+
 namespace :db do
+  desc "Backfill task_template_id for existing tasks based on title"
+  task :backfill_task_template_ids => :environment do
+    require_relative 'app'
+    puts "Starting to backfill task_template_id for existing tasks..."
+
+    # Find all tasks that don't have a template linked yet
+    tasks_to_update = Task.where(task_template_id: nil)
+
+    if tasks_to_update.empty?
+      puts "✅ No tasks to update. All tasks seem to be correctly associated."
+      next
+    end
+
+    puts "Found #{tasks_to_update.count} tasks with missing template associations."
+
+    # Group tasks by title to reduce database queries
+    tasks_grouped_by_title = tasks_to_update.group_by(&:title)
+    templates_cache = TaskTemplate.all.index_by(&:title)
+
+    updated_count = 0
+
+    tasks_grouped_by_title.each do |title, tasks|
+      template = templates_cache[title]
+
+      if template
+        task_ids = tasks.map(&:id)
+        puts "-> Linking #{tasks.count} tasks with title '#{title}' to template ID #{template.id}."
+        Task.where(id: task_ids).update_all(task_template_id: template.id)
+        updated_count += tasks.count
+      else
+        puts "-> ⚠️ No matching template found for tasks with title '#{title}'. These will remain custom tasks."
+      end
+    end
+
+    puts "\n✅ Backfill complete!"
+    puts "Successfully updated #{updated_count} tasks."
+  end
+
   desc "Seed the database with all sample data"
   task :seed => ['db:seed:admins', 'db:seed:members', 'db:seed:tasks'] do
     puts "✅ All seeding complete!"
@@ -47,15 +87,17 @@ namespace :db do
 
       # Upsert Task Templates
       [
+        { title: 'Generic Task', difficulty: 'bronze', category: 'General', description: 'A customizable task for any household chore' },
         { title: 'Fill and start dishwasher', difficulty: 'silver', category: 'Kitchen' },
         { title: 'Empty dishwasher', difficulty: 'bronze', category: 'Kitchen' },
+        { title: 'Collect dirty laundry', difficulty: 'bronze', category: 'Laundry' },
+        { title: 'Wash laundry', difficulty: 'bronze', category: 'Laundry' },
         { title: 'Hang laundry', difficulty: 'bronze', category: 'Laundry' },
         { title: 'Fold laundry', difficulty: 'silver', category: 'Laundry' },
         { title: 'Put away laundry', difficulty: 'silver', category: 'Laundry' },
-        { title: 'Mow lawn', difficulty: 'gold', category: 'Yard' },
+        { title: 'Gardening', difficulty: 'gold', category: 'Yard' },
         { title: 'Water backyard', difficulty: 'bronze', category: 'Yard' },
         { title: 'Water frontyard', difficulty: 'bronze', category: 'Yard' },
-        { title: 'Generic Task', difficulty: 'bronze', category: 'General', description: 'A customizable task for any household chore' }
       ].each do |attrs|
         template = TaskTemplate.find_or_initialize_by(title: attrs[:title])
         template.difficulty = attrs[:difficulty]

@@ -16,6 +16,7 @@ RSpec.describe Task, type: :model do
 
     it 'is invalid without a difficulty' do
       task = Task.new(title: 'Test Task', member: member)
+      task.difficulty = nil
       expect(task).not_to be_valid
     end
 
@@ -44,6 +45,19 @@ RSpec.describe Task, type: :model do
     it 'returns 5 for gold tasks' do
       task = Task.new(difficulty: 'gold')
       expect(task.points_value).to eq(5)
+    end
+  end
+
+  describe '#custom_task?' do
+    it 'returns true when task_template_id is nil' do
+      task = Task.new(title: 'Custom Task', difficulty: 'bronze', member: member)
+      expect(task.custom_task?).to be true
+    end
+
+    it 'returns false when task_template_id is set' do
+      template = TaskTemplate.create!(title: 'Test Template', difficulty: 'bronze', category: 'General')
+      task = Task.new(title: 'Template Task', difficulty: 'bronze', member: member, task_template: template)
+      expect(task.custom_task?).to be false
     end
   end
 end

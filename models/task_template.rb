@@ -1,4 +1,5 @@
 class TaskTemplate < ActiveRecord::Base
+  has_many :tasks
   validates :title, presence: true
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }
   validates :category, presence: true
@@ -22,26 +23,28 @@ class TaskTemplate < ActiveRecord::Base
 
   # Create a new task from this template for a specific member
   def create_task_for(member, custom_title: nil, custom_difficulty: nil)
+    task_attributes = {
+      description: description,
+      category: category,
+      member: member,
+      status: 'todo',
+      task_template: self # Link to this template
+    }
+
     if generic_task? && custom_title.present?
       # For Generic Task, use the custom title and difficulty
-      Task.create!(
+      task_attributes.merge!(
         title: custom_title,
-        description: description,
-        difficulty: custom_difficulty || difficulty,
-        category: category,
-        member: member,
-        status: 'todo'
+        difficulty: custom_difficulty || difficulty
       )
     else
       # For regular templates, use the template's values
-      Task.create!(
+      task_attributes.merge!(
         title: title,
-        description: description,
-        difficulty: difficulty,
-        category: category,
-        member: member,
-        status: 'todo'
+        difficulty: difficulty
       )
     end
+
+    Task.create!(task_attributes)
   end
 end
