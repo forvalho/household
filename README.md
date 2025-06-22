@@ -25,7 +25,7 @@ A simple web application for managing household tasks and activities. Built with
     - Templates remain available for other members to use
     - Includes a "Generic Task" template for custom chores
 - **Customizable Avatars**: Users can personalize their avatars using the DiceBear API, choosing from dozens of styles and custom background colors
-- **Tasks Board**: A Kanban board for members to see their tasks categorized by status (Available Tasks, To Do, In Progress, Done, Skipped)
+- **Tasks Board**: A Kanban board for members to see their tasks categorized by status (To Do, In Progress, Done)
 - **Admin Dashboard**: A central place for admins to oversee all tasks and manage task templates with a modern sidebar layout
 - **Interactive Leaderboard**: Click any member row to navigate directly to their task board
 - **RSpec Test Suite**: A solid testing foundation to ensure application stability
@@ -103,8 +103,7 @@ The application follows a modular structure for better organization and maintain
 │   ├── member.rb
 │   ├── task.rb
 │   ├── task_template.rb
-│   ├── task_completion.rb
-│   └── task_skip.rb
+│   └── task_completion.rb
 ├── routes/             # Sinatra route definitions
 │   ├── admin.rb
 │   ├── members.rb
@@ -133,7 +132,7 @@ The application follows a modular structure for better organization and maintain
 
 ### 🎯 Tasks Board Interface
 - **Modern UI**: Clean, responsive design with Bootstrap 5.
-- **Kanban Board**: A drag-and-drop interface for managing tasks, with columns for Available Tasks, To Do, In Progress, Done, and Skipped.
+- **Kanban Board**: A drag-and-drop interface for managing tasks, with columns for To Do, In Progress, and Done.
 - **Template Cards**: Consistent design with regular task cards for seamless UX
 - **Equal-Height Columns**: All columns on the board dynamically adjust to the same height for a clean, symmetrical layout.
 - **Visual Task Management**: Color-coded difficulty levels and user assignments.
@@ -147,7 +146,7 @@ The application follows a modular structure for better organization and maintain
 
 ### 📊 Comprehensive Reporting
 - **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
-- **Performance Tracking**: Completion rates, skip tracking, and progress monitoring
+- **Performance Tracking**: Completion rates and progress monitoring
 - **Interactive Leaderboard**: Click any member row to view their task board
 - **Visual Charts**: Interactive charts showing points distribution and completion rates
 

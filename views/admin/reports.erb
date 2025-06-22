@@ -36,15 +36,6 @@
     <div class="col-md-3">
         <div class="card stats-card">
             <div class="card-body text-center">
-                <i class="fas fa-times-circle fa-2x mb-2"></i>
-                <h4><%= @member_stats.sum { |stat| stat[:skips] } %></h4>
-                <p class="mb-0">Total Tasks Skipped</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card stats-card">
-            <div class="card-body text-center">
                 <i class="fas fa-bullseye fa-2x mb-2"></i>
                 <h4><%= @member_stats.map { |s| s[:points] }.max || 0 %></h4>
                 <p class="mb-0">Top Score</p>
@@ -71,7 +62,6 @@
                                 <th>Points Earned</th>
                                 <th>Medals Earned</th>
                                 <th>Tasks Completed</th>
-                                <th>Tasks Skipped</th>
                                 <th>Performance Score</th>
                                 <th>Performance</th>
                             </tr>
@@ -99,9 +89,6 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-success"><%= stat[:completions] %></span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning text-dark"><%= stat[:skips] %></span>
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">

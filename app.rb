@@ -64,10 +64,6 @@ helpers do
     completions.sum { |tc| tc.task.points_value }
   end
 
-  def calculate_member_skips(member, start_date = 30.days.ago)
-    member.task_skips.where('skipped_at >= ?', start_date).count
-  end
-
   def calculate_completion_rate(member, start_date)
     total_tasks = member.tasks.where('created_at >= ?', start_date).count
     completed_tasks = member.task_completions.joins(:task).where('completed_at >= ?', start_date).count

@@ -34,10 +34,6 @@ module ApplicationHelper
     member.task_completions.where('completed_at >= ?', Date.today.beginning_of_day).count
   end
 
-  def skipped_today(member)
-    member.task_skips.where('skipped_at >= ?', Date.today.beginning_of_day).count
-  end
-
   def total_points_today(member)
     member.task_completions.joins(:task)
            .where('task_completions.completed_at >= ?', Date.today.beginning_of_day)

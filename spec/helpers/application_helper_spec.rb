@@ -20,15 +20,6 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
   end
 
-  describe '#skipped_today' do
-    it 'returns count of skips today' do
-      task = Task.create!(title: 'Test Task', member: member, status: 'skipped', difficulty: 'bronze')
-      TaskSkip.create!(task: task, member: member, skipped_at: Time.now, reason: 'Too busy')
-
-      expect(helper.skipped_today(member)).to eq(1)
-    end
-  end
-
   describe '#total_points_today' do
     it 'returns total points from completions today' do
       bronze_task = Task.create!(title: 'Bronze Task', member: member, status: 'done', difficulty: 'bronze')

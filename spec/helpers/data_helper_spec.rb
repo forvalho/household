@@ -64,30 +64,13 @@ RSpec.describe DataHelper, type: :helper do
     end
   end
 
-  describe '#calculate_member_skips' do
-    it 'counts skips within the specified period' do
-      task = Task.create!(title: 'Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
-      TaskSkip.create!(task: task, member: member, skipped_at: 1.day.ago, reason: 'Too busy')
-
-      expect(helper.calculate_member_skips(member)).to eq(1)
-    end
-
-    it 'only counts skips within the specified period' do
-      task = Task.create!(title: 'Old Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
-      TaskSkip.create!(task: task, member: member, skipped_at: 40.days.ago, reason: 'Too busy')
-
-      expect(helper.calculate_member_skips(member, 30.days.ago)).to eq(0)
-    end
-  end
-
   describe '#calculate_completion_rate' do
     it 'calculates completion rate for one-time tasks' do
       Task.create!(title: 'Completed Task', member: member, status: 'done', difficulty: 'bronze')
       Task.create!(title: 'Todo Task', member: member, status: 'todo', difficulty: 'bronze')
-      Task.create!(title: 'Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
 
       period = 30.days.ago..Time.now
-      expect(helper.calculate_completion_rate(member, period)).to eq(33.3)
+      expect(helper.calculate_completion_rate(member, period)).to eq(50.0)
     end
 
     it 'returns 0 for members with no tasks' do

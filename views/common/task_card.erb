@@ -74,11 +74,9 @@
                 <%
                   can_change_status = admin_logged_in? || (member_selected? && task.member_id == current_member.id)
                   valid_statuses = {
-                    'unassigned' => [],
-                    'todo' => ['in_progress', 'skipped'],
-                    'in_progress' => ['done', 'skipped'],
-                    'done' => [],
-                    'skipped' => ['todo']
+                    'todo' => ['in_progress'],
+                    'in_progress' => ['done', 'todo'],
+                    'done' => []
                   }
                   available_actions = valid_statuses[task.status] || []
                 %>
@@ -110,15 +108,6 @@
                             <form action="/tasks/<%= task.id %>/complete" method="post" class="d-inline">
                                 <button type="submit" class="dropdown-item" <%= 'disabled' if !can_change_status || !available_actions.include?('done') %>>
                                     <i class="fas fa-check-circle fa-fw me-2 text-success"></i> Done
-                                </button>
-                            </form>
-                        </li>
-                        <!-- Skipped -->
-                        <li>
-                            <form action="/tasks/<%= task.id %>/status" method="post" class="d-inline">
-                                <input type="hidden" name="_method" value="put"><input type="hidden" name="status" value="skipped">
-                                <button type="submit" class="dropdown-item" <%= 'disabled' if !can_change_status || !available_actions.include?('skipped') %>>
-                                    <i class="fas fa-times-circle fa-fw me-2 text-danger"></i> Skipped
                                 </button>
                             </form>
                         </li>

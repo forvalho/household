@@ -15,12 +15,11 @@ RSpec.describe 'Task Coverage', type: :request do
       # Create some tasks for the member
       Task.create!(title: 'Completed Task', member: member, status: 'done', difficulty: 'bronze')
       Task.create!(title: 'Todo Task', member: member, status: 'todo', difficulty: 'bronze')
-      Task.create!(title: 'Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
 
       get '/admin/reports'
       expect(last_response).to be_ok
       expect(last_response.body).to include('Test Member')
-      expect(last_response.body).to include('33.3%') # 1 out of 3 tasks completed
+      expect(last_response.body).to include('50.0%') # 1 out of 2 tasks completed
     end
 
     xit 'handles members with no tasks' do
@@ -45,15 +44,6 @@ RSpec.describe 'Task Coverage', type: :request do
       expect(last_response.body).to include('1') # Gold medals
       expect(last_response.body).to include('1') # Silver medals
       expect(last_response.body).to include('1') # Bronze medals
-    end
-
-    xit 'displays skip count' do
-      task = Task.create!(title: 'Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
-      TaskSkip.create!(task: task, member: member, skipped_at: 1.day.ago, reason: 'Too busy')
-
-      get '/admin/reports'
-      expect(last_response).to be_ok
-      expect(last_response.body).to include('1') # Skip count
     end
 
     xit 'filters by date range' do

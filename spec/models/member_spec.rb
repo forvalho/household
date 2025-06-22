@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Member, type: :model do
+  let(:member) { Member.new(name: 'Test Member') }
+
   describe 'validations' do
     it 'is valid with a unique name' do
       Member.create!(name: 'Test Member')
@@ -27,13 +29,7 @@ RSpec.describe Member, type: :model do
     end
 
     it 'has many task_completions' do
-        association = described_class.reflect_on_association(:task_completions)
-        expect(association.macro).to eq :has_many
-    end
-
-    it 'has many task_skips' do
-        association = described_class.reflect_on_association(:task_skips)
-        expect(association.macro).to eq :has_many
+      expect(member).to have_many(:task_completions)
     end
   end
 end

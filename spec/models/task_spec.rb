@@ -5,22 +5,22 @@ RSpec.describe Task, type: :model do
 
   describe 'validations' do
     it 'is valid with a title and difficulty' do
-      task = Task.new(title: 'Test Task', difficulty: 'bronze')
+      task = Task.new(title: 'Test Task', difficulty: 'bronze', member: member)
       expect(task).to be_valid
     end
 
     it 'is invalid without a title' do
-      task = Task.new(difficulty: 'bronze')
+      task = Task.new(difficulty: 'bronze', member: member)
       expect(task).not_to be_valid
     end
 
     it 'is invalid without a difficulty' do
-      task = Task.new(title: 'Test Task')
+      task = Task.new(title: 'Test Task', member: member)
       expect(task).not_to be_valid
     end
 
     it 'is invalid with a wrong difficulty' do
-      task = Task.new(title: 'Test Task', difficulty: 'invalid')
+      task = Task.new(title: 'Test Task', difficulty: 'invalid', member: member)
       expect(task).not_to be_valid
     end
   end
@@ -28,7 +28,6 @@ RSpec.describe Task, type: :model do
   describe 'associations' do
     it { should belong_to(:member) }
     it { should have_many(:task_completions) }
-    it { should have_many(:task_skips) }
   end
 
   describe '#points_value' do

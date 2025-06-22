@@ -18,10 +18,6 @@ module DataHelper
     }
   end
 
-  def calculate_member_skips(member, start_date = 30.days.ago)
-    member.task_skips.where('skipped_at >= ?', start_date).count
-  end
-
   def calculate_completion_rate(member, period)
     # Get all tasks that were active during the period
     tasks = member.tasks.where('created_at <= ?', period.end)

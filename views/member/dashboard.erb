@@ -141,19 +141,6 @@
             </div>
         </div>
     </div>
-
-    <div class="col">
-        <div class="kanban-column">
-            <h5 class="text-center mb-3">
-                <i class="fas fa-times-circle text-danger"></i> Skipped
-            </h5>
-            <div id="skipped-column" class="task-list" data-status="skipped">
-                <% @member_tasks.select { |t| t.status == 'skipped' }.each do |task| %>
-                    <%= erb :'common/task_card', locals: { task: task } %>
-                <% end %>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- New Task Modal -->

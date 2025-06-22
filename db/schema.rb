@@ -39,12 +39,4 @@ ActiveRecord::Schema.define do
     t.text :notes
     t.timestamps
   end
-
-  create_table :task_skips, if_not_exists: true do |t|
-    t.integer :task_id, null: false
-    t.integer :member_id, null: false
-    t.datetime :skipped_at, null: false
-    t.text :reason, null: false
-    t.timestamps
-  end
 end

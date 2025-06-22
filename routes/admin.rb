@@ -95,7 +95,6 @@ namespace '/admin' do
         member: member,
         points: calculate_member_points(member, @start_date),
         medals: calculate_member_medals(member, @start_date),
-        skips: calculate_member_skips(member, @start_date),
         completions: completed_tasks,
         completion_rate: completion_rate
       }

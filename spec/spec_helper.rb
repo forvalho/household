@@ -28,11 +28,11 @@ RSpec.configure do |config|
 
   # Clean up the test database before each run
   config.before(:suite) do
+    TaskTemplate.destroy_all
+    TaskCompletion.destroy_all
     Task.destroy_all
     Member.destroy_all
     Admin.destroy_all
-    TaskCompletion.destroy_all
-    TaskSkip.destroy_all
   end
 
   # Clean up between tests
@@ -41,6 +41,10 @@ RSpec.configure do |config|
     Member.destroy_all
     Admin.destroy_all
     TaskCompletion.destroy_all
-    TaskSkip.destroy_all
+  end
+
+  # Helper method for feature specs
+  def login_as(member)
+    visit "/members/#{member.id}/select"
   end
 end

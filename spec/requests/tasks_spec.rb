@@ -5,7 +5,6 @@ RSpec.describe 'Task Routes', type: :request do
   let!(:member) { Member.create!(name: 'Test Member') }
   let!(:other_member) { Member.create!(name: 'Other Member') }
   let!(:task) { Task.create!(title: 'Test Task', difficulty: 'bronze', member: member, status: 'todo') }
-  let!(:unassigned_task) { Task.create!(title: 'Unassigned Task', difficulty: 'bronze', status: 'unassigned') }
 
   describe 'PUT /tasks/:id/status' do
     it 'denies permission for non-admin/non-assigned member (HTML)' do
@@ -69,33 +68,6 @@ RSpec.describe 'Task Routes', type: :request do
       follow_redirect!
       expect(last_request.path).to eq('/dashboard')
       expect(task.reload.status).not_to eq('done')
-    end
-  end
-
-  describe 'POST /tasks/:id/skip' do
-    it 'redirects if not logged in as member' do
-      post "/tasks/#{task.id}/skip"
-      expect(last_response).to be_redirect
-      follow_redirect!
-      expect(last_request.path).to eq('/')
-    end
-
-    it 'allows assigned member to skip task' do
-      get "/members/#{member.id}/select"
-      post "/tasks/#{task.id}/skip", { reason: 'Busy' }
-      expect(last_response).to be_redirect
-      follow_redirect!
-      expect(last_request.path).to eq('/dashboard')
-      expect(task.reload.status).to eq('skipped')
-    end
-
-    it 'denies other member from skipping task' do
-      get "/members/#{other_member.id}/select"
-      post "/tasks/#{task.id}/skip", { reason: 'Busy' }
-      expect(last_response).to be_redirect
-      follow_redirect!
-      expect(last_request.path).to eq('/dashboard')
-      expect(task.reload.status).not_to eq('skipped')
     end
   end
 

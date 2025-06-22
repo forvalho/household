@@ -1,64 +1,59 @@
 require 'spec_helper'
 
 RSpec.describe 'Task Assignment', type: :feature do
-  let!(:admin) { Admin.create!(username: 'admin', password_digest: BCrypt::Password.create('password')) }
-  let!(:member) { Member.create!(name: 'Test Member') }
-  let!(:unassigned_task) { Task.create!(title: 'Unassigned Task', difficulty: 'bronze') }
-  let!(:assigned_task) { Task.create!(title: 'Assigned Task', difficulty: 'silver', member: member) }
+  let!(:admin) { Admin.create!(username: 'admin', password: 'admin123') }
+  let!(:member1) { Member.create!(name: 'Member 1') }
+  let!(:member2) { Member.create!(name: 'Member 2') }
+  let!(:task) { Task.create!(title: 'Test Task', difficulty: 'bronze', member: member1, status: 'todo') }
 
-  def admin_login
-    visit '/admin/login'
-    fill_in 'username', with: 'admin'
-    fill_in 'password', with: 'password'
-    click_button 'Sign In'
+  before do
+    post '/admin/login', { username: 'admin', password: 'admin123' }
     visit '/admin/dashboard'
   end
 
   def member_login
-    visit "/members/#{member.id}/select"
+    visit "/members/#{member1.id}/select"
     visit '/dashboard'
   end
 
   context 'as an admin' do
-    before { admin_login }
-
     it 'can assign a task to a member' do
-      within "[data-testid='task-card-#{unassigned_task.id}']" do
-        find("[data-testid='assignee-dropdown-#{unassigned_task.id}'] .dropdown-toggle").click
-        click_button 'Test Member'
+      within "[data-testid='task-card-#{task.id}']" do
+        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
+        click_button 'Member 2'
       end
-      expect(unassigned_task.reload.member).to eq(member)
+      expect(task.reload.member).to eq(member2)
     end
 
     it 'can unassign a task' do
-      within "[data-testid='task-card-#{assigned_task.id}']" do
-        find("[data-testid='assignee-dropdown-#{assigned_task.id}'] .dropdown-toggle").click
+      within "[data-testid='task-card-#{task.id}']" do
+        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
         click_button 'Unassigned'
       end
-      expect(assigned_task.reload.member).to be_nil
+      expect(task.reload.member).to be_nil
     end
   end
 
   context 'as a member' do
     before do
-      assigned_task.update(member: member) # Ensure assignment
+      task.update(member: member1) # Ensure assignment
       member_login
     end
 
     xit 'can claim an unassigned task' do
-      within "[data-testid='task-card-#{unassigned_task.id}']" do
-        find("[data-testid='assignee-dropdown-#{unassigned_task.id}'] .dropdown-toggle").click
-        click_button 'Test Member'
+      within "[data-testid='task-card-#{task.id}']" do
+        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
+        click_button 'Member 2'
       end
-      expect(unassigned_task.reload.member).to eq(member)
+      expect(task.reload.member).to eq(member2)
     end
 
     xit 'can unassign themselves from a task' do
-      within "[data-testid='task-card-#{assigned_task.id}']" do
-        find("[data-testid='assignee-dropdown-#{assigned_task.id}'] .dropdown-toggle").click
+      within "[data-testid='task-card-#{task.id}']" do
+        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
         click_button 'Unassigned'
       end
-      expect(assigned_task.reload.member).to be_nil
+      expect(task.reload.member).to be_nil
     end
   end
 end

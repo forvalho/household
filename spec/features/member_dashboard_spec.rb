@@ -24,11 +24,9 @@ RSpec.describe 'Member Dashboard', type: :feature do
 
   it 'shows available task templates' do
     visit '/dashboard'
-    within '#templates-column' do
-      expect(page).to have_content('Test Template')
-      expect(page).to have_content('Kitchen')
-      expect(page).to have_button('Assign to Me')
-    end
+    expect(page).to have_content('Available Tasks')
+    expect(page).to have_content('Generic Task')
+    expect(page).to have_button('Assign Task')
   end
 
   it 'shows the member their assigned tasks' do
