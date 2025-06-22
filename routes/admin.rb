@@ -87,12 +87,17 @@ namespace '/admin' do
     @start_date = @period.to_i.days.ago
 
     @member_stats = @members.map do |member|
+      total_tasks = member.tasks.where('created_at >= ?', @start_date).count
+      completed_tasks = member.task_completions.where('completed_at >= ?', @start_date).count
+      completion_rate = total_tasks > 0 ? ((completed_tasks.to_f / total_tasks) * 100).round : 0
+
       {
         member: member,
         points: calculate_member_points(member, @start_date),
         medals: calculate_member_medals(member, @start_date),
         skips: calculate_member_skips(member, @start_date),
-        completions: member.task_completions.where('completed_at >= ?', @start_date).count
+        completions: completed_tasks,
+        completion_rate: completion_rate
       }
     end
 

@@ -56,33 +56,33 @@
                                         <div class="task-card-wrapper mb-3">
                                             <%= erb :'common/task_card', locals: { task: task } %>
                                         </div>
-                                    <% end %>
-                                </div>
-                                <div class="col-md-4">
+                                <% end %>
+                            </div>
+                            <div class="col-md-4">
                                     <h5 class="kanban-title">In Progress</h5>
                                     <% member_tasks.select { |t| t.status == 'in_progress' }.each do |task| %>
                                         <div class="task-card-wrapper mb-3">
                                             <%= erb :'common/task_card', locals: { task: task } %>
                                         </div>
-                                    <% end %>
-                                </div>
-                                <div class="col-md-4">
+                                <% end %>
+                            </div>
+                            <div class="col-md-4">
                                     <h5 class="kanban-title">Done / Skipped</h5>
                                     <% member_tasks.select { |t| ['done', 'skipped'].include?(t.status) }.each do |task| %>
                                         <div class="task-card-wrapper mb-3">
                                             <%= erb :'common/task_card', locals: { task: task } %>
                                         </div>
-                                    <% end %>
-                                </div>
+                                <% end %>
                             </div>
-                        <% else %>
-                            <p class="text-center text-muted">No tasks assigned to <%= member.name %>.</p>
-                        <% end %>
-                    </div>
+                        </div>
+                    <% else %>
+                        <p class="text-center text-muted">No tasks assigned to <%= member.name %>.</p>
+                    <% end %>
                 </div>
             </div>
-        <% end %>
-    </div>
+        </div>
+    <% end %>
+</div>
 </div>
 
 <!-- New Task Modal -->
@@ -117,19 +117,11 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="taskDifficulty" class="form-label">Difficulty</label>
-                                <select class="form-select" id="taskDifficulty" name="difficulty">
-                                    <option value="easy">Easy (1 point)</option>
-                                    <option value="medium" selected>Medium (2 points)</option>
-                                    <option value="hard">Hard (3 points)</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="taskRecurrence" class="form-label">Recurrence</label>
-                                <select class="form-select" id="taskRecurrence" name="recurrence">
-                                    <option value="none" selected>None (One-time task)</option>
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
+                                <label for="difficulty" class="form-label">Difficulty</label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="bronze">Bronze (1 point)</option>
+                                    <option value="silver" selected>Silver (3 points)</option>
+                                    <option value="gold">Gold (5 points)</option>
                                 </select>
                             </div>
                         </div>
@@ -137,8 +129,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="taskDueDate" class="form-label">Due Date</label>
-                                <input type="date" class="form-control" id="taskDueDate" name="due_date" value="<%= Date.today.iso8601 %>">
+                                <label for="due_date" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="due_date" name="due_date">
                             </div>
                         </div>
                     </div>

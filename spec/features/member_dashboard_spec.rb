@@ -1,43 +1,39 @@
 require 'spec_helper'
 
 RSpec.describe 'Member Dashboard', type: :feature do
-  let!(:member) { Member.create!(name: 'Test Member') }
-  let!(:task) { Task.create!(title: 'Test Task', member: member, status: 'todo', recurrence: 'none') }
+  let!(:member) { Member.create!(name: 'Test Member', avatar_url: 'http://example.com/avatar.png') }
+  let!(:task) { Task.create!(title: 'Test Task', difficulty: 'bronze', member: member, status: 'in_progress') }
 
   before do
-    # Simulate member login
+    # Simulate member selection by visiting the select page
     visit "/members/#{member.id}/select"
   end
 
   it 'displays the member dashboard' do
+    visit '/dashboard'
     expect(page).to have_content("Test Member's Tasks")
-    expect(page).to have_content('Unassigned')
-    expect(page).to have_content('To Do')
-    expect(page).to have_content('In Progress')
-    expect(page).to have_content('Done')
+    expect(page).to have_css("img[src*='http://example.com/avatar.png']")
   end
 
   it 'shows the member their assigned tasks' do
     visit '/dashboard'
-    expect(page).to have_content("Test Member's Tasks")
-    expect(page).to have_content('Test Task')
+    within '#in-progress-column' do
+      expect(page).to have_content('Test Task')
+    end
   end
 
   it 'allows a member to complete a task' do
     visit '/dashboard'
 
-    # A task must be in progress before it can be completed
-    find("[data-task-id='#{task.id}'] .action-dropdown .dropdown-toggle").click
-    click_button 'In Progress'
+    # Find the task card and click the complete button
+    within "[data-testid='task-card-#{task.id}']" do
+      find("[data-testid='action-dropdown-#{task.id}'] .dropdown-toggle").click
+      click_button 'Done'
+    end
 
-    expect(page).to have_content('Task status updated to In Progress')
-    expect(task.reload.status).to eq('in_progress')
-
-    # Now, complete the task
-    find("[data-task-id='#{task.id}'] .action-dropdown .dropdown-toggle").click
-    click_button 'Done'
-
-    expect(page).to have_content('Task completed!')
-    expect(task.reload.status).to eq('done')
+    # Check that the task is now in the "Done" column
+    within '#done-column' do
+      expect(page).to have_content('Test Task')
+    end
   end
 end

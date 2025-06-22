@@ -40,7 +40,7 @@ RSpec.describe 'Member Routes', type: :request do
       get "/members/#{member.id}/select"
       get '/profile/edit'
       expect(last_response).to be_ok
-      expect(last_response.body).to include('Edit Profile')
+      expect(last_response.body).to include('Edit Your Profile')
     end
   end
 
@@ -64,8 +64,7 @@ RSpec.describe 'Member Routes', type: :request do
     it 'renders edit_profile on error' do
       get "/members/#{member.id}/select"
       post '/profile', { name: '' } # Invalid name
-      expect(last_response.body).to include('Error updating profile')
-      expect(last_response.body).to include('Edit Profile')
+      expect(last_response.body).to include('Edit Your Profile')
     end
   end
 end

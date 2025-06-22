@@ -6,7 +6,6 @@ class Task < ActiveRecord::Base
   validates :title, presence: true
   validates :status, inclusion: { in: %w[unassigned todo in_progress done skipped], message: "%{value} is not a valid status" }
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }
-  validates :recurrence, inclusion: { in: %w[none daily weekly], message: "%{value} is not a valid recurrence" }
 
   def points_value
     case difficulty

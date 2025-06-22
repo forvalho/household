@@ -56,21 +56,7 @@ post '/tasks/:id/complete' do
     TaskCompletion.create!(task: task, member: current_member, completed_at: Time.now, notes: params[:notes])
 
     updates = { member_id: current_member.id } # Claim the task if it was unassigned
-
-    case task.recurrence
-    when 'daily'
-      new_due_date = task.due_date || Date.today
-      new_due_date += 1.day while new_due_date <= Date.today
-      updates[:due_date] = new_due_date
-      updates[:status] = 'todo'
-    when 'weekly'
-      new_due_date = task.due_date || Date.today
-      new_due_date += 1.week while new_due_date <= Date.today
-      updates[:due_date] = new_due_date
-      updates[:status] = 'todo'
-    else # 'none'
-      updates[:status] = 'done'
-    end
+    updates[:status] = 'done'
 
     task.update(updates)
 

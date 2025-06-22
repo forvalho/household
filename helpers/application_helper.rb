@@ -44,7 +44,7 @@ module ApplicationHelper
   def total_points_today(member)
     member.task_completions.joins(:task)
            .where('task_completions.completed_at >= ?', Date.today.beginning_of_day)
-           .sum('tasks.points')
+           .sum { |tc| tc.task.points_value }
   end
 
   def pluralize(count, singular, plural = nil)

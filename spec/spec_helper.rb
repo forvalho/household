@@ -1,47 +1,46 @@
+ENV['RACK_ENV'] = 'test'
+
 require 'simplecov'
 SimpleCov.start do
   add_filter '/spec/'
   add_filter '/vendor/'
 end
 
-ENV['RACK_ENV'] = 'test'
-
-require 'rspec'
-require 'rack/test'
 require 'capybara/rspec'
 require 'capybara/dsl'
-require 'database_cleaner/active_record'
+require 'rack/test'
+require 'sinatra/base'
+require_relative '../app'
 
-# Load the Sinatra application
-require File.expand_path '../app.rb', __dir__
+# Load all helpers and models
+Dir[File.join(__dir__, '..', 'helpers', '*.rb')].each { |file| require file }
+Dir[File.join(__dir__, '..', 'models', '*.rb')].each { |file| require file }
 
-# Configure RSpec
+Capybara.app = Sinatra::Application
+
 RSpec.configure do |config|
-  # Include Rack::Test methods for request specs
+  config.include Capybara::DSL
   config.include Rack::Test::Methods
 
-  # Include Capybara DSL for feature specs
-  config.include Capybara::DSL
-
-  # Define the app for Rack::Test
   def app
     Sinatra::Application
   end
 
-  # Configure Capybara
-  Capybara.app = app
-  Capybara.default_driver = :rack_test
-  Capybara.javascript_driver = :selenium_chrome_headless
-
-  # Configure DatabaseCleaner
+  # Clean up the test database before each run
   config.before(:suite) do
-    DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.clean_with(:truncation)
+    Task.destroy_all
+    Member.destroy_all
+    Admin.destroy_all
+    TaskCompletion.destroy_all
+    TaskSkip.destroy_all
   end
 
-  config.around(:each) do |example|
-    DatabaseCleaner.cleaning do
-      example.run
-    end
+  # Clean up between tests
+  config.after(:each) do
+    Task.destroy_all
+    Member.destroy_all
+    Admin.destroy_all
+    TaskCompletion.destroy_all
+    TaskSkip.destroy_all
   end
 end

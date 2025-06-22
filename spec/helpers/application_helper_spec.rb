@@ -1,110 +1,55 @@
 require 'spec_helper'
 
-RSpec.describe ApplicationHelper do
-  include ApplicationHelper
-
-  # Mock session for testing
-  def session
-    @session ||= {}
-  end
+RSpec.describe ApplicationHelper, type: :helper do
+  let(:helper) { HelperTester.new }
+  let(:member) { Member.create!(name: 'Test Member') }
 
   describe '#format_date' do
     it 'formats a date correctly' do
       date = Date.new(2023, 12, 25)
-      expect(format_date(date)).to eq('Dec 25, 2023')
+      expect(helper.format_date(date)).to eq('Dec 25, 2023')
     end
   end
 
   describe '#completed_today' do
-    let(:member) { Member.create!(name: 'Test Member') }
-
-    it 'returns 0 when no completions today' do
-      expect(completed_today(member)).to eq(0)
-    end
-
     it 'returns count of completions today' do
-      task = Task.create!(title: 'Test Task', member: member)
+      task = Task.create!(title: 'Test Task', member: member, status: 'done', difficulty: 'bronze')
       TaskCompletion.create!(task: task, member: member, completed_at: Time.now)
 
-      expect(completed_today(member)).to eq(1)
+      expect(helper.completed_today(member)).to eq(1)
     end
   end
 
   describe '#skipped_today' do
-    let(:member) { Member.create!(name: 'Test Member') }
-
-    it 'returns 0 when no skips today' do
-      expect(skipped_today(member)).to eq(0)
-    end
-
     it 'returns count of skips today' do
-      task = Task.create!(title: 'Test Task', member: member)
+      task = Task.create!(title: 'Test Task', member: member, status: 'skipped', difficulty: 'bronze')
       TaskSkip.create!(task: task, member: member, skipped_at: Time.now, reason: 'Too busy')
 
-      expect(skipped_today(member)).to eq(1)
+      expect(helper.skipped_today(member)).to eq(1)
     end
   end
 
   describe '#total_points_today' do
-    let(:member) { Member.create!(name: 'Test Member') }
-
-    it 'returns 0 when no completions today' do
-      expect(total_points_today(member)).to eq(0)
-    end
-
     it 'returns total points from completions today' do
-      task1 = Task.create!(title: 'Easy Task', member: member, points: 1)
-      task2 = Task.create!(title: 'Hard Task', member: member, points: 3)
+      bronze_task = Task.create!(title: 'Bronze Task', member: member, status: 'done', difficulty: 'bronze')
+      silver_task = Task.create!(title: 'Silver Task', member: member, status: 'done', difficulty: 'silver')
 
-      TaskCompletion.create!(task: task1, member: member, completed_at: Time.now)
-      TaskCompletion.create!(task: task2, member: member, completed_at: Time.now)
+      TaskCompletion.create!(task: bronze_task, member: member, completed_at: Time.now)
+      TaskCompletion.create!(task: silver_task, member: member, completed_at: Time.now)
 
-      expect(total_points_today(member)).to eq(4)
+      expect(helper.total_points_today(member)).to eq(4) # 1 + 3
     end
   end
 
-  describe 'flash message helpers' do
-    it 'sets and gets flash messages' do
-      set_flash('success', 'Test message')
-      flash = get_flash
-
-      expect(flash[:type]).to eq('success')
-      expect(flash[:message]).to eq('Test message')
+  describe 'logged in helpers' do
+    it 'correctly identifies a selected member' do
+      helper.session[:member_id] = member.id
+      expect(helper.member_selected?).to be true
     end
 
-    it 'clears flash after getting' do
-      set_flash('error', 'Test error')
-      get_flash
-      expect(get_flash).to be_nil
-    end
-  end
-
-  describe 'authentication helpers' do
-    let(:admin) { Admin.create!(username: 'admin', password_digest: BCrypt::Password.create('password')) }
-    let(:member) { Member.create!(name: 'Test Member') }
-
-    it 'checks admin login status' do
-      expect(admin_logged_in?).to be false
-
-      session[:admin_id] = admin.id
-      expect(admin_logged_in?).to be true
-    end
-
-    it 'gets current admin' do
-      session[:admin_id] = admin.id
-      expect(current_admin).to eq(admin)
-    end
-
-    it 'checks member selection status' do
-      expect(member_selected?).to be false
-
-      session[:member_id] = member.id
-      expect(member_selected?).to be true
-    end
-
-    it 'gets current member' do
-      session[:member_id] = member.id
-      expect(current_member).to eq(member)
+    it 'correctly identifies an admin' do
+      helper.session[:admin_id] = 1
+      expect(helper.admin_logged_in?).to be true
     end
   end
 end

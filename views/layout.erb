@@ -10,28 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg admin-header mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/">Household</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <div class="navbar-nav ms-auto">
-                    <% if member_selected? %>
-                        <a class="nav-link" href="/member/dashboard">Dashboard</a>
-                        <a class="nav-link" href="/leaderboard">Leaderboard</a>
-                        <a class="nav-link" href="/profile/edit">Edit Profile</a>
-                        <a class="nav-link" href="/">Switch User</a>
-                    <% else %>
-                        <a class="nav-link" href="/">Home</a>
-                        <a class="nav-link" href="/leaderboard">Leaderboard</a>
-                        <a class="nav-link" href="/admin/login">Admin Login</a>
-                    <% end %>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <%= erb :'common/header' %>
 
     <div class="container-fluid">
         <% flash = flash_message %>

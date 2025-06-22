@@ -7,6 +7,7 @@ gem 'sqlite3', '~> 2.1'
 gem 'bcrypt', '~> 3.1'
 gem 'json', '~> 2.6'
 gem 'puma', '~> 6.0'
+gem 'rake', '~> 13.0'
 
 group :development do
   gem 'rerun', '~> 0.14'

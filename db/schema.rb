@@ -16,8 +16,7 @@ ActiveRecord::Schema.define do
     t.string :title, null: false
     t.text :description
     t.string :status, default: 'unassigned'
-    t.string :difficulty, default: 'medium'
-    t.string :recurrence, default: 'none', null: false
+    t.string :difficulty, default: 'bronze'
     t.string :category
     t.integer :member_id
     t.date :due_date

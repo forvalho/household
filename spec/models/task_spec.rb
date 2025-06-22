@@ -4,23 +4,23 @@ RSpec.describe Task, type: :model do
   let(:member) { Member.create!(name: 'Test Member') }
 
   describe 'validations' do
-    it 'is valid with a title and member' do
-      task = Task.new(title: 'Test Task', member: member)
+    it 'is valid with a title and difficulty' do
+      task = Task.new(title: 'Test Task', difficulty: 'bronze')
       expect(task).to be_valid
     end
 
     it 'is invalid without a title' do
-      task = Task.new(title: nil, member: member)
+      task = Task.new(difficulty: 'bronze')
       expect(task).not_to be_valid
     end
 
-    it 'is invalid with a bad status' do
-        task = Task.new(title: 'Test', member: member, status: 'invalid_status')
-        expect(task).not_to be_valid
+    it 'is invalid without a difficulty' do
+      task = Task.new(title: 'Test Task')
+      expect(task).not_to be_valid
     end
 
-    it 'is invalid with a bad recurrence' do
-      task = Task.new(title: 'Test', member_id: member.id, recurrence: 'invalid_recurrence')
+    it 'is invalid with a wrong difficulty' do
+      task = Task.new(title: 'Test Task', difficulty: 'invalid')
       expect(task).not_to be_valid
     end
   end
@@ -32,19 +32,19 @@ RSpec.describe Task, type: :model do
   end
 
   describe '#points_value' do
-    it 'returns 1 for easy tasks' do
-      task = Task.new(difficulty: 'easy')
+    it 'returns 1 for bronze tasks' do
+      task = Task.new(difficulty: 'bronze')
       expect(task.points_value).to eq(1)
     end
 
-    it 'returns 2 for medium tasks' do
-      task = Task.new(difficulty: 'medium')
-      expect(task.points_value).to eq(2)
+    it 'returns 3 for silver tasks' do
+      task = Task.new(difficulty: 'silver')
+      expect(task.points_value).to eq(3)
     end
 
-    it 'returns 3 for hard tasks' do
-      task = Task.new(difficulty: 'hard')
-      expect(task.points_value).to eq(3)
+    it 'returns 5 for gold tasks' do
+      task = Task.new(difficulty: 'gold')
+      expect(task.points_value).to eq(5)
     end
   end
 end

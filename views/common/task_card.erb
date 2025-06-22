@@ -1,24 +1,24 @@
-<div class="task-card difficulty-<%= task.medal %>" data-task-id="<%= task.id %>" data-status="<%= task.status %>">
+<div class="task-card difficulty-<%= task.medal %>" data-task-id="<%= task.id %>" data-status="<%= task.status %>" data-testid="task-card-<%= task.id %>">
     <div class="card-body d-flex flex-column">
         <!-- Top Section: Title & Points -->
-        <div class="d-flex justify-content-between align-items-start mb-2">
-            <h6 class="mb-0 fw-bold"><%= task.title %></h6>
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <h6 class="mb-0 fw-bold"><%= task.title %></h6>
             <span class="medal-badge" title="<%= pluralize(task.points_value, 'point') %>">
                 <i class="fas fa-medal medal-<%= task.medal %>"></i>
             </span>
-        </div>
+    </div>
 
         <!-- Optional Description -->
-        <% if task.description.present? %>
-            <p class="small text-muted mb-2"><%= task.description %></p>
-        <% end %>
+    <% if task.description.present? %>
+        <p class="small text-muted mb-2"><%= task.description %></p>
+    <% end %>
 
         <!-- Bottom Section: Actions & Tags -->
         <div class="mt-auto">
             <!-- Actions: Assignee & Move To -->
             <div class="task-actions-container mb-2">
                 <!-- Assignee Dropdown -->
-                <div class="assignee-selector dropdown">
+                <div class="assignee-selector dropdown" data-testid="assignee-dropdown-<%= task.id %>">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <% if task.member %>
                             <% if task.member.avatar_url.present? %>
@@ -82,7 +82,7 @@
                   }
                   available_actions = valid_statuses[task.status] || []
                 %>
-                <div class="action-dropdown dropdown">
+                <div class="action-dropdown dropdown" data-testid="action-dropdown-<%= task.id %>">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-caret-square-down me-1"></i> Move to...
                     </button>
@@ -123,27 +123,21 @@
                             </form>
                         </li>
                     </ul>
-                </div>
-            </div>
+        </div>
+    </div>
 
             <!-- Tags: Category & Due Date -->
             <div class="task-tags">
-                <% if task.category.present? %>
-                    <span class="badge bg-secondary"><%= task.category %></span>
-                <% end %>
+    <% if task.category.present? %>
+            <span class="badge bg-secondary"><%= task.category %></span>
+    <% end %>
                 <% if task.due_date %>
                     <span class="badge <%= task.due_date < Date.today ? 'bg-danger' : 'bg-info' %>">
                         <i class="fas fa-calendar-alt me-1"></i>
                         <%= task.due_date.strftime('%b %-d') %>
-                    </span>
-                <% end %>
-            </div>
-
-            <% if task.recurrence != 'none' && task.completed_today? %>
-                <div class="alert alert-success py-1 px-2 small mt-2">
-                    <i class="fas fa-check-circle"></i> Completed for today!
-                </div>
-            <% end %>
+            </span>
+        <% end %>
+    </div>
         </div>
     </div>
 </div>

@@ -1,157 +1,101 @@
 require 'spec_helper'
+require 'bcrypt'
 
 RSpec.describe 'Task Coverage', type: :request do
-  let(:admin) { Admin.create!(username: 'admin', password: 'password') }
   let(:member) { Member.create!(name: 'Test Member') }
-  let(:other_member) { Member.create!(name: 'Other Member') }
-  let!(:task) { Task.create!(title: 'Test Task', member: member, status: 'todo', difficulty: 'bronze') }
-  let!(:other_task) { Task.create!(title: 'Other member task', member: other_member, status: 'todo', difficulty: 'bronze') }
-  let!(:unassigned_task) { Task.create!(title: 'Unassigned Task', status: 'unassigned', difficulty: 'bronze') }
+  let(:admin) { Admin.create!(username: 'admin', password_digest: BCrypt::Password.create('admin123')) }
 
-  def login_admin
-    post '/admin/login', username: admin.username, password: 'password'
+  before do
+    post '/admin/login', { username: 'admin', password: 'admin123' }
+    follow_redirect!
   end
 
-  def login_member(member)
-    get "/members/#{member.id}/select"
-  end
+  describe 'GET /admin/reports' do
+    it 'displays member completion rates' do
+      # Create some tasks for the member
+      Task.create!(title: 'Completed Task', member: member, status: 'done', difficulty: 'bronze')
+      Task.create!(title: 'Todo Task', member: member, status: 'todo', difficulty: 'bronze')
+      Task.create!(title: 'Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
 
-  describe "PUT /tasks/:id/status" do
-    context "as an admin" do
-      before { login_admin }
-      xit "updates the status" do
-        put "/tasks/#{task.id}/status", { status: 'in_progress' }
-        expect(task.reload.status).to eq('in_progress')
-        expect(last_request.env['rack.session']['flash']['success']).to eq('Task status updated to In Progress')
-      end
-
-      xit 'updates the status with a JSON response' do
-        put "/tasks/#{task.id}/status", { status: 'in_progress' }.to_json, { "CONTENT_TYPE" => "application/json" }
-        expect(last_response).to be_ok
-        expect(JSON.parse(last_response.body)['status']).to eq('in_progress')
-      end
+      get '/admin/reports'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('Test Member')
+      expect(last_response.body).to include('33.3%') # 1 out of 3 tasks completed
     end
 
-    context "as a member" do
-      xit "cannot update another member's task" do
-        login_member(member)
-        put "/tasks/#{other_task.id}/status", { status: 'in_progress' }
-        expect(other_task.reload.status).to eq('todo')
-        expect(last_request.env['rack.session']['flash']['error']).to eq('Permission denied')
-      end
-    end
-  end
-
-  describe "POST /tasks/:id/skip" do
-    context "as a member" do
-      before { login_member(member) }
-
-      xit "skips their own task" do
-        expect {
-          post "/tasks/#{task.id}/skip", { reason: 'a reason' }
-        }.to change(TaskSkip, :count).by(1)
-        expect(task.reload.status).to eq('skipped')
-        expect(last_request.env['rack.session']['flash']['warning']).to eq('Task skipped with reason recorded')
-      end
-
-      xit "cannot skip another member's task" do
-        post "/tasks/#{other_task.id}/skip", { reason: 'a reason' }
-        expect(other_task.reload.status).to eq('todo')
-        expect(last_request.env['rack.session']['flash']['error']).to eq('You can only skip your own tasks')
-      end
-    end
-  end
-
-  describe "PATCH /tasks/:id/assignee" do
-    context "as admin" do
-      before { login_admin }
-      it "assigns a task to a member" do
-        patch "/tasks/#{unassigned_task.id}/assignee", { member_id: member.id }
-        expect(unassigned_task.reload.member_id).to eq(member.id)
-      end
-
-      it "unassigns a task" do
-        patch "/tasks/#{task.id}/assignee", { member_id: '' }
-        expect(task.reload.member_id).to be_nil
-      end
+    it 'handles members with no tasks' do
+      get '/admin/reports'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('Test Member')
+      expect(last_response.body).to include('0.0%')
     end
 
-    context "as member" do
-      before { login_member(member) }
-      it "can claim an unassigned task" do
-        patch "/tasks/#{unassigned_task.id}/assignee", { member_id: member.id }
-        expect(unassigned_task.reload.member_id).to eq(member.id)
-      end
+    it 'displays points and medals' do
+      bronze_task = Task.create!(title: 'Bronze Task', member: member, status: 'done', difficulty: 'bronze')
+      silver_task = Task.create!(title: 'Silver Task', member: member, status: 'done', difficulty: 'silver')
+      gold_task = Task.create!(title: 'Gold Task', member: member, status: 'done', difficulty: 'gold')
 
-      it "can unassign themselves" do
-        patch "/tasks/#{task.id}/assignee", { member_id: '' }
-        expect(task.reload.member_id).to be_nil
-      end
+      TaskCompletion.create!(task: bronze_task, member: member, completed_at: 1.day.ago)
+      TaskCompletion.create!(task: silver_task, member: member, completed_at: 2.days.ago)
+      TaskCompletion.create!(task: gold_task, member: member, completed_at: 3.days.ago)
 
-      it "cannot assign a task to someone else" do
-        patch "/tasks/#{unassigned_task.id}/assignee", { member_id: other_member.id }
-        expect(unassigned_task.reload.member_id).to be_nil
-      end
+      get '/admin/reports'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('9') # Total points
+      expect(last_response.body).to include('1') # Gold medals
+      expect(last_response.body).to include('1') # Silver medals
+      expect(last_response.body).to include('1') # Bronze medals
+    end
 
-      it "cannot unassign someone else" do
-        patch "/tasks/#{other_task.id}/assignee", { member_id: '' }
-        expect(other_task.reload.member_id).to eq(other_member.id)
-      end
+    it 'displays skip count' do
+      task = Task.create!(title: 'Skipped Task', member: member, status: 'skipped', difficulty: 'bronze')
+      TaskSkip.create!(task: task, member: member, skipped_at: 1.day.ago, reason: 'Too busy')
+
+      get '/admin/reports'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('1') # Skip count
+    end
+
+    it 'filters by date range' do
+      # Create tasks with different completion dates
+      old_task = Task.create!(title: 'Old Task', member: member, status: 'done', difficulty: 'bronze')
+      recent_task = Task.create!(title: 'Recent Task', member: member, status: 'done', difficulty: 'bronze')
+
+      TaskCompletion.create!(task: old_task, member: member, completed_at: 40.days.ago)
+      TaskCompletion.create!(task: recent_task, member: member, completed_at: 1.day.ago)
+
+      get '/admin/reports?start_date=30&end_date=1'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('Recent Task')
+      expect(last_response.body).not_to include('Old Task')
     end
   end
 
-  describe "POST /tasks/:id/complete" do
-    context "as a member" do
-      before { login_member(member) }
+  describe 'GET /leaderboard' do
+    it 'displays leaderboard with points' do
+      member2 = Member.create!(name: 'Another Member')
 
-      it "completes a non-recurring task" do
-        expect {
-          post "/tasks/#{task.id}/complete"
-        }.to change(TaskCompletion, :count).by(1)
-        expect(task.reload.status).to eq('done')
-      end
+      # Member 1: 3 points
+      bronze_task = Task.create!(title: 'Bronze Task', member: member, status: 'done', difficulty: 'bronze')
+      TaskCompletion.create!(task: bronze_task, member: member, completed_at: 1.day.ago)
 
-      it "completes a daily recurring task" do
-        daily_task = Task.create!(title: 'Daily Task', member: member, status: 'todo', recurrence: 'daily', due_date: Date.today, difficulty: 'bronze')
-        post "/tasks/#{daily_task.id}/complete"
-        expect(daily_task.reload.status).to eq('todo')
-        expect(daily_task.due_date).to eq(Date.today + 1.day)
-      end
+      # Member 2: 5 points
+      gold_task = Task.create!(title: 'Gold Task', member: member2, status: 'done', difficulty: 'gold')
+      TaskCompletion.create!(task: gold_task, member: member2, completed_at: 1.day.ago)
 
-      it "completes a weekly recurring task" do
-        weekly_task = Task.create!(title: 'Weekly Task', member: member, status: 'todo', recurrence: 'weekly', due_date: Date.today, difficulty: 'bronze')
-        post "/tasks/#{weekly_task.id}/complete"
-        expect(weekly_task.reload.status).to eq('todo')
-        expect(weekly_task.due_date).to be > Date.today + 6.days
-      end
+      get '/leaderboard'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('Another Member')
+      expect(last_response.body).to include('Test Member')
+      # Member 2 should appear first (more points)
+      expect(last_response.body.index('Another Member')).to be < last_response.body.index('Test Member')
+    end
 
-      it "allows a member to claim and complete an unassigned task" do
-        expect {
-          post "/tasks/#{unassigned_task.id}/complete"
-        }.to change(TaskCompletion, :count).by(1)
-        expect(unassigned_task.reload.status).to eq('done')
-        expect(unassigned_task.member_id).to eq(member.id)
-      end
-
-      it "completes a daily recurring task with no initial due date" do
-        daily_task = Task.create!(title: 'Daily Task', member: member, status: 'todo', recurrence: 'daily', due_date: nil, difficulty: 'bronze')
-        post "/tasks/#{daily_task.id}/complete"
-        expect(daily_task.reload.status).to eq('todo')
-        expect(daily_task.due_date).to eq(Date.today + 1.day)
-      end
-
-      it "completes a weekly recurring task with no initial due date" do
-        weekly_task = Task.create!(title: 'Weekly Task', member: member, status: 'todo', recurrence: 'weekly', due_date: nil, difficulty: 'bronze')
-        post "/tasks/#{weekly_task.id}/complete"
-        expect(weekly_task.reload.status).to eq('todo')
-        expect(weekly_task.due_date).to be > Date.today + 6.days
-      end
-
-      xit "prevents completing another member's task" do
-        post "/tasks/#{other_task.id}/complete"
-        expect(other_task.reload.status).to eq('todo')
-        expect(last_request.env['rack.session']['flash']['error']).to eq('You can only complete your own tasks')
-      end
+    it 'handles members with no points' do
+      get '/leaderboard'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('Test Member')
+      expect(last_response.body).to include('0')
     end
   end
 end

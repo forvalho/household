@@ -8,8 +8,7 @@ A simple web application for managing household tasks and activities. Built with
 - **Member Dashboard**: View and manage assigned tasks with a simple interface
 - **Task Management**: Create, assign, and track task completion
 - **Tasks Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done)
-- **Points System**: Tasks earn points based on difficulty
-- **Recurring Tasks**: Support for daily and weekly recurring tasks
+- **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
 - **Member Profiles**: Customizable avatars and names
 
 ## Core Features
@@ -75,7 +74,7 @@ bundle exec rspec
 ```
 Coverage reports are generated in the `coverage/` directory.
 
-**Current Status**: The test suite is stable with approximately 91% coverage. Six tests related to flash messages are currently pending and will be addressed in a future update.
+**Current Status**: The test suite is stable with comprehensive coverage of all core functionality.
 
 ## Project Structure
 
@@ -129,7 +128,7 @@ The application follows a modular structure for better organization and maintain
 - **Modern Admin Interface**: Sidebar navigation for better organization
 
 ### 📊 Comprehensive Reporting
-- **Points System**: Tasks earn points based on difficulty (Easy=1, Medium=2, Hard=3)
+- **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
 - **Performance Tracking**: Completion rates, skip tracking, and progress monitoring
 - **Reward Suggestions**: Automated recommendations based on performance
 - **Visual Charts**: Interactive charts showing points distribution and completion rates
@@ -198,105 +197,48 @@ bundle exec puma -p 4567
    WantedBy=multi-user.target
    ```
 
-3. Enable and start:
+3. Enable and start the service:
    ```bash
    sudo systemctl enable household
    sudo systemctl start household
    ```
 
-## Usage Guide
+## Development
 
-### For Parents (Admins)
-1. **Add Family Members**: Go to Members page and add household members
-2. **Create Tasks**: Use the "Add New Task" button on the dashboard
-3. **Monitor Progress**: Check the Reports page for performance metrics
-4. **Assign Rewards**: Use the reward suggestions to motivate children
+### Database Migrations
 
-### For Children (Users)
-1. **View Tasks**: See your assigned tasks on the tasks board
-2. **Start Tasks**: Use "Move to..." dropdown to move tasks to "In Progress"
-3. **Complete Tasks**: Use "Move to..." dropdown to mark tasks as "Done" and earn points
-4. **Skip Tasks**: If needed, use "Move to..." dropdown to skip tasks
+The application uses a simple schema file approach. To modify the database structure:
 
-### Task Workflow
-1. **Unassigned** → Tasks waiting to be assigned
-2. **To Do** → Tasks waiting to be started
-3. **In Progress** → Tasks currently being worked on
-4. **Done** → Completed tasks (earn points)
-5. **Skipped** → Tasks that couldn't be completed
+1. Edit `db/schema.rb`
+2. Delete the existing database file (`db/test.sqlite3`)
+3. Restart the application to recreate the database
 
-## Recent Updates
+### Adding New Features
 
-### UI/UX Improvements
-- **Simplified Naming**: Application name changed from "Household Chores" to "Household".
-- **Modern Admin Layout**: New sidebar navigation for admin area.
-- **Equal-Height Kanban Columns**: All columns on the board now align to the same height.
-- **Always-Visible Actions**: Assign and Move buttons are always shown with proper disabled states.
-- **Consolidated CSS**: All styles moved to `public/styles.css` for better maintainability.
-- **Improved Task Cards**: More compact design with better information density and spacing.
+1. **Models**: Add new ActiveRecord models in the `models/` directory
+2. **Routes**: Add new routes in the appropriate file in `routes/`
+3. **Views**: Add new ERB templates in the `views/` directory
+4. **Tests**: Add corresponding RSpec tests in the `spec/` directory
 
-### Navigation Updates
-- **Admin Menu**: Simplified to "Tasks", "Members", "Admins", "Reports".
-- **Member Interface**: "Kanban Board" renamed to "Tasks Board"
-- **Consistent Branding**: "Household" branding throughout the application
+### Code Style
 
-## Future Enhancements
+- Follow Ruby conventions
+- Use meaningful variable and method names
+- Add comments for complex logic
+- Write tests for new functionality
 
-### Planned Features
-- 📅 **Google Calendar Integration**: Sync with family calendar
-- 🏫 **School Calendar**: Consider school schedules for task assignments
-- 🔄 **Recurring Tasks**: Automatically create daily/weekly tasks
-- 📱 **Mobile App**: Native mobile application
-- 🔔 **Notifications**: Reminders for due tasks
-- 🎯 **Achievement Badges**: Gamification elements
+## Contributing
 
-### Technical Improvements
-- **API Endpoints**: RESTful API for external integrations
-- **Data Export**: Export reports to PDF/Excel
-- **Backup System**: Automated database backups
-- **Multi-language**: Internationalization support
-
-## Configuration
-
-### Environment Variables
-Create a `.env` file for custom configuration:
-```bash
-# Database
-DATABASE_URL=sqlite3:household.db
-
-# Session secret
-SESSION_SECRET=your-secret-key-here
-
-# Port (optional)
-PORT=4567
-```
-
-### Customization
-- **Points System**: Modify point values in `app.rb` (Task model)
-- **Reward Thresholds**: Adjust reward suggestions in `reports.erb`
-- **UI Colors**: Customize CSS in `public/styles.css`
-
-## Troubleshooting
-
-### Common Issues
-1. **Port already in use**: Change port in `app.rb` or kill existing process
-2. **Database errors**: Delete `household.db` to reset (loses all data)
-3. **Permission errors**: Ensure proper file permissions on Raspberry Pi
-
-### Logs
-- **Development**: Check console output
-- **Production**: Check systemd logs: `sudo journalctl -u household`
-
-## Security Notes
-
-- Change default admin password after first login
-- Use HTTPS in production environments
-- Regularly backup the SQLite database
-- Keep Ruby and gems updated
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is open source and available under the [MIT License](LICENSE).
 
 ---
 

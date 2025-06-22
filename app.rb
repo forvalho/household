@@ -123,8 +123,24 @@ get '/leaderboard' do
   erb :leaderboard
 end
 
-# Load schema first, then seed data
-db_schema = File.join(__dir__, 'db', 'schema.rb')
-load db_schema if File.exist?(db_schema)
+# Load all helpers and models
+Dir[File.join(__dir__, 'helpers', '*.rb')].each { |file| require file }
+Dir[File.join(__dir__, 'models', '*.rb')].each { |file| require file }
 
-load File.join(__dir__, 'db', 'seeds.rb')
+# Set up database connection based on environment
+configure do
+  env = ENV['RACK_ENV'] || 'development'
+  db_path = File.join(__dir__, 'db', "#{env}.sqlite3")
+
+  ActiveRecord::Base.establish_connection(
+    adapter: 'sqlite3',
+    database: db_path
+  )
+
+  # Load database schema if it exists
+  schema_path = File.join(__dir__, 'db', 'schema.rb')
+  load(schema_path) if File.exist?(schema_path)
+end
+
+# Load all route files
+Dir[File.join(__dir__, 'routes', '*.rb')].each { |file| require file }

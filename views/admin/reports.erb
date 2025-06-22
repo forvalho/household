@@ -237,7 +237,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 function updatePeriod(period) {
-    window.location.href = `/reports?period=${period}`;
+    window.location.href = `/admin/reports?period=${period}`;
 }
 
 // Points Distribution Chart
@@ -247,7 +247,7 @@ const pointsChart = new Chart(pointsCtx, {
     data: {
         labels: <%= @member_stats.map { |stat| stat[:member].name }.to_json %>,
         datasets: [{
-            data: <%= @member_stats.map { |stat| stat[:points] }.to_json %>,
+            data: <%= @member_stats.map { |stat| stat[:points] || 0 }.to_json %>,
             backgroundColor: [
                 '#FF6384',
                 '#36A2EB',
@@ -276,10 +276,11 @@ const completionChart = new Chart(completionCtx, {
         labels: <%= @member_stats.map { |stat| stat[:member].name }.to_json %>,
         datasets: [{
             label: 'Completion Rate (%)',
-            data: <%= @member_stats.map { |stat| stat[:completion_rate] }.to_json %>,
+            data: <%= @member_stats.map { |stat| stat[:completion_rate] || 0 }.to_json %>,
             backgroundColor: <%= @member_stats.map { |stat|
-                stat[:completion_rate] >= 80 ? '#28a745' :
-                stat[:completion_rate] >= 60 ? '#ffc107' : '#dc3545'
+                completion_rate = stat[:completion_rate] || 0
+                completion_rate >= 80 ? '#28a745' :
+                completion_rate >= 60 ? '#ffc107' : '#dc3545'
             }.to_json %>,
             borderColor: '#333',
             borderWidth: 1
