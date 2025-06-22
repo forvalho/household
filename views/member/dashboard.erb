@@ -46,11 +46,30 @@
                             <div class="mt-auto">
                                 <!-- Actions: Assign Template -->
                                 <div class="task-actions-container mb-2">
-                                    <form method="POST" action="/task-templates/<%= template.id %>/assign" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-plus me-1"></i> Assign to Me
+                                    <!-- Assignee Dropdown -->
+                                    <div class="assignee-selector dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-user-plus"></i>
+                                            <span class="ms-2">Assign Task</span>
                                         </button>
-                                    </form>
+                                        <ul class="dropdown-menu assignee-dropdown-menu">
+                                            <% Member.all.order(:name).each do |member| %>
+                                                <li>
+                                                    <form action="/task-templates/<%= template.id %>/assign" method="post" class="assignee-form">
+                                                        <input type="hidden" name="member_id" value="<%= member.id %>">
+                                                        <button type="submit" class="dropdown-item" <%= 'disabled' unless admin_logged_in? || member.id == current_member.id %>>
+                                                            <% if member.avatar_url.present? %>
+                                                                <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
+                                                            <% else %>
+                                                                <div class="user-avatar me-2"><%= member.name.first.upcase %></div>
+                                                            <% end %>
+                                                            <%= member.name %>
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            <% end %>
+                                        </ul>
+                                    </div>
                                 </div>
 
                                 <!-- Tags: Category -->

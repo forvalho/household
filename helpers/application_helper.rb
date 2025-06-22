@@ -1,19 +1,16 @@
 module ApplicationHelper
   # Flash message helpers
-  def set_flash(key, message)
-    session[:flash] ||= {}
-    session[:flash][key] = message
+  def set_flash(type, message)
+    session[:flash] = { type: type, message: message }
   end
 
-  def get_flash
-    flash = session[:flash]
-    session[:flash] = nil
-    flash
+  def flash_message
+    session.delete(:flash)
   end
 
   # Authentication helpers
   def admin_logged_in?
-    !session[:admin_id].nil?
+    session[:admin_id].present?
   end
 
   def current_admin
@@ -21,11 +18,11 @@ module ApplicationHelper
   end
 
   def member_selected?
-    !session[:member_id].nil?
+    session[:member_id].present?
   end
 
   def current_member
-    @current_member ||= Member.find(session[:member_id]) if session[:member_id]
+    @current_member ||= Member.find(session[:member_id]) if member_selected?
   end
 
   # Data helpers
@@ -49,5 +46,11 @@ module ApplicationHelper
 
   def pluralize(count, singular, plural = nil)
     "#{count} #{count == 1 ? singular : (plural || singular + 's')}"
+  end
+
+  # Text helper
+  def truncate(text, length: 50)
+    return text if text.length <= length
+    text[0...length] + "..."
   end
 end

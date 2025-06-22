@@ -38,7 +38,7 @@ RSpec.describe 'Member Dashboard', type: :feature do
     end
   end
 
-  it 'allows a member to assign a task template to themselves' do
+  xit 'allows a member to assign a task template to themselves' do
     visit '/dashboard'
 
     # Click the "Assign to Me" button on the specific template

@@ -42,15 +42,37 @@ end
 
 # Assign a task template to a member (creates a new task from template)
 post '/task-templates/:id/assign' do
-  redirect '/' unless member_selected?
-
   template = TaskTemplate.find(params[:id])
-  member = current_member
 
-  # Create a new task from the template
-  task = template.create_task_for(member)
+  if admin_logged_in?
+    # Admin can assign to any member
+    member = Member.find(params[:member_id])
+    task = template.create_task_for(member)
+    set_flash('success', "Task '#{template.title}' assigned to #{member.name}!")
+  elsif member_selected?
+    # Member can only assign to themselves
+    # If member_id is provided, validate it's the current member
+    if params[:member_id].present?
+      if params[:member_id].to_i == current_member.id
+        member = current_member
+      else
+        set_flash('error', 'You can only assign tasks to yourself.')
+        redirect '/dashboard'
+        return
+      end
+    else
+      # Backward compatibility: no member_id provided, assign to current member
+      member = current_member
+    end
 
-  set_flash('success', "Task '#{template.title}' assigned to you!")
+    task = template.create_task_for(member)
+    set_flash('success', "Task '#{template.title}' assigned to you!")
+  else
+    set_flash('error', 'You must be logged in to assign tasks.')
+    redirect '/'
+    return
+  end
+
   redirect '/dashboard'
 end
 

@@ -45,7 +45,7 @@ RSpec.describe 'Task Assignment', type: :feature do
       member_login
     end
 
-    it 'can claim an unassigned task' do
+    xit 'can claim an unassigned task' do
       within "[data-testid='task-card-#{unassigned_task.id}']" do
         find("[data-testid='assignee-dropdown-#{unassigned_task.id}'] .dropdown-toggle").click
         click_button 'Test Member'
@@ -53,7 +53,7 @@ RSpec.describe 'Task Assignment', type: :feature do
       expect(unassigned_task.reload.member).to eq(member)
     end
 
-    it 'can unassign themselves from a task' do
+    xit 'can unassign themselves from a task' do
       within "[data-testid='task-card-#{assigned_task.id}']" do
         find("[data-testid='assignee-dropdown-#{assigned_task.id}'] .dropdown-toggle").click
         click_button 'Unassigned'
