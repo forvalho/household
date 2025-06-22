@@ -1,5 +1,6 @@
-require 'sinatra/base'
+require 'sinatra'
 require 'sinatra/activerecord'
+require 'sinatra/contrib'
 require 'sinatra/namespace'
 require 'bcrypt'
 require 'json'
