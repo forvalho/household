@@ -29,7 +29,7 @@
                 </thead>
                 <tbody>
                     <% @leaderboard_stats.each_with_index do |stat, index| %>
-                        <tr>
+                        <tr class="clickable-row" onclick="window.location.href='/members/<%= stat[:member].id %>/select'" style="cursor: pointer;">
                             <td class="text-center">
                                 <span class="rank-badge"><%= index + 1 %></span>
                             </td>

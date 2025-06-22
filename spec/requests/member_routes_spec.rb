@@ -2,6 +2,13 @@ require 'spec_helper'
 
 RSpec.describe 'Member Routes', type: :request do
   let!(:member) { Member.create!(name: 'Test Member') }
+  let!(:template) do
+    TaskTemplate.create!(
+      title: 'Test Template',
+      difficulty: 'bronze',
+      category: 'Kitchen'
+    )
+  end
 
   describe 'GET /members/:id/select' do
     it 'sets the session and redirects to dashboard' do
@@ -20,11 +27,12 @@ RSpec.describe 'Member Routes', type: :request do
       expect(last_request.path).to eq('/')
     end
 
-    it 'shows dashboard if logged in' do
+    it 'shows dashboard with task templates if logged in' do
       get "/members/#{member.id}/select"
       get '/dashboard'
       expect(last_response).to be_ok
-      expect(last_response.body).to include('Tasks')
+      expect(last_response.body).to include('Available Tasks')
+      expect(last_response.body).to include('Test Template')
     end
   end
 

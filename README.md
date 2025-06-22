@@ -4,22 +4,30 @@ A simple web application for managing household tasks and activities. Built with
 
 ## Features
 
-- **Admin Dashboard**: Create and manage tasks, view member statistics, and generate reports
-- **Member Dashboard**: View and manage assigned tasks with a simple interface
-- **Task Management**: Create, assign, and track task completion
-- **Tasks Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done)
+- **Task Template System**: Reusable task templates that members can assign to themselves
+- **Admin Dashboard**: Create and manage task templates, view member statistics, and generate reports
+- **Member Dashboard**: View available task templates and manage assigned tasks with a simple interface
+- **Task Management**: Create templates, assign tasks, and track task completion
+- **Tasks Board**: A Kanban board for members to see their tasks categorized by status (To Do, In Progress, Done)
 - **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
 - **Member Profiles**: Customizable avatars and names
+- **Interactive Leaderboard**: Click any member row to view their task board
 
 ## Core Features
 
 - **Profile-Based Login**: A visual, avatar-based login screen for family members
 - **Role-Based Access**:
-    - **Members**: Can view their dashboard and complete assigned tasks
-    - **Admins**: Can manage members, tasks, admins, and view reports
+    - **Members**: Can view their dashboard, assign task templates to themselves, and complete assigned tasks
+    - **Admins**: Can manage members, task templates, admins, and view reports
+- **Task Template System**:
+    - Reusable task templates available to all members
+    - Members can assign templates to themselves (creates individual tasks)
+    - Templates remain available for other members to use
+    - Includes a "Generic Task" template for custom chores
 - **Customizable Avatars**: Users can personalize their avatars using the DiceBear API, choosing from dozens of styles and custom background colors
-- **Tasks Board**: A simple board for members to see their tasks categorized by status (To Do, In Progress, Done)
-- **Admin Dashboard**: A central place for admins to oversee all tasks assigned to all members with a modern sidebar layout
+- **Tasks Board**: A Kanban board for members to see their tasks categorized by status (Available Tasks, To Do, In Progress, Done, Skipped)
+- **Admin Dashboard**: A central place for admins to oversee all tasks and manage task templates with a modern sidebar layout
+- **Interactive Leaderboard**: Click any member row to navigate directly to their task board
 - **RSpec Test Suite**: A solid testing foundation to ensure application stability
 
 ## Technology Stack
@@ -86,15 +94,17 @@ The application follows a modular structure for better organization and maintain
 ├── Gemfile             # Ruby gem dependencies
 ├── README.md           # You are here!
 ├── db/
-│   ├── schema.rb       # Database schema definition
-│   └── seeds.rb        # Initial seed data for admins and members
+│   └── schema.rb       # Database schema definition
 ├── helpers/
 │   ├── application_helper.rb # Core helpers (auth, flash messages)
 │   └── data_helper.rb      # Data and statistics helpers
 ├── models/             # ActiveRecord models
 │   ├── admin.rb
 │   ├── member.rb
-│   └── ...
+│   ├── task.rb
+│   ├── task_template.rb
+│   ├── task_completion.rb
+│   └── task_skip.rb
 ├── routes/             # Sinatra route definitions
 │   ├── admin.rb
 │   ├── members.rb
@@ -114,9 +124,17 @@ The application follows a modular structure for better organization and maintain
 
 ## Features
 
+### 🎯 Task Template System
+- **Reusable Templates**: Create task templates that all members can access
+- **Self-Assignment**: Members can assign templates to themselves with one click
+- **Multiple Assignments**: Multiple members can work on the same type of task simultaneously
+- **Template Management**: Admins can create, edit, and delete task templates
+- **Generic Tasks**: Bronze-level "Generic Task" template for custom chores
+
 ### 🎯 Tasks Board Interface
 - **Modern UI**: Clean, responsive design with Bootstrap 5.
-- **Kanban Board**: A drag-and-drop interface for managing tasks, with columns for Unassigned, To Do, In Progress, Done, and Skipped.
+- **Kanban Board**: A drag-and-drop interface for managing tasks, with columns for Available Tasks, To Do, In Progress, Done, and Skipped.
+- **Template Cards**: Consistent design with regular task cards for seamless UX
 - **Equal-Height Columns**: All columns on the board dynamically adjust to the same height for a clean, symmetrical layout.
 - **Visual Task Management**: Color-coded difficulty levels and user assignments.
 - **Compact Cards**: Optimized task cards for better information density.
@@ -130,7 +148,7 @@ The application follows a modular structure for better organization and maintain
 ### 📊 Comprehensive Reporting
 - **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
 - **Performance Tracking**: Completion rates, skip tracking, and progress monitoring
-- **Reward Suggestions**: Automated recommendations based on performance
+- **Interactive Leaderboard**: Click any member row to view their task board
 - **Visual Charts**: Interactive charts showing points distribution and completion rates
 
 ### 🎁 Reward System

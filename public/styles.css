@@ -501,3 +501,19 @@ button.dropdown-item:disabled {
 .navbar-nav .nav-link i {
     margin-right: 0.5rem;
 }
+
+/* Clickable Leaderboard Rows */
+.leaderboard-table .clickable-row {
+    transition: background-color 0.2s ease;
+}
+
+.leaderboard-table .clickable-row:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.leaderboard-table .clickable-row:active {
+    background-color: #e9ecef;
+    transform: translateY(0);
+}
