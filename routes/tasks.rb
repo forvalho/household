@@ -47,8 +47,13 @@ post '/task-templates/:id/assign' do
   if admin_logged_in?
     # Admin can assign to any member
     member = Member.find(params[:member_id])
-    task = template.create_task_for(member)
-    set_flash('success', "Task '#{template.title}' assigned to #{member.name}!")
+    if template.generic_task? && params[:custom_title].present?
+      task = template.create_task_for(member, custom_title: params[:custom_title], custom_difficulty: params[:custom_difficulty])
+      set_flash('success', "Custom task '#{params[:custom_title]}' assigned to #{member.name}!")
+    else
+      task = template.create_task_for(member)
+      set_flash('success', "Task '#{template.title}' assigned to #{member.name}!")
+    end
   elsif member_selected?
     # Member can only assign to themselves
     # If member_id is provided, validate it's the current member
@@ -65,8 +70,13 @@ post '/task-templates/:id/assign' do
       member = current_member
     end
 
-    task = template.create_task_for(member)
-    set_flash('success', "Task '#{template.title}' assigned to you!")
+    if template.generic_task? && params[:custom_title].present?
+      task = template.create_task_for(member, custom_title: params[:custom_title], custom_difficulty: params[:custom_difficulty])
+      set_flash('success', "Custom task '#{params[:custom_title]}' assigned to you!")
+    else
+      task = template.create_task_for(member)
+      set_flash('success', "Task '#{template.title}' assigned to you!")
+    end
   else
     set_flash('error', 'You must be logged in to assign tasks.')
     redirect '/'
@@ -222,4 +232,28 @@ patch '/tasks/:id/assignee' do
     set_flash('error', 'You must be logged in.')
   end
   redirect back
+end
+
+# Create a custom task (from Generic Task modal)
+post '/custom-tasks' do
+  redirect '/' unless member_selected?
+
+  if admin_logged_in?
+    # Admin can assign to any member
+    member = Member.find(params[:member_id])
+  else
+    # Member can only assign to themselves
+    member = current_member
+  end
+
+  task = Task.create!(
+    title: params[:title],
+    difficulty: params[:difficulty],
+    category: params[:category],
+    member: member,
+    status: 'todo'
+  )
+
+  set_flash('success', "Custom task '#{task.title}' created and assigned to #{member.name}!")
+  redirect '/dashboard'
 end

@@ -517,3 +517,75 @@ button.dropdown-item:disabled {
     background-color: #e9ecef;
     transform: translateY(0);
 }
+
+/* Custom radio buttons for difficulty selection */
+.difficulty-radio-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem; /* Reduced gap for better fit */
+}
+
+.difficulty-radio-group .form-check {
+    flex: 1; /* Allow each option to grow and fill space */
+}
+
+.difficulty-radio-group .form-check-input {
+    /* More robust way to hide the radio button */
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.difficulty-radio-group .form-check-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Make label fill the container */
+    height: 110px; /* Fixed height for consistency */
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.difficulty-radio-group .form-check-label:hover {
+    border-color: #adb5bd;
+    background-color: #f8f9fa;
+}
+
+/* Base style for checked labels */
+.difficulty-radio-group .form-check-input:checked + .form-check-label {
+    font-weight: 600;
+}
+
+/* Gold */
+.difficulty-radio-group .form-check-input#difficulty_gold:checked + .form-check-label {
+    border-color: #ffd700;
+    background-color: #fffbeb;
+    color: #a18200;
+    box-shadow: 0 0 0 1px #ffd700;
+}
+
+/* Silver */
+.difficulty-radio-group .form-check-input#difficulty_silver:checked + .form-check-label {
+    border-color: #c0c0c0;
+    background-color: #f8f8f8;
+    color: #808080;
+    box-shadow: 0 0 0 1px #c0c0c0;
+}
+
+/* Bronze */
+.difficulty-radio-group .form-check-input#difficulty_bronze:checked + .form-check-label {
+    border-color: #cd7f32;
+    background-color: #fef5eb;
+    color: #8b572a;
+    box-shadow: 0 0 0 1px #cd7f32;
+}
+
+.difficulty-radio-group .form-check-input:checked + .form-check-label .text-muted {
+    color: inherit !important;
+}

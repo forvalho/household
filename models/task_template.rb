@@ -16,15 +16,32 @@ class TaskTemplate < ActiveRecord::Base
     difficulty
   end
 
+  def generic_task?
+    title == 'Generic Task'
+  end
+
   # Create a new task from this template for a specific member
-  def create_task_for(member)
-    Task.create!(
-      title: title,
-      description: description,
-      difficulty: difficulty,
-      category: category,
-      member: member,
-      status: 'todo'
-    )
+  def create_task_for(member, custom_title: nil, custom_difficulty: nil)
+    if generic_task? && custom_title.present?
+      # For Generic Task, use the custom title and difficulty
+      Task.create!(
+        title: custom_title,
+        description: description,
+        difficulty: custom_difficulty || difficulty,
+        category: category,
+        member: member,
+        status: 'todo'
+      )
+    else
+      # For regular templates, use the template's values
+      Task.create!(
+        title: title,
+        description: description,
+        difficulty: difficulty,
+        category: category,
+        member: member,
+        status: 'todo'
+      )
+    end
   end
 end

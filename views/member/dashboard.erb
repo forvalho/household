@@ -32,13 +32,21 @@
                             <!-- Top Section: Title & Points -->
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="mb-0 fw-bold"><%= template.title %></h6>
-                                <span class="medal-badge" title="<%= pluralize(template.points_value, 'point') %>">
-                                    <i class="fas fa-medal medal-<%= template.medal %>"></i>
-                                </span>
+                                <% if template.generic_task? %>
+                                    <span class="badge bg-secondary" title="Custom difficulty">
+                                        <i class="fas fa-edit"></i> Custom
+                                    </span>
+                                <% else %>
+                                    <span class="medal-badge" title="<%= pluralize(template.points_value, 'point') %>">
+                                        <i class="fas fa-medal medal-<%= template.medal %>"></i>
+                                    </span>
+                                <% end %>
                             </div>
 
                             <!-- Optional Description -->
-                            <% if template.description.present? %>
+                            <% if template.generic_task? %>
+                                <p class="small text-muted mb-2">Create your own task with custom title and difficulty</p>
+                            <% elsif template.description.present? %>
                                 <p class="small text-muted mb-2"><%= template.description %></p>
                             <% end %>
 
@@ -46,30 +54,39 @@
                             <div class="mt-auto">
                                 <!-- Actions: Assign Template -->
                                 <div class="task-actions-container mb-2">
-                                    <!-- Assignee Dropdown -->
-                                    <div class="assignee-selector dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <% if template.generic_task? %>
+                                        <!-- Generic Task: Show modal button -->
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#genericTaskModal">
                                             <i class="fas fa-user-plus"></i>
                                             <span class="ms-2">Assign Task</span>
                                         </button>
-                                        <ul class="dropdown-menu assignee-dropdown-menu">
-                                            <% Member.all.order(:name).each do |member| %>
-                                                <li>
-                                                    <form action="/task-templates/<%= template.id %>/assign" method="post" class="assignee-form">
-                                                        <input type="hidden" name="member_id" value="<%= member.id %>">
-                                                        <button type="submit" class="dropdown-item" <%= 'disabled' unless admin_logged_in? || member.id == current_member.id %>>
-                                                            <% if member.avatar_url.present? %>
-                                                                <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
-                                                            <% else %>
-                                                                <div class="user-avatar me-2"><%= member.name.first.upcase %></div>
-                                                            <% end %>
-                                                            <%= member.name %>
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            <% end %>
-                                        </ul>
-                                    </div>
+                                    <% else %>
+                                        <!-- Regular Template: Show dropdown -->
+                                        <!-- Assignee Dropdown -->
+                                        <div class="assignee-selector dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span class="ms-2">Assign Task</span>
+                                            </button>
+                                            <ul class="dropdown-menu assignee-dropdown-menu">
+                                                <% Member.all.order(:name).each do |member| %>
+                                                    <li>
+                                                        <form action="/task-templates/<%= template.id %>/assign" method="post" class="assignee-form">
+                                                            <input type="hidden" name="member_id" value="<%= member.id %>">
+                                                            <button type="submit" class="dropdown-item" <%= 'disabled' unless admin_logged_in? || member.id == current_member.id %>>
+                                                                <% if member.avatar_url.present? %>
+                                                                    <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
+                                                                <% else %>
+                                                                    <div class="user-avatar me-2"><%= member.name.first.upcase %></div>
+                                                                <% end %>
+                                                                <%= member.name %>
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                <% end %>
+                                            </ul>
+                                        </div>
+                                    <% end %>
                                 </div>
 
                                 <!-- Tags: Category -->
@@ -272,60 +289,108 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Sortable for each column
-    const columns = document.querySelectorAll('.task-list');
-    columns.forEach(column => {
-        new Sortable(column, {
-            group: 'tasks',
-            animation: 150,
-            ghostClass: 'dragging',
-            onEnd: function(evt) {
-                const taskId = evt.item.dataset.taskId;
-                const newStatus = evt.to.dataset.status;
+<!-- Generic Task Modal -->
+<div class="modal fade" id="genericTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Create Custom Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/custom-tasks">
+                <div class="modal-body">
+                    <p class="text-muted mb-3">Create a custom task with your own title and difficulty level.</p>
 
-                fetch(`/tasks/${taskId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update the task card's status
-                        evt.item.dataset.status = newStatus;
-                    } else {
-                        // Revert the move if it failed
-                        evt.from.appendChild(evt.item);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating task status:', error);
-                    evt.from.appendChild(evt.item);
-                });
-            }
+                    <div class="mb-3">
+                        <label for="custom_title" class="form-label">Task Title</label>
+                        <input type="text" class="form-control" id="custom_title" name="title" required placeholder="e.g., Clean garage, Organize closet">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">Difficulty</label>
+                        <div class="difficulty-radio-group">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="difficulty" id="difficulty_bronze" value="bronze" checked>
+                                <label class="form-check-label" for="difficulty_bronze">
+                                    <i class="fas fa-medal medal-bronze fa-2x"></i>
+                                    <div>Bronze</div>
+                                    <small class="text-muted">(1 point)</small>
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="difficulty" id="difficulty_silver" value="silver">
+                                <label class="form-check-label" for="difficulty_silver">
+                                    <i class="fas fa-medal medal-silver fa-2x"></i>
+                                    <div>Silver</div>
+                                    <small class="text-muted">(3 points)</small>
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="difficulty" id="difficulty_gold" value="gold">
+                                <label class="form-check-label" for="difficulty_gold">
+                                    <i class="fas fa-medal medal-gold fa-2x"></i>
+                                    <div>Gold</div>
+                                    <small class="text-muted">(5 points)</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="custom_category" class="form-label">Category</label>
+                        <select class="form-select" id="custom_category" name="category" required>
+                            <option value="General" selected>General</option>
+                            <option value="Kitchen">Kitchen</option>
+                            <option value="Laundry">Laundry</option>
+                            <option value="Yard">Yard</option>
+                            <option value="Bathroom">Bathroom</option>
+                            <option value="Bedroom">Bedroom</option>
+                            <option value="Living Room">Living Room</option>
+                            <option value="Office">Office</option>
+                            <option value="Garage">Garage</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="member_id" value="<%= current_member.id %>">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-hide flash messages after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        var flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(function(message) {
+            setTimeout(function() {
+                new bootstrap.Alert(message).close();
+            }, 5000);
+        });
+
+        // Fix for task card dropdown z-index issue
+        var taskCardDropdowns = document.querySelectorAll('.task-card .dropdown');
+        taskCardDropdowns.forEach(function(dd) {
+            dd.addEventListener('show.bs.dropdown', function () {
+                var taskCard = dd.closest('.task-card');
+                if (taskCard) {
+                    taskCard.style.zIndex = 100;
+                }
+            });
+            dd.addEventListener('hide.bs.dropdown', function () {
+                var taskCard = dd.closest('.task-card');
+                if (taskCard) {
+                    taskCard.style.zIndex = 'auto';
+                }
+            });
         });
     });
-
-    // Handle complete task modal
-    const completeTaskModal = document.getElementById('completeTaskModal');
-    completeTaskModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const taskId = button.dataset.taskId;
-        const form = document.getElementById('completeTaskForm');
-        form.action = `/tasks/${taskId}/complete`;
-    });
-
-    // Handle skip task modal
-    const skipTaskModal = document.getElementById('skipTaskModal');
-    skipTaskModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const taskId = button.dataset.taskId;
-        const form = document.getElementById('skipTaskForm');
-        form.action = `/tasks/${taskId}/skip`;
-    });
-});
 </script>

@@ -74,6 +74,18 @@ RSpec.describe TaskTemplate, type: :model do
     end
   end
 
+  describe '#generic_task?' do
+    it 'returns true for Generic Task' do
+      template = TaskTemplate.new(title: 'Generic Task')
+      expect(template.generic_task?).to be true
+    end
+
+    it 'returns false for other tasks' do
+      template = TaskTemplate.new(title: 'Regular Task')
+      expect(template.generic_task?).to be false
+    end
+  end
+
   describe '#create_task_for' do
     let(:member) { Member.create!(name: 'Test Member') }
     let(:template) do
@@ -103,6 +115,43 @@ RSpec.describe TaskTemplate, type: :model do
       expect(task).to be_a(Task)
       expect(task.member_id).to eq(member.id)
       expect(task.status).to eq('todo')
+    end
+
+    context 'with Generic Task' do
+      let(:generic_template) do
+        TaskTemplate.create!(
+          title: 'Generic Task',
+          description: 'Custom task',
+          difficulty: 'bronze',
+          category: 'General'
+        )
+      end
+
+      it 'creates a task with custom title and difficulty' do
+        task = generic_template.create_task_for(member, custom_title: 'Clean Garage', custom_difficulty: 'gold')
+
+        expect(task).to be_persisted
+        expect(task.title).to eq('Clean Garage')
+        expect(task.difficulty).to eq('gold')
+        expect(task.description).to eq('Custom task')
+        expect(task.category).to eq('General')
+        expect(task.member).to eq(member)
+        expect(task.status).to eq('todo')
+      end
+
+      it 'uses template difficulty when no custom difficulty provided' do
+        task = generic_template.create_task_for(member, custom_title: 'Clean Garage')
+
+        expect(task.title).to eq('Clean Garage')
+        expect(task.difficulty).to eq('bronze') # Uses template default
+      end
+
+      it 'creates regular task when no custom title provided' do
+        task = generic_template.create_task_for(member)
+
+        expect(task.title).to eq('Generic Task')
+        expect(task.difficulty).to eq('bronze')
+      end
     end
   end
 end
