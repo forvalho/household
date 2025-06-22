@@ -1,4 +1,26 @@
 module ApplicationHelper
+  AVATAR_BACKGROUND_COLORS = [
+    '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
+    '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50',
+    '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800',
+    '#ff5722', '#795548', '#9e9e9e', '#607d8b'
+  ].freeze
+
+  AVATAR_STYLES = [
+    'https://i.pravatar.cc/150?img=1',
+    'https://i.pravatar.cc/150?img=2',
+    'https://i.pravatar.cc/150?img=3',
+    'https://i.pravatar.cc/150?img=4',
+    'https://i.pravatar.cc/150?img=5',
+    'https://i.pravatar.cc/150?img=6',
+    'https://i.pravatar.cc/150?img=7',
+    'https://i.pravatar.cc/150?img=8',
+    'https://i.pravatar.cc/150?img=9',
+    'https://i.pravatar.cc/150?img=10',
+    'https://i.pravatar.cc/150?img=11',
+    'https://i.pravatar.cc/150?img=12'
+  ].freeze
+
   # Flash message helpers
   def set_flash(type, message)
     session[:flash] = { type: type, message: message }

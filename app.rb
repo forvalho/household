@@ -1,4 +1,4 @@
-require 'sinatra'
+require 'sinatra/base'
 require 'sinatra/activerecord'
 require 'sinatra/contrib'
 require 'sinatra/namespace'
@@ -7,29 +7,43 @@ require 'json'
 require 'date'
 require 'digest/md5'
 
-# Load all application files
-['models', 'helpers', 'routes'].each do |dir|
-  Dir[File.join(__dir__, dir, '**', '*.rb')].sort.each { |file| require file }
+# --- 1. Load dependent files (Models & Helpers) ---
+['models', 'helpers'].each do |dir|
+  Dir[File.join(__dir__, dir, '**', '*.rb')].sort.each { |file| require_relative file }
 end
 
+# --- 2. Define the main Application class ---
 class App < Sinatra::Base
   register Sinatra::Namespace
   register Sinatra::ActiveRecordExtension
 
-  # Enable sessions
+  # Configuration
+  set :database_file, "config/database.yml"
+  set :views, File.join(__dir__, 'views')
   enable :sessions
 
-  # Set the main views directory
-  set :views, File.join(__dir__, 'views')
-
-  # Include helpers
+  # Helpers
   helpers ApplicationHelper
   helpers DataHelper
 
-  # Additional helpers
+  # Local helpers
   helpers do
     def require_admin_login
-      redirect '/admin/login' unless admin_logged_in?
+      redirect '/admin/login' unless session[:admin_id]
+    end
+
+    def admin_logged_in?
+      !!session[:admin_id]
+    end
+
+    def find_member_or_halt(id)
+      member = Member.find_by(id: id)
+      halt 404, "Member not found" unless member
+      member
+    end
+
+    def flash_message
+      session.delete(:flash)
     end
 
     def outstanding_tasks(member)
@@ -47,16 +61,18 @@ class App < Sinatra::Base
       return 0 if total_tasks == 0
       (completed_tasks.to_f / total_tasks * 100).round(1)
     end
+  end
 
-    # Helper to find a member or halt
-    def find_member_or_halt(id)
-      member = Member.find_by(id: id)
-      halt 404, "Member not found" unless member
-      member
-    end
-
-    def flash_message
-      session.delete(:flash)
-    end
+  # --- Routes ---
+  get '/' do
+    @members = Member.all.order(:name)
+    erb :index
   end
 end
+
+# --- 3. Load the routes ---
+Dir[File.join(__dir__, 'routes', '**', '*.rb')].sort.each { |file| require_relative file }
+
+# Define a simple DataMigration model for Rake tasks
+class DataMigration < ActiveRecord::Base
+end rescue nil

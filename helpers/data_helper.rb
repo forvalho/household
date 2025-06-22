@@ -8,14 +8,14 @@ module DataHelper
     completions.sum { |tc| tc.task.points_value }
   end
 
-  def calculate_member_medals(member, start_date = 30.days.ago)
+  def calculate_member_medals(member, start_date)
+    medals = { gold: 0, silver: 0, bronze: 0 }
     completions = member.task_completions.joins(:task).where('completed_at >= ?', start_date)
-    medals = completions.group_by { |tc| tc.task.medal }
-    {
-      gold: medals['gold']&.count || 0,
-      silver: medals['silver']&.count || 0,
-      bronze: medals['bronze']&.count || 0
-    }
+    completions.each do |completion|
+      difficulty = completion.task.difficulty.to_sym
+      medals[difficulty] += 1 if medals.key?(difficulty)
+    end
+    medals
   end
 
   def calculate_completion_rate(member, period)
