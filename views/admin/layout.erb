@@ -25,6 +25,11 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
+                        <a class="sidebar-link <%= 'active' if request.path_info == '/task-templates' %>" href="/task-templates">
+                            <i class="fas fa-clipboard-list"></i> Task Templates
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
                         <a class="sidebar-link <%= 'active' if request.path_info == '/admin/members' %>" href="/admin/members">
                             <i class="fas fa-users"></i> Members
                         </a>

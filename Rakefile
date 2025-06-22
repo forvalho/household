@@ -40,12 +40,12 @@ namespace :db do
       puts "✅ Member seeding complete!"
     end
 
-    desc "Seed sample tasks"
+    desc "Seed sample task templates"
     task :tasks do
       require_relative 'app'
-      puts "Seeding tasks..."
+      puts "Seeding task templates..."
 
-      # Upsert Tasks
+      # Upsert Task Templates
       [
         { title: 'Fill and start dishwasher', difficulty: 'silver', category: 'Kitchen' },
         { title: 'Empty dishwasher', difficulty: 'bronze', category: 'Kitchen' },
@@ -54,17 +54,18 @@ namespace :db do
         { title: 'Put away laundry', difficulty: 'silver', category: 'Laundry' },
         { title: 'Mow lawn', difficulty: 'gold', category: 'Yard' },
         { title: 'Water backyard', difficulty: 'bronze', category: 'Yard' },
-        { title: 'Water frontyard', difficulty: 'bronze', category: 'Yard' }
+        { title: 'Water frontyard', difficulty: 'bronze', category: 'Yard' },
+        { title: 'Generic Task', difficulty: 'bronze', category: 'General', description: 'A customizable task for any household chore' }
       ].each do |attrs|
-        task = Task.find_or_initialize_by(title: attrs[:title])
-        task.difficulty = attrs[:difficulty]
-        task.category = attrs[:category]
-        task.status ||= 'unassigned' # Set status only if it's a new record
-        task.save!
-        puts " -> Created/updated task: #{task.title}"
+        template = TaskTemplate.find_or_initialize_by(title: attrs[:title])
+        template.difficulty = attrs[:difficulty]
+        template.category = attrs[:category]
+        template.description = attrs[:description] if attrs[:description]
+        template.save!
+        puts " -> Created/updated task template: #{template.title}"
       end
 
-      puts "✅ Task seeding complete!"
+      puts "✅ Task template seeding complete!"
     end
   end
 end

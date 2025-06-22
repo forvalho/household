@@ -12,6 +12,14 @@ ActiveRecord::Schema.define do
     t.timestamps
   end
 
+  create_table :task_templates, if_not_exists: true do |t|
+    t.string :title, null: false
+    t.text :description
+    t.string :difficulty, default: 'bronze'
+    t.string :category, null: false
+    t.timestamps
+  end
+
   create_table :tasks, if_not_exists: true do |t|
     t.string :title, null: false
     t.text :description

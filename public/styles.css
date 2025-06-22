@@ -499,5 +499,5 @@ button.dropdown-item:disabled {
     color: #007bff !important;
 }
 .navbar-nav .nav-link i {
-    font-size: 1rem;
+    margin-right: 0.5rem;
 }
