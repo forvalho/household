@@ -1,10 +1,4 @@
 # Ignore database files
-*.db
-*.db-shm
-*.db-wal
-*.sqlite3
-*.sqlite3-shm
-*.sqlite3-wal
 db/*.sqlite3
 db/*.sqlite3-shm
 db/*.sqlite3-wal
@@ -13,7 +7,6 @@ db/*.sqlite3-wal
 /vendor/
 .bundle/
 .env*
-/coverage/
 
 # Logs
 *.log
@@ -24,9 +17,4 @@ db/*.sqlite3-wal
 
 # OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
