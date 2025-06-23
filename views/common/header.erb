@@ -5,54 +5,38 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <div class="navbar-nav ms-auto">
+            <div class="navbar-nav ms-auto align-items-center">
                 <% current_path = request.path_info %>
+
+                <!-- Common Links for everyone -->
+                <% unless current_path == '/' %>
+                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <% end %>
+                <% unless current_path == '/leaderboard' %>
+                    <a class="nav-link" href="/leaderboard"><i class="fas fa-trophy"></i> Leaderboard</a>
+                <% end %>
+
+                <!-- Links for a selected member -->
                 <% if member_selected? %>
-                    <!-- Member navigation: no Dashboard link, no Leaderboard link if on /leaderboard -->
-                    <% unless current_path == '/' %>
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    <% end %>
-                    <% unless current_path == '/leaderboard' %>
-                        <a class="nav-link" href="/leaderboard">
-                            <i class="fas fa-trophy"></i> Leaderboard
-                        </a>
-                    <% end %>
-                    <a class="nav-link" href="/profile/edit">
-                        <i class="fas fa-user-edit"></i> Profile
-                    </a>
-                <% elsif admin_logged_in? %>
-                    <!-- Admin navigation: Home and Leaderboard, but not Leaderboard if on /leaderboard -->
-                    <% unless current_path == '/' %>
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    <% end %>
-                    <% unless current_path == '/leaderboard' %>
-                        <a class="nav-link" href="/leaderboard">
-                            <i class="fas fa-trophy"></i> Leaderboard
-                        </a>
-                    <% end %>
-                    <a class="nav-link" href="/admin/logout">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
-                <% else %>
-                    <!-- Public navigation: Home (unless on home), Admin (unless on admin area), Leaderboard (unless on leaderboard) -->
-                    <% unless current_path == '/' %>
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    <% end %>
-                    <% unless current_path == '/admin/login' || current_path.start_with?('/admin') %>
-                        <a class="nav-link" href="/admin/login">
-                            <i class="fas fa-user-shield"></i> Admin
-                        </a>
-                    <% end %>
-                    <% unless current_path == '/leaderboard' %>
-                        <a class="nav-link" href="/leaderboard">
-                            <i class="fas fa-trophy"></i> Leaderboard
-                        </a>
+                    <a class="nav-link" href="/profile/edit"><i class="fas fa-user-edit"></i> Profile</a>
+                <% end %>
+
+                <!-- Links for a logged-in Admin -->
+                <% if admin_logged_in? %>
+                    <div class="nav-item ms-lg-3">
+                        <div class="d-flex align-items-center">
+                            <a class="btn btn-sm btn-secondary" href="/admin/dashboard" role="button">
+                                <i class="fas fa-user-shield"></i> Admin
+                            </a>
+                            <a class="nav-link ms-2" href="/admin/logout" title="Logout Admin">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                <% elsif !member_selected? %>
+                    <!-- Show Admin login only if no member is selected and no admin is logged in -->
+                     <% unless current_path.start_with?('/admin') %>
+                        <a class="nav-link" href="/admin/login"><i class="fas fa-user-shield"></i> Admin</a>
                     <% end %>
                 <% end %>
             </div>
