@@ -7,35 +7,41 @@ require 'json'
 require 'date'
 require 'digest/md5'
 
+# Load the Household module with ROOT constant
+require_relative 'lib/household'
+
 # --- 1. Load dependent files (Models & Helpers) ---
 ['models', 'helpers'].each do |dir|
   Dir[File.join(__dir__, dir, '**', '*.rb')].sort.each { |file| require_relative file }
 end
 
-# --- 2. Define the main Application class ---
+# --- 2. Load Plugins ---
+require_relative 'plugins/admin/admin'
+
+# --- 3. Define the main Application class ---
 class App < Sinatra::Base
   register Sinatra::Namespace
   register Sinatra::ActiveRecordExtension
+
+  # Register plugins
+  register Household::Admin
 
   # Configuration
   set :database_file, "config/database.yml"
   set :views, File.join(__dir__, 'views')
   enable :sessions
+  enable :method_override
 
   # Helpers
   helpers ApplicationHelper
   helpers DataHelper
 
+  before do
+    @nav_links = []
+  end
+
   # Local helpers
   helpers do
-    def require_admin_login
-      redirect '/admin/login' unless session[:admin_id]
-    end
-
-    def admin_logged_in?
-      !!session[:admin_id]
-    end
-
     def find_member_or_halt(id)
       member = Member.find_by(id: id)
       halt 404, "Member not found" unless member
@@ -64,14 +70,12 @@ class App < Sinatra::Base
   end
 
   # --- Routes ---
-  get '/' do
-    @members = Member.all.order(:name)
-    erb :index
+  # Load route files within App class context
+  Dir[File.join(__dir__, 'routes', '**', '*.rb')].sort.each do |file|
+    next if file.include?('admin.rb') # Skip the old admin routes
+    instance_eval(File.read(file), file)
   end
 end
-
-# --- 3. Load the routes ---
-Dir[File.join(__dir__, 'routes', '**', '*.rb')].sort.each { |file| require_relative file }
 
 # Define a simple DataMigration model for Rake tasks
 class DataMigration < ActiveRecord::Base

@@ -344,3 +344,15 @@ Additional gamification features:
 - **Plugin architecture**: The plugin system will enable rapid feature development
 - **Approval workflow**: Task approval system will add quality control to task completion
 - **RPG elements**: Level system will increase engagement and motivation
+
+## Features
+- [ ] Member-specific task ordering/pinning
+- [ ] Task comments or notes section
+- [ ] User-facing notifications (e.g., "You have a new task")
+- [ ] "Vacation mode" for members to pause task assignments
+
+## Architecture & Refactoring
+- [ ] **(Future)** Fully decouple plugin migrations. Investigate creating custom Rake tasks to allow plugins to manage their own schema and data migrations from within their own directory (`plugins/admin/db/migrate`).
+- [ ] **(Future)** Fully decouple plugin tests. Configure RSpec to discover and run tests from within each plugin's directory (`plugins/admin/spec/`) in addition to the main `spec/` folder.
+- [ ] **(Future)** Fully decouple plugin seeding. Create a mechanism for plugins to register their own seed tasks that can be called by the main `db:seed` Rake task.
+- [ ] Evaluate replacing the custom data migration system with a more robust, existing gem if the need arises.

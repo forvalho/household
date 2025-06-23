@@ -1,290 +1,90 @@
-# Household
+# Household Task Management App
 
-A simple web application for managing household tasks and activities. Built with Ruby, Sinatra, and SQLite.
+A Sinatra-based web application for managing household chores and tasks among members.
 
-## Features
+## Core Concepts
 
-- **Task Template System**: Reusable task templates that members can assign to themselves
-- **Admin Dashboard**: Create and manage task templates, view member statistics, and generate reports
-- **Member Dashboard**: View available task templates and manage assigned tasks with a simple interface
-- **Task Management**: Create templates, assign tasks, and track task completion
-- **Tasks Board**: A Kanban board for members to see their tasks categorized by status (To Do, In Progress, Done)
-- **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
-- **Member Profiles**: Customizable avatars and names
-- **Interactive Leaderboard**: Click any member row to view their task board
+- **Members**: Represents individuals in the household.
+- **Task Templates**: Reusable templates for common chores (e.g., "Empty dishwasher").
+- **Tasks**: Instances of a `TaskTemplate` assigned to a specific `Member`. Custom, one-off tasks can also be created.
+- **Task Completions**: Records when a `Member` completes a `Task`, awarding points based on difficulty.
+- **Leaderboard**: A ranked list of members based on points earned over a specific period.
 
-## Core Features
+## Architecture
 
-- **Profile-Based Login**: A visual, avatar-based login screen for family members
-- **Role-Based Access**:
-    - **Members**: Can view their dashboard, assign task templates to themselves, and complete assigned tasks
-    - **Admins**: Can manage members, task templates, admins, and view reports
-- **Task Template System**:
-    - Reusable task templates available to all members
-    - Members can assign templates to themselves (creates individual tasks)
-    - Templates remain available for other members to use
-    - Includes a "Generic Task" template for custom chores
-- **Customizable Avatars**: Users can personalize their avatars using the DiceBear API, choosing from dozens of styles and custom background colors
-- **Tasks Board**: A Kanban board for members to see their tasks categorized by status (To Do, In Progress, Done)
-- **Admin Dashboard**: A central place for admins to oversee all tasks and manage task templates with a modern sidebar layout
-- **Interactive Leaderboard**: Click any member row to navigate directly to their task board
-- **RSpec Test Suite**: A solid testing foundation to ensure application stability
+This application follows a modern, modular Sinatra architecture. Key features are encapsulated into self-contained **Plugins** located in the `plugins/` directory.
 
-## Technology Stack
+- **Admin Plugin**: The first major feature to be extracted as a plugin. It contains all the routes, views, and assets for the admin back-end.
 
-- **Backend**: Ruby 3.3+ with Sinatra
-- **Database**: SQLite3
-- **Authentication**: `bcrypt` for secure admin passwords
-- **Frontend**: ERB (Embedded Ruby) with Bootstrap 5 and vanilla JavaScript
-- **Testing**: RSpec, Capybara, and SimpleCov for test coverage
+For more detailed information, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Getting Started
 
 ### Prerequisites
 
-- Ruby (version 3.3.0 or newer is recommended)
-- Bundler (`gem install bundler`)
+- Ruby (see `.ruby-version` for details)
+- Bundler
 
-### Installation & Setup
+### Installation
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd household
-    ```
-
-2.  **Install dependencies:**
-    ```bash
+1.  Clone the repository.
+2.  Install dependencies:
+    ```sh
     bundle install
     ```
 
-3.  **Run the application:**
-    This command will also create the database and run the initial seed data.
-    ```bash
-    bundle exec ruby app.rb
+### Database Setup
+
+The application uses `sinatra-activerecord` and Rake tasks to manage the database schema and data migrations.
+
+1.  **Create the database:** This will create the database defined in `config/database.yml` for the current `RACK_ENV`.
+    ```sh
+    bundle exec rake db:create
+    ```
+2.  **Run Schema Migrations:** This will create all the necessary tables.
+    ```sh
+    bundle exec rake db:migrate
+    ```
+3.  **Run Data Migrations:** This will run any pending data migrations, such as creating the initial admin user.
+    ```sh
+    bundle exec rake db:data:migrate
+    ```
+4.  **(Optional) Seed the database:** To populate the application with sample data (members, task templates, etc.), run the seed task.
+    ```sh
+    bundle exec rake db:seed
     ```
 
-4.  **Access the application:**
-    - **Member Login**: Open your browser to `http://localhost:4567`
-    - **Admin Login**: Navigate to `http://localhost:4567/admin/login`
+### Running the Application
 
-### Default Credentials
+To run the application locally, use the Puma rack server:
 
--   **Username**: `admin`
--   **Password**: `admin123`
+```sh
+bundle exec puma
+```
+
+The application will be available at `http://localhost:9292`.
 
 ### Running Tests
 
-To run the RSpec test suite and generate a coverage report:
+To run the test suite, use the provided script. This is the required method as it ensures the test database is correctly prepared before the tests run.
 
-```bash
-bundle exec rspec
-```
-Coverage reports are generated in the `coverage/` directory.
-
-**Current Status**: The test suite is stable with comprehensive coverage of all core functionality.
-
-## Project Structure
-
-The application follows a modular structure for better organization and maintainability:
-
-```
-├── app.rb              # Main Sinatra application file, loads all components
-├── config.ru           # Rackup file for deployment
-├── Gemfile             # Ruby gem dependencies
-├── README.md           # You are here!
-├── db/
-│   └── schema.rb       # Database schema definition
-├── helpers/
-│   ├── application_helper.rb # Core helpers (auth, flash messages)
-│   └── data_helper.rb      # Data and statistics helpers
-├── models/             # ActiveRecord models
-│   ├── admin.rb
-│   ├── member.rb
-│   ├── task.rb
-│   ├── task_template.rb
-│   └── task_completion.rb
-├── routes/             # Sinatra route definitions
-│   ├── admin.rb
-│   ├── members.rb
-│   └── tasks.rb
-├── spec/               # RSpec tests
-│   ├── features/
-│   ├── models/
-│   └── requests/
-├── public/
-│   └── styles.css      # Consolidated CSS styles
-└── views/              # ERB templates
-    ├── admin/          # Views for the admin section (with sidebar layout)
-    ├── common/         # Shared partials (avatar_selector, task_card)
-    ├── member/         # Views for the member section
-    └── layout.erb      # Main application layout
+```sh
+bin/rspec
 ```
 
-## Features
+To run a single test file:
 
-### 🎯 Task Template System
-- **Reusable Templates**: Create task templates that all members can access
-- **Self-Assignment**: Members can assign templates to themselves with one click
-- **Multiple Assignments**: Multiple members can work on the same type of task simultaneously
-- **Template Management**: Admins can create, edit, and delete task templates
-- **Generic Tasks**: Bronze-level "Generic Task" template for custom chores
-
-### 🎯 Tasks Board Interface
-- **Modern UI**: Clean, responsive design with Bootstrap 5.
-- **Kanban Board**: A drag-and-drop interface for managing tasks, with columns for To Do, In Progress, and Done.
-- **Template Cards**: Consistent design with regular task cards for seamless UX
-- **Equal-Height Columns**: All columns on the board dynamically adjust to the same height for a clean, symmetrical layout.
-- **Visual Task Management**: Color-coded difficulty levels and user assignments.
-- **Compact Cards**: Optimized task cards for better information density.
-
-### 👥 User Management
-- **Role-based Access**: Admin and regular user roles.
-- **Family Profiles**: Add household members with customizable avatars
-- **Secure Authentication**: BCrypt password hashing
-- **Modern Admin Interface**: Sidebar navigation for better organization
-
-### 📊 Comprehensive Reporting
-- **Points System**: Tasks earn points based on difficulty (Bronze=1, Silver=3, Gold=5)
-- **Performance Tracking**: Completion rates and progress monitoring
-- **Interactive Leaderboard**: Click any member row to view their task board
-- **Visual Charts**: Interactive charts showing points distribution and completion rates
-
-### 🎁 Reward System
-- **Quantifiable Progress**: Track points earned over time periods
-- **Smart Suggestions**: Age-appropriate reward recommendations
-- **Performance Levels**: Excellent, Good, Needs Improvement, Poor ratings
-
-## Performance Benefits
-
-✅ **Lightweight**: Minimal dependencies, fast startup
-✅ **Low Memory**: SQLite database, efficient queries
-✅ **Responsive**: Works on tablets, phones, and old computers
-✅ **Offline Capable**: No external API dependencies
-✅ **Optimized CSS**: Consolidated styles for faster loading
-
-## Deployment on Raspberry Pi
-
-### Option 1: Direct Ruby Execution
-```bash
-# Install Ruby on Raspberry Pi
-sudo apt update
-sudo apt install ruby ruby-bundler sqlite3
-
-# Navigate to app directory
-cd /path/to/household
-
-# Install gems
-bundle install
-
-# Run the app
-bundle exec ruby app.rb
+```sh
+bin/rspec spec/features/your_spec_file.rb
 ```
 
-### Option 2: Production with Puma
-```bash
-# Install gems including puma
-bundle install
+## How to Contribute
 
-# Run with puma server
-bundle exec puma -p 4567
-```
-
-### Option 3: Systemd Service (Recommended)
-1. Create service file:
-   ```bash
-   sudo nano /etc/systemd/system/household.service
-   ```
-
-2. Add content:
-   ```ini
-   [Unit]
-   Description=Household App
-   After=network.target
-
-   [Service]
-   Type=simple
-   User=pi
-   WorkingDirectory=/home/pi/household
-   ExecStart=/usr/bin/bundle exec puma -p 4567
-   Restart=always
-   RestartSec=10
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-
-3. Enable and start the service:
-   ```bash
-   sudo systemctl enable household
-   sudo systemctl start household
-   ```
-
-## Database Management & Migrations
-
-- **Migrations First**: All database changes are managed via ActiveRecord migrations in `db/migrate/`. Never edit `db/schema.rb` directly—this file is auto-generated after migrations run.
-- **Setup/Reset**:
-  - To create or reset the database, use:
-    ```bash
-    RACK_ENV=development bundle exec rake db:drop db:create db:migrate
-    RACK_ENV=development bundle exec rake db:seed
-    ```
-    For test or production, set `RACK_ENV` accordingly.
-- **Resilient Migrations**: Migrations are written to be idempotent and safe to run multiple times or in production. They check for table/column existence before making changes.
-- **Seeding**: All seed data is managed in `db/seeds.rb`. Run:
-    ```bash
-    bundle exec rake db:seed
-    ```
-    to populate the database with default admins, members, categories, and task templates.
-
-## Development
-
-### Database Migrations
-
-- **Never edit `db/schema.rb` directly.**
-- To modify the database structure:
-  1. Create a new migration in `db/migrate/` (see existing files for examples).
-  2. Run:
-     ```bash
-     bundle exec rake db:migrate
-     ```
-  3. (Optional) Seed data with:
-     ```bash
-     bundle exec rake db:seed
-     ```
-- The `db/schema.rb` file is auto-generated after migrations and is for reference only.
-
-### Seeding
-
-- All seed logic is in `db/seeds.rb`.
-- To seed the database:
-  ```bash
-  bundle exec rake db:seed
-  ```
-- This will create default admins, members, categories, and task templates.
-
-### Adding New Features
-
-1. **Models**: Add new ActiveRecord models in the `models/` directory
-2. **Routes**: Add new routes in the appropriate file in `routes/`
-3. **Views**: Add new ERB templates in the `views/` directory
-4. **Tests**: Add corresponding RSpec tests in the `spec/` directory
-
-### Code Style
-
-- Follow Ruby conventions
-- Use meaningful variable and method names
-- Add comments for complex logic
-- Write tests for new functionality
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+1.  Fork the repository.
+2.  Create your feature branch (`git checkout -b my-new-feature`).
+3.  Commit your changes (`git commit -am 'Add some feature'`).
+4.  Push to the branch (`git push origin my-new-feature`).
+5.  Create a new Pull Request.
 
 ## License
 

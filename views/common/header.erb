@@ -6,37 +6,47 @@
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
             <div class="navbar-nav ms-auto align-items-center">
-                <% current_path = request.path_info %>
+                <%
+                    # --- Build Navigation ---
+                    current_path = request.path_info
+                    nav_items = []
 
-                <!-- Common Links for everyone -->
-                <% unless current_path == '/' %>
-                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                <% end %>
-                <% unless current_path == '/leaderboard' %>
-                    <a class="nav-link" href="/leaderboard"><i class="fas fa-trophy"></i> Leaderboard</a>
-                <% end %>
+                    # 1. Common Links
+                    nav_items << { href: "/", icon: 'fa-home', text: 'Home' } unless current_path == '/'
+                    nav_items << { href: "/leaderboard", icon: 'fa-trophy', text: 'Leaderboard' } unless current_path == '/leaderboard'
 
-                <!-- Links for a selected member -->
-                <% if member_selected? %>
-                    <a class="nav-link" href="/profile/edit"><i class="fas fa-user-edit"></i> Profile</a>
-                <% end %>
+                    # 2. Member-specific links
+                    if member_selected?
+                        nav_items << { href: "/profile/edit", icon: 'fa-user-edit', text: 'Profile' }
+                    end
 
-                <!-- Links for a logged-in Admin -->
-                <% if admin_logged_in? %>
-                    <div class="nav-item ms-lg-3">
-                        <div class="d-flex align-items-center">
-                            <a class="btn btn-sm btn-secondary" href="/admin/dashboard" role="button">
-                                <i class="fas fa-user-shield"></i> Admin
-                            </a>
-                            <a class="nav-link ms-2" href="/admin/logout" title="Logout Admin">
-                                <i class="fas fa-sign-out-alt"></i>
+                    # 3. Append plugin-provided links (already in @nav_links)
+                    nav_items.concat(@nav_links || [])
+
+                    # 4. Final fallback link (Admin Login)
+                    unless admin_logged_in? || member_selected? || current_path.start_with?('/admin')
+                        nav_items << { href: "/admin/login", icon: 'fa-user-shield', text: 'Admin' }
+                    end
+                %>
+
+                <%# --- Render Navigation --- %>
+                <% nav_items.each do |item| %>
+                    <% if item[:type] == :button %>
+                        <div class="nav-item ms-lg-3">
+                           <a class="btn btn-sm btn-secondary" href="<%= item[:href] %>" role="button">
+                                <i class="fas <%= item[:icon] %>"></i> <%= item[:text] %>
                             </a>
                         </div>
-                    </div>
-                <% elsif !member_selected? %>
-                    <!-- Show Admin login only if no member is selected and no admin is logged in -->
-                     <% unless current_path.start_with?('/admin') %>
-                        <a class="nav-link" href="/admin/login"><i class="fas fa-user-shield"></i> Admin</a>
+                    <% elsif item[:type] == :icon %>
+                         <div class="nav-item">
+                            <a class="nav-link ms-2" href="<%= item[:href] %>" title="<%= item[:title] %>">
+                                <i class="fas <%= item[:icon] %>"></i>
+                            </a>
+                        </div>
+                    <% else %>
+                        <a class="nav-link" href="<%= item[:href] %>">
+                            <i class="fas <%= item[:icon] %>"></i> <%= item[:text] %>
+                        </a>
                     <% end %>
                 <% end %>
             </div>

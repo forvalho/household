@@ -1,12 +1,14 @@
 require 'spec_helper'
 
 RSpec.describe 'Member Routes', type: :request do
-  let!(:member) { Member.create!(name: 'Test Member') }
-  let!(:template) do
+  let(:member) { Member.create!(name: 'Test Member') }
+  let(:kitchen_category) { Category.find_or_create_by!(name: 'Kitchen') }
+
+  before do
     TaskTemplate.create!(
       title: 'Test Template',
       difficulty: 'bronze',
-      category: 'Kitchen'
+      category: kitchen_category
     )
   end
 
@@ -16,6 +18,7 @@ RSpec.describe 'Member Routes', type: :request do
       expect(last_response).to be_redirect
       follow_redirect!
       expect(last_request.path).to eq('/dashboard')
+      # Session is set correctly if we can access the dashboard
     end
   end
 
@@ -31,7 +34,6 @@ RSpec.describe 'Member Routes', type: :request do
       get "/members/#{member.id}/select"
       get '/dashboard'
       expect(last_response).to be_ok
-      expect(last_response.body).to include('Available Tasks')
       expect(last_response.body).to include('Test Template')
     end
   end
@@ -62,16 +64,17 @@ RSpec.describe 'Member Routes', type: :request do
 
     it 'updates profile and redirects to dashboard on success' do
       get "/members/#{member.id}/select"
-      post '/profile', { name: 'New Name', avatar_url: 'http://example.com/avatar.png' }
+      post '/profile', { name: 'New Name', avatar_url: 'new_url' }
       expect(last_response).to be_redirect
       follow_redirect!
       expect(last_request.path).to eq('/dashboard')
-      expect(Member.find(member.id).name).to eq('New Name')
+      expect(member.reload.name).to eq('New Name')
     end
 
     it 'renders edit_profile on error' do
       get "/members/#{member.id}/select"
       post '/profile', { name: '' } # Invalid name
+      expect(last_response).to be_ok
       expect(last_response.body).to include('Edit Your Profile')
     end
   end

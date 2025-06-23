@@ -24,7 +24,7 @@ class TaskTemplate < ActiveRecord::Base
   end
 
   # Create a new task from this template for a specific member
-  def create_task_for(member, custom_title: nil, custom_difficulty: nil)
+  def create_task_for(member:, custom_title: nil, custom_difficulty: nil)
     task_attributes = {
       description: description,
       category: category,
@@ -37,13 +37,13 @@ class TaskTemplate < ActiveRecord::Base
       # For Generic Task, use the custom title and difficulty
       task_attributes.merge!(
         title: custom_title,
-        difficulty: custom_difficulty || difficulty
+        difficulty: custom_difficulty || self.difficulty
       )
     else
       # For regular templates, use the template's values
       task_attributes.merge!(
-        title: title,
-        difficulty: difficulty
+        title: self.title,
+        difficulty: self.difficulty
       )
     end
 

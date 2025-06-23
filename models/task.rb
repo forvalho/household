@@ -5,6 +5,7 @@ class Task < ActiveRecord::Base
   belongs_to :category
 
   validates :title, presence: true
+  validates :member, presence: true
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }
   validates :status, inclusion: { in: %w[todo in_progress done] }
 

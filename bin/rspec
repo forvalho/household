@@ -1,5 +1,10 @@
 #!/bin/bash
 export RACK_ENV=test
 
+# Ensure the test database is up-to-date
+echo "==> Preparing test database..."
+bundle exec rake db:prepare
+
 # Run the tests
+echo "==> Running RSpec..."
 bundle exec rspec "$@"

@@ -8,7 +8,7 @@ module DataHelper
     completions.sum { |tc| tc.task.points_value }
   end
 
-  def calculate_member_medals(member, start_date)
+  def calculate_member_medals(member, start_date = 30.days.ago)
     medals = { gold: 0, silver: 0, bronze: 0 }
     completions = member.task_completions.joins(:task).where('completed_at >= ?', start_date)
     completions.each do |completion|

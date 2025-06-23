@@ -1,5 +1,16 @@
 require 'spec_helper'
 
+# Helper tester for application helper tests
+class HelperTester
+  include ApplicationHelper
+  include Household::Admin::Helpers
+
+  # Mock session for flash messages if needed
+  def session
+    @session ||= {}
+  end
+end
+
 RSpec.describe ApplicationHelper, type: :helper do
   let(:helper) { HelperTester.new }
   let(:member) { Member.create!(name: 'Test Member') }

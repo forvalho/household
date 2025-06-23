@@ -16,14 +16,14 @@ require_relative '../app'
 Dir[File.join(__dir__, '..', 'helpers', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, '..', 'models', '*.rb')].each { |file| require file }
 
-Capybara.app = Sinatra::Application
+Capybara.app = App
 
 RSpec.configure do |config|
   config.include Capybara::DSL
   config.include Rack::Test::Methods
 
   def app
-    Sinatra::Application
+    App
   end
 
   # Clean up the test database before each run
@@ -46,5 +46,12 @@ RSpec.configure do |config|
   # Helper method for feature specs
   def login_as(member)
     visit "/members/#{member.id}/select"
+  end
+
+  # Helper method for admin login in request specs
+  def login_as_admin(admin)
+    # Set the session directly for request specs
+    rack_session = { admin_id: admin.id }
+    env 'rack.session', rack_session
   end
 end

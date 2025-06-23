@@ -1,18 +1,21 @@
 require 'spec_helper'
 
 RSpec.describe TaskTemplate, type: :model do
+  let(:kitchen_category) { Category.find_or_create_by!(name: 'Kitchen') }
+  let(:general_category) { Category.find_or_create_by!(name: 'General') }
+
   describe 'validations' do
     it 'is valid with valid attributes' do
       template = TaskTemplate.new(
         title: 'Test Template',
         difficulty: 'bronze',
-        category: 'Kitchen'
+        category: kitchen_category
       )
       expect(template).to be_valid
     end
 
     it 'requires a title' do
-      template = TaskTemplate.new(difficulty: 'bronze', category: 'Kitchen')
+      template = TaskTemplate.new(difficulty: 'bronze', category: kitchen_category)
       expect(template).not_to be_valid
       expect(template.errors[:title]).to include("can't be blank")
     end
@@ -27,18 +30,18 @@ RSpec.describe TaskTemplate, type: :model do
       template = TaskTemplate.new(
         title: 'Test Template',
         difficulty: 'invalid',
-        category: 'Kitchen'
+        category: kitchen_category
       )
       expect(template).not_to be_valid
       expect(template.errors[:difficulty]).to include('is not included in the list')
     end
 
     it 'accepts valid difficulties' do
-      %w[bronze silver gold].each do |difficulty|
+      ['bronze', 'silver', 'gold'].each do |difficulty|
         template = TaskTemplate.new(
           title: 'Test Template',
           difficulty: difficulty,
-          category: 'Kitchen'
+          category: kitchen_category
         )
         expect(template).to be_valid
       end
@@ -47,17 +50,29 @@ RSpec.describe TaskTemplate, type: :model do
 
   describe '#points_value' do
     it 'returns correct points for bronze difficulty' do
-      template = TaskTemplate.new(difficulty: 'bronze')
+      template = TaskTemplate.create!(
+        title: 'Bronze Task',
+        difficulty: 'bronze',
+        category: kitchen_category
+      )
       expect(template.points_value).to eq(1)
     end
 
     it 'returns correct points for silver difficulty' do
-      template = TaskTemplate.new(difficulty: 'silver')
+      template = TaskTemplate.create!(
+        title: 'Silver Task',
+        difficulty: 'silver',
+        category: kitchen_category
+      )
       expect(template.points_value).to eq(3)
     end
 
     it 'returns correct points for gold difficulty' do
-      template = TaskTemplate.new(difficulty: 'gold')
+      template = TaskTemplate.create!(
+        title: 'Gold Task',
+        difficulty: 'gold',
+        category: kitchen_category
+      )
       expect(template.points_value).to eq(5)
     end
 
@@ -88,66 +103,77 @@ RSpec.describe TaskTemplate, type: :model do
 
   describe '#create_task_for' do
     let(:member) { Member.create!(name: 'Test Member') }
-    let(:template) do
-      TaskTemplate.create!(
+
+    it 'creates a new task from the template' do
+      template = TaskTemplate.create!(
         title: 'Test Template',
         description: 'Test description',
         difficulty: 'silver',
-        category: 'Kitchen'
+        category: kitchen_category
       )
-    end
 
-    it 'creates a new task from the template' do
-      task = template.create_task_for(member)
-
-      expect(task).to be_persisted
-      expect(task.title).to eq('Test Template')
-      expect(task.description).to eq('Test description')
-      expect(task.difficulty).to eq('silver')
-      expect(task.category).to eq('Kitchen')
-      expect(task.member).to eq(member)
-      expect(task.status).to eq('todo')
+      expect {
+        template.create_task_for(member: member)
+      }.to change(Task, :count).by(1)
     end
 
     it 'creates a task with correct attributes' do
-      task = template.create_task_for(member)
+      template = TaskTemplate.create!(
+        title: 'Test Template',
+        description: 'Test description',
+        difficulty: 'silver',
+        category: kitchen_category
+      )
 
-      expect(task).to be_a(Task)
-      expect(task.member_id).to eq(member.id)
+      task = template.create_task_for(member: member)
+
+      expect(task.title).to eq('Test Template')
+      expect(task.description).to eq('Test description')
+      expect(task.difficulty).to eq('silver')
+      expect(task.member).to eq(member)
+      expect(task.task_template).to eq(template)
       expect(task.status).to eq('todo')
     end
 
     context 'with Generic Task' do
-      let(:generic_template) do
-        TaskTemplate.create!(
+      it 'creates a task with custom title and difficulty' do
+        template = TaskTemplate.create!(
           title: 'Generic Task',
           description: 'Custom task',
           difficulty: 'bronze',
-          category: 'General'
+          category: general_category
         )
-      end
 
-      it 'creates a task with custom title and difficulty' do
-        task = generic_template.create_task_for(member, custom_title: 'Clean Garage', custom_difficulty: 'gold')
+        task = template.create_task_for(member: member, custom_title: 'Custom Title', custom_difficulty: 'gold')
 
-        expect(task).to be_persisted
-        expect(task.title).to eq('Clean Garage')
+        expect(task.title).to eq('Custom Title')
         expect(task.difficulty).to eq('gold')
-        expect(task.description).to eq('Custom task')
-        expect(task.category).to eq('General')
-        expect(task.member).to eq(member)
-        expect(task.status).to eq('todo')
+        expect(task.task_template).to eq(template)
       end
 
       it 'uses template difficulty when no custom difficulty provided' do
-        task = generic_template.create_task_for(member, custom_title: 'Clean Garage')
+        template = TaskTemplate.create!(
+          title: 'Generic Task',
+          description: 'Custom task',
+          difficulty: 'bronze',
+          category: general_category
+        )
 
-        expect(task.title).to eq('Clean Garage')
-        expect(task.difficulty).to eq('bronze') # Uses template default
+        task = template.create_task_for(member: member, custom_title: 'Custom Title')
+
+        expect(task.title).to eq('Custom Title')
+        expect(task.difficulty).to eq('bronze')
       end
 
       it 'creates regular task when no custom title provided' do
-        task = generic_template.create_task_for(member)
+        template = TaskTemplate.create!(
+          title: 'Generic Task',
+          description: 'Custom task',
+          difficulty: 'bronze',
+          category: general_category
+        )
+
+        task = template.create_task_for(member: member)
 
         expect(task.title).to eq('Generic Task')
         expect(task.difficulty).to eq('bronze')

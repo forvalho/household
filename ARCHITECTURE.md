@@ -140,4 +140,100 @@ Routes are organized into separate files by feature:
 **Action:**
 - All future code, scripts, and assistant actions must prompt for confirmation before any destructive database operation.
 
+## Architectural Decisions
+
+### Admin Area as a Sinatra Extension Plugin
+
+**Decision:** The "Admin" feature set has been decoupled from the main application into a self-contained Sinatra Extension, located in the `plugins/admin/` directory.
+
+**Context:** As the application grew, the admin-specific routes, views, and logic were intertwined with the core member-facing application, making the code harder to maintain and reason about. We wanted to create a clear separation of concerns.
+
+**Implementation:**
+- A new top-level `plugins/` directory was created to house extensions.
+- All admin routes, views, and specific CSS assets were moved into `plugins/admin/`.
+- The plugin is loaded and registered in the main `app.rb` file (`register Household::Admin`).
+- The plugin is responsible for its own concerns, including serving its own assets and registering its navigation links with the main application via a shared `@nav_links` collection.
+
+**What is Not Decoupled (And Why):**
+- **Database Migrations:** The schema migration for the `admins` table remains in the main `db/migrate` folder.
+- **Data Migrations/Seeds:** The data migration to create the initial admin user is in the main `db/data` folder.
+- **Tests:** All specs for the admin feature are still within the main `spec/` directory.
+
+**Reasoning for a Partial Decoupling:** Our primary goal was to achieve a clean separation of the *runtime application logic*. While a full decoupling (including migrations and tests, as if for a distributable gem) is possible, it would add significant complexity (custom Rake tasks, test runner configurations) for little practical benefit for a single, self-contained application. The current approach provides excellent logical separation without unnecessary overhead.
+
+### Standardized Test Execution
+
+**Decision:** All tests must be run using the `bin/rspec` script.
+
+**Context:** To ensure a reliable and consistent test environment, especially when dealing with database schemas, we needed to standardize the test execution process.
+**Implementation:** The `bin/rspec` script was created to automatically set `RACK_ENV=test` and, most importantly, run `bundle exec rake db:prepare` before executing the `rspec` command. This guarantees that the test database is always created and migrated to the latest version before any tests are run, preventing a common source of test failures.
+
+## Plugin Architecture
+
+### Admin Plugin Structure
+The admin functionality is encapsulated in a self-contained plugin located in `plugins/admin/`. This follows the principle of separation of concerns and allows for better maintainability.
+
+**Structure:**
+- `plugins/admin/admin.rb` - Main plugin registration and routes
+- `plugins/admin/helpers.rb` - Admin-specific helper methods
+- `plugins/admin/views/` - Admin-specific ERB templates
+- `plugins/admin/public/` - Admin-specific CSS assets
+
+**Helper Methods:**
+Admin helper methods (`admin_logged_in?`, `current_admin`, `require_admin_login`) are defined in their own module (`Household::Admin::Helpers`) and included via `app.helpers Household::Admin::Helpers`. This keeps admin functionality completely isolated from the main application.
+
+### Navigation Registry System
+The main application initializes an `@nav_links` array on each request. Plugins can programmatically add their navigation links to this collection. The main header simply renders the links provided in the registry.
+
+**Trade-offs:**
+- ✅ Clean separation between main app and plugins
+- ✅ Plugins can add navigation without modifying main app
+- ❌ Slightly more complex than direct navigation in views
+- ❌ Migrations and tests remain coupled to main app (avoiding over-engineering)
+
+## Method Signatures
+
+### Named Arguments Preference
+We prefer named arguments over positional arguments for better code clarity and maintainability. This is especially important for methods that may have multiple optional parameters.
+
+**Example:**
+```ruby
+# Preferred - All arguments named
+def create_task_for(member:, custom_title: nil, custom_difficulty: nil)
+  # implementation
+end
+
+# Avoid - Mixed positional and named
+def create_task_for(member, custom_title: nil, custom_difficulty: nil)
+  # implementation
+end
+
+# Avoid - All positional
+def create_task_for(member, title, difficulty)
+  # implementation
+end
+```
+
+**Rationale:**
+- Makes method calls more readable
+- Reduces errors from parameter order confusion
+- Easier to add new optional parameters in the future
+- Self-documenting code
+
+## Route Loading Strategy
+
+### Single App Class with Route Files
+All routes are defined within a single `App` class. Route files are loaded within the App class context and contain only route definitions, not class definitions.
+
+**Structure:**
+- `app.rb` - Main App class definition
+- `routes/` - Route definitions loaded into App class
+- `plugins/` - Self-contained plugins registered with App
+
+**Benefits:**
+- Consistent routing context
+- Shared helpers and configuration
+- Clean separation of concerns
+- Easy to understand and maintain
+
 ---
