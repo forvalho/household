@@ -141,3 +141,18 @@ post '/custom-tasks' do
   set_flash('success', "Custom task '#{task.title}' created and assigned to #{member.name}!")
   redirect '/dashboard'
 end
+
+# Member assigns themselves a task template
+post '/task-templates/:id/assign' do
+  redirect '/' unless member_selected?
+  template = TaskTemplate.find(params[:id])
+  member = current_member
+  if template.generic_task? && params[:custom_title].present?
+    task = template.create_task_for(member: member, custom_title: params[:custom_title], custom_difficulty: params[:custom_difficulty])
+    set_flash('success', "Custom task '#{params[:custom_title]}' assigned to you!")
+  else
+    task = template.create_task_for(member: member)
+    set_flash('success', "Task '#{template.title}' assigned to you!")
+  end
+  redirect '/dashboard'
+end

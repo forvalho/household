@@ -9,6 +9,7 @@ module Household
       # --- Configuration ---
       # Use Household::ROOT to get the plugin's views path
       plugin_views_path = File.join(Household::ROOT, 'plugins', 'admin', 'views')
+      app.set :plugin_views_path, plugin_views_path
 
       # Serve static files (CSS) from this plugin's public folder
       app.use Rack::Static, urls: ['/admin-assets'], root: File.expand_path('../public', __FILE__)
@@ -16,12 +17,20 @@ module Household
       # --- Helpers ---
       app.helpers Household::Admin::Helpers
 
+      # This filter runs for all admin pages and prepares the sidebar
+      app.before '/admin/*' do
+        # Don't show sidebar on the login page
+        pass if request.path_info == '/admin/login'
+
+        # Set variables for the main layout to use
+        @wrapper_class = 'admin-content-wrapper'
+        @sidebar_html = render_sidebar
+        @main_content_class = 'admin-main-content'
+      end
+
+      # This filter runs on every request to add the admin nav links if logged in
       app.before do
-        @nav_links ||= []
-        if admin_logged_in?
-          @nav_links << { type: :button, text: 'Admin', href: '/admin/dashboard', icon: 'fa-user-shield' }
-          @nav_links << { type: :icon, href: '/admin/logout', icon: 'fa-sign-out-alt', title: 'Logout Admin' }
-        end
+        add_admin_nav_links
       end
 
       # --- Routes ---
@@ -58,13 +67,13 @@ module Household
           @members = Member.where(active: true).order(:name)
           @tasks_by_member = Task.includes(:member).order(:created_at).group_by(&:member_id)
           @tasks_by_status = Task.order(:created_at).group_by(&:status)
-          erb :dashboard, views: plugin_views_path, layout: :layout
+          erb :dashboard, views: plugin_views_path, layout: :layout, layout_options: { views: File.join(Household::ROOT, 'views') }
         end
 
         # Member Management
         get '/members' do
           @members = Member.all
-          erb :members, views: plugin_views_path, layout: :layout
+          erb :members, views: plugin_views_path, layout: :layout, layout_options: { views: File.join(Household::ROOT, 'views') }
         end
 
         post '/members' do
@@ -90,7 +99,7 @@ module Household
         # Admin Management
         get '/admins' do
           @admins = ::Admin.all
-          erb :admins, views: plugin_views_path, layout: :layout
+          erb :admins, views: plugin_views_path, layout: :layout, layout_options: { views: File.join(Household::ROOT, 'views') }
         end
 
         post '/admins' do
@@ -124,13 +133,13 @@ module Household
             stat[:performance_score] = max_points > 0 ? ((stat[:points] / max_points) * 100).round : 0
           end
 
-          erb :reports, views: plugin_views_path, layout: :layout
+          erb :reports, views: plugin_views_path, layout: :layout, layout_options: { views: File.join(Household::ROOT, 'views') }
         end
 
         # --- Task Template Management ---
         get '/task-templates' do
           @templates = TaskTemplate.all.order(:category, :title)
-          erb :task_templates, views: plugin_views_path, layout: :layout
+          erb :task_templates, views: plugin_views_path, layout: :layout, layout_options: { views: File.join(Household::ROOT, 'views') }
         end
 
         post '/task-templates' do
@@ -164,48 +173,19 @@ module Household
           redirect '/admin/task-templates'
         end
 
-        # Assign a task template to a member (creates a new task from template)
+        # Assign a task template to a member (admin only)
         post '/task-templates/:id/assign' do
+          require_admin_login
           template = TaskTemplate.find(params[:id])
-
-          if admin_logged_in?
-            # Admin can assign to any member
-            member = Member.find(params[:member_id])
-            if template.generic_task? && params[:custom_title].present?
-              task = template.create_task_for(member: member, custom_title: params[:custom_title], custom_difficulty: params[:custom_difficulty])
-              set_flash('success', "Custom task '#{params[:custom_title]}' assigned to #{member.name}!")
-            else
-              task = template.create_task_for(member: member)
-              set_flash('success', "Task '#{template.title}' assigned to #{member.name}!")
-            end
-          elsif member_selected?
-            # Member can only assign to themselves
-            if params[:member_id].present?
-              if params[:member_id].to_i == current_member.id
-                member = current_member
-              else
-                set_flash('error', 'You can only assign tasks to yourself.')
-                redirect '/dashboard'
-                return
-              end
-            else
-              member = current_member
-            end
-
-            if template.generic_task? && params[:custom_title].present?
-              task = template.create_task_for(member: member, custom_title: params[:custom_title], custom_difficulty: params[:custom_difficulty])
-              set_flash('success', "Custom task '#{params[:custom_title]}' assigned to you!")
-            else
-              task = template.create_task_for(member: member)
-              set_flash('success', "Task '#{template.title}' assigned to you!")
-            end
+          member = Member.find(params[:member_id])
+          if template.generic_task? && params[:custom_title].present?
+            task = template.create_task_for(member: member, custom_title: params[:custom_title], custom_difficulty: params[:custom_difficulty])
+            set_flash('success', "Custom task '#{params[:custom_title]}' assigned to #{member.name}!")
           else
-            set_flash('error', 'You must be logged in to assign tasks.')
-            redirect '/'
-            return
+            task = template.create_task_for(member: member)
+            set_flash('success', "Task '#{template.title}' assigned to #{member.name}!")
           end
-
-          redirect '/dashboard'
+          redirect '/admin/dashboard'
         end
 
         # Admin can assign template to any member

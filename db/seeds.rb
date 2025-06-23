@@ -24,7 +24,8 @@ categories = {
   'General' => Category.find_or_create_by!(name: 'General'),
   'Kitchen' => Category.find_or_create_by!(name: 'Kitchen'),
   'Laundry' => Category.find_or_create_by!(name: 'Laundry'),
-  'Yard' => Category.find_or_create_by!(name: 'Yard')
+  'Yard' => Category.find_or_create_by!(name: 'Yard'),
+  'Pets' => Category.find_or_create_by!(name: 'Pets'),
 }
 
 # Seed task templates
@@ -40,6 +41,9 @@ categories = {
   { title: 'Gardening', difficulty: 'gold', category: categories['Yard'] },
   { title: 'Water backyard', difficulty: 'bronze', category: categories['Yard'] },
   { title: 'Water frontyard', difficulty: 'bronze', category: categories['Yard'] },
+  { title: 'Walk pets', difficulty: 'silver', category: categories['Pets'] },
+  { title: 'Feed pets', difficulty: 'bronze', category: categories['Pets'] },
+  { title: 'Bathe pets', difficulty: 'silver', category: categories['Pets'] },
 ].each do |attrs|
   template = TaskTemplate.find_or_initialize_by(title: attrs[:title])
   template.difficulty = attrs[:difficulty]

@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+export RACK_ENV=production
+
+PORT=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -p|--port)
+      PORT="$2"
+      shift 2
+      ;;
+    *)
+      echo "Usage: $0 [-p PORT]"
+      exit 1
+      ;;
+  esac
+done
+
+echo "==> Migrating schema..."
+bundle exec rake db:migrate
+
+echo "==> Running data migrations..."
+bundle exec rake db:data:migrate
+
+echo "==> Starting Puma..."
+if [[ -n "$PORT" ]]; then
+  exec bundle exec puma -p "$PORT"
+else
+  exec bundle exec puma
+fi

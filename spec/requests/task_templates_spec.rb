@@ -126,61 +126,57 @@ RSpec.describe 'Task Template Routes', type: :request do
   describe 'POST /admin/task-templates/:id/assign' do
     let(:template) { TaskTemplate.first }
 
-    context 'when no member is selected' do
+    context 'when no admin is logged in' do
       it 'redirects to admin login' do
-        post "/admin/task-templates/#{template.id}/assign"
+        post "/admin/task-templates/#{template.id}/assign", { member_id: 1 }
         expect(last_response).to be_redirect
         follow_redirect!
         expect(last_request.path).to eq('/admin/login')
       end
     end
 
-    context 'when member is selected' do
-      before do
-        get "/members/#{member.id}/select"
-      end
-
-      # Temporarily skipped with xit
-      xit 'creates a new task from template for the member' do
-        expect {
-          post "/admin/task-templates/#{template.id}/assign"
-        }.to change(Task, :count).by(1)
-      end
-
-      # Temporarily skipped with xit
-      xit 'creates a new task from template for the member' do
-        post "/admin/task-templates/#{template.id}/assign"
-        expect(last_response).to be_redirect
-        task = Task.last
-        expect(task.member).to eq(member)
-        expect(task.task_template).to eq(template)
-      end
-    end
-  end
-
-  describe 'POST /admin/task-templates/:id/assign-to/:member_id' do
-    let(:template) { TaskTemplate.first }
-
     context 'when admin is logged in' do
+      let(:member) { Member.create!(name: 'Member') }
       before do
         login_as_admin(admin)
       end
 
-      # Temporarily skipped with xit
-      xit 'creates a new task from template for the specified member' do
+      it 'creates a new task from template for the specified member' do
         expect {
-          post "/admin/task-templates/#{template.id}/assign-to/#{member.id}"
+          post "/admin/task-templates/#{template.id}/assign", { member_id: member.id }
         }.to change(Task, :count).by(1)
+        expect(last_response).to be_redirect
+        follow_redirect!
+        expect(last_request.path).to eq('/admin/dashboard')
+      end
+    end
+  end
+
+  describe 'POST /task-templates/:id/assign' do
+    let(:template) { TaskTemplate.first }
+    let(:member) { Member.create!(name: 'Member') }
+
+    context 'when not logged in as member' do
+      it 'redirects to home' do
+        post "/task-templates/#{template.id}/assign"
+        expect(last_response).to be_redirect
+        follow_redirect!
+        expect(last_request.path).to eq('/')
       end
     end
 
-    context 'when not logged in as admin' do
-      # Temporarily skipped with xit
-      xit 'redirects to admin login' do
-        post "/admin/task-templates/#{template.id}/assign-to/#{member.id}"
-        expect(last_response.status).to eq(302)
+    context 'when logged in as member' do
+      before do
+        get "/members/#{member.id}/select"
+      end
+
+      it 'creates a new task from template for the member' do
+        expect {
+          post "/task-templates/#{template.id}/assign"
+        }.to change(Task, :count).by(1)
+        expect(last_response).to be_redirect
         follow_redirect!
-        expect(last_request.path).to eq('/admin/login')
+        expect(last_request.path).to eq('/dashboard')
       end
     end
   end

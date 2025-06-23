@@ -37,7 +37,7 @@ class App < Sinatra::Base
   helpers DataHelper
 
   before do
-    @nav_links = []
+    @nav_links ||= []
   end
 
   # Local helpers

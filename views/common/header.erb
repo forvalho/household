@@ -5,51 +5,51 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <div class="navbar-nav ms-auto align-items-center">
+            <ul class="navbar-nav ms-auto align-items-center">
                 <%
                     # --- Build Navigation ---
                     current_path = request.path_info
                     nav_items = []
 
                     # 1. Common Links
-                    nav_items << { href: "/", icon: 'fa-home', text: 'Home' } unless current_path == '/'
-                    nav_items << { href: "/leaderboard", icon: 'fa-trophy', text: 'Leaderboard' } unless current_path == '/leaderboard'
+                    nav_items << { href: "/", icon: 'fa-home', text: 'Home' }
+                    nav_items << { href: "/leaderboard", icon: 'fa-trophy', text: 'Leaderboard' }
 
                     # 2. Member-specific links
                     if member_selected?
                         nav_items << { href: "/profile/edit", icon: 'fa-user-edit', text: 'Profile' }
                     end
 
-                    # 3. Append plugin-provided links (already in @nav_links)
-                    nav_items.concat(@nav_links || [])
+                    # 3. Append plugin-provided links
+                    if @nav_links.is_a?(Array)
+                        nav_items.concat(@nav_links)
+                    end
 
                     # 4. Final fallback link (Admin Login)
                     unless admin_logged_in? || member_selected? || current_path.start_with?('/admin')
-                        nav_items << { href: "/admin/login", icon: 'fa-user-shield', text: 'Admin' }
+                        nav_items << { type: :button, href: "/admin/login", icon: 'fa-user-shield', text: 'Admin' }
                     end
                 %>
 
                 <%# --- Render Navigation --- %>
                 <% nav_items.each do |item| %>
-                    <% if item[:type] == :button %>
-                        <div class="nav-item ms-lg-3">
-                           <a class="btn btn-sm btn-secondary" href="<%= item[:href] %>" role="button">
+                    <li class="nav-item">
+                        <% if item[:type] == :button %>
+                            <a class="btn btn-sm btn-secondary ms-lg-2 <%= 'active' if item[:href] == current_path %>" href="<%= item[:href] %>" role="button">
                                 <i class="fas <%= item[:icon] %>"></i> <%= item[:text] %>
                             </a>
-                        </div>
-                    <% elsif item[:type] == :icon %>
-                         <div class="nav-item">
-                            <a class="nav-link ms-2" href="<%= item[:href] %>" title="<%= item[:title] %>">
+                        <% elsif item[:type] == :icon %>
+                            <a class="nav-link" href="<%= item[:href] %>" title="<%= item[:title] %>">
                                 <i class="fas <%= item[:icon] %>"></i>
                             </a>
-                        </div>
-                    <% else %>
-                        <a class="nav-link" href="<%= item[:href] %>">
-                            <i class="fas <%= item[:icon] %>"></i> <%= item[:text] %>
-                        </a>
-                    <% end %>
+                        <% else %>
+                            <a class="nav-link <%= 'active' if item[:href] == current_path %>" href="<%= item[:href] %>">
+                                <i class="fas <%= item[:icon] %>"></i> <%= item[:text] %>
+                            </a>
+                        <% end %>
+                    </li>
                 <% end %>
-            </div>
+            </ul>
         </div>
     </div>
 </nav>
