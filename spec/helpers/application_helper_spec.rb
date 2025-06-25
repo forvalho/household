@@ -3,7 +3,7 @@ require 'spec_helper'
 # Helper tester for application helper tests
 class HelperTester
   include ApplicationHelper
-  include Household::Admin::Helpers
+  include AdminHelper
 
   # Mock session for flash messages if needed
   def session

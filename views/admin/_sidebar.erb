@@ -6,6 +6,11 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a class="sidebar-link <%= 'active' if request.path_info == '/admin/custom-tasks' %>" href="/admin/custom-tasks">
+                <i class="fas fa-lightbulb"></i> Custom Tasks
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a class="sidebar-link <%= 'active' if request.path_info == '/admin/task-templates' %>" href="/admin/task-templates">
                 <i class="fas fa-clipboard-list"></i> Task Templates
             </a>

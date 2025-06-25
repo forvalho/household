@@ -104,18 +104,18 @@ post '/tasks/convert-to-template' do
     title: params[:title],
     description: params[:description],
     difficulty: params[:difficulty],
-    category: params[:category]
+    category: Category.find_by(id: params[:category_id])
   )
 
   if template.save
     # Link the original task to the new template
     task.update(task_template_id: template.id)
     set_flash('success', "Task '#{task.title}' converted to template successfully!")
+    redirect '/admin/dashboard'
   else
     set_flash('error', 'Error creating template: ' + template.errors.full_messages.join(', '))
+    redirect '/admin/dashboard'
   end
-
-  redirect '/dashboard'
 end
 
 # Custom task creation

@@ -11,6 +11,8 @@ class Task < ActiveRecord::Base
 
   before_validation :set_default_status, on: :create
 
+  scope :custom, -> { where(task_template_id: nil) }
+
   def points_value
     case difficulty
     when 'bronze' then 1

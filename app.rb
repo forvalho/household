@@ -15,16 +15,10 @@ require_relative 'lib/household'
   Dir[File.join(__dir__, dir, '**', '*.rb')].sort.each { |file| require_relative file }
 end
 
-# --- 2. Load Plugins ---
-require_relative 'plugins/admin/admin'
-
 # --- 3. Define the main Application class ---
 class App < Sinatra::Base
   register Sinatra::Namespace
   register Sinatra::ActiveRecordExtension
-
-  # Register plugins
-  register Household::Admin
 
   # Configuration
   set :database_file, "config/database.yml"
@@ -46,6 +40,7 @@ class App < Sinatra::Base
   # Helpers
   helpers ApplicationHelper
   helpers DataHelper
+  helpers AdminHelper
 
   before do
     @nav_links ||= []
@@ -83,8 +78,7 @@ class App < Sinatra::Base
   # --- Routes ---
   # Load route files within App class context
   Dir[File.join(__dir__, 'routes', '**', '*.rb')].sort.each do |file|
-    next if file.include?('admin.rb') # Skip the old admin routes
-    instance_eval(File.read(file), file)
+    class_eval(File.read(file), file)
   end
 end
 

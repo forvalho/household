@@ -22,7 +22,7 @@ A Sinatra-based web application for managing household chores and tasks among me
 
 This application follows a modern, modular Sinatra architecture. Key features are encapsulated into self-contained **Plugins** located in the `plugins/` directory.
 
-- **Admin Plugin**: The first major feature to be extracted as a plugin. It contains all the routes, views, and assets for the admin back-end.
+- **Admin Area**: The admin interface is fully integrated into the main app, with all routes, views, and assets in the core codebase.
 
 For more detailed information, see [ARCHITECTURE.md](ARCHITECTURE.md).
 

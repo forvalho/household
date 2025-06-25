@@ -109,6 +109,7 @@ end
 
 ### Git & Version Control
 - **Meaningful commits**: Write clear, descriptive commit messages
+- **Commit message accuracy**: Commit messages must be descriptive of the actual staged changes as they stand at the time of commit, and should not reference changes that were added and removed within the same set of changes.
 - **Feature branches**: Create feature branches for new development
 - **Pull requests**: Use pull requests for code review and integration
 
@@ -118,7 +119,7 @@ end
 - **Architecture docs**: Update ARCHITECTURE.md for significant changes
 - **TODO tracking**: Keep TODO.md updated with planned features
 - **Feature completion checklist**: Before considering any feature complete, ensure:
-  - Remove completed items from TODO.md
+  - Move completed items to the "Completed ✅" section in TODO.md (don't delete them)
   - Update README.md with new features/changes
   - Update ARCHITECTURE.md if architectural changes were made
   - All documentation reflects the current state of the implementation
