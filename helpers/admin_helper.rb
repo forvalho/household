@@ -14,12 +14,4 @@ module AdminHelper
   def render_sidebar
     erb :'admin/_sidebar', layout: false
   end
-
-  def add_admin_nav_links
-    @nav_links ||= []
-    if admin_logged_in?
-      @nav_links << { type: :button, text: 'Admin', href: '/admin/dashboard', icon: 'fa-user-shield' }
-      @nav_links << { type: :icon, href: '/admin/logout', icon: 'fa-sign-out-alt', title: 'Logout Admin' }
-    end
-  end
 end

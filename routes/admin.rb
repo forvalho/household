@@ -17,10 +17,6 @@ before '/admin/*' do
   @main_content_class = 'admin-main-content'
 end
 
-before do
-  add_admin_nav_links
-end
-
 namespace '/admin' do
   # Admin Login
   get '/login' do

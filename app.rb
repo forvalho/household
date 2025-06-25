@@ -42,10 +42,6 @@ class App < Sinatra::Base
   helpers DataHelper
   helpers AdminHelper
 
-  before do
-    @nav_links ||= []
-  end
-
   # Local helpers
   helpers do
     def find_member_or_halt(id)

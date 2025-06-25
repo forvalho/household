@@ -20,13 +20,12 @@
                         nav_items << { href: "/profile/edit", icon: 'fa-user-edit', text: 'Profile' }
                     end
 
-                    # 3. Append plugin-provided links
-                    if @nav_links.is_a?(Array)
-                        nav_items.concat(@nav_links)
-                    end
-
-                    # 4. Final fallback link (Admin Login)
-                    unless admin_logged_in? || member_selected? || current_path.start_with?('/admin')
+                    # 3. Admin navigation
+                    if admin_logged_in?
+                        nav_items << { type: :button, href: "/admin/dashboard", icon: 'fa-user-shield', text: 'Admin' }
+                        nav_items << { type: :icon, href: "/admin/logout", icon: 'fa-sign-out-alt', title: 'Logout Admin' }
+                    else
+                        # Show admin login button only if no member selected and not on admin pages
                         nav_items << { type: :button, href: "/admin/login", icon: 'fa-user-shield', text: 'Admin' }
                     end
                 %>
