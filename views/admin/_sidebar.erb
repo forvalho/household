@@ -16,6 +16,11 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a class="sidebar-link <%= 'active' if request.path_info == '/admin/categories' %>" href="/admin/categories">
+                <i class="fas fa-tags"></i> Categories
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a class="sidebar-link <%= 'active' if request.path_info == '/admin/members' %>" href="/admin/members">
                 <i class="fas fa-users"></i> Members
             </a>

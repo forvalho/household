@@ -194,6 +194,52 @@ namespace '/admin' do
     erb :'admin/settings', layout: :layout
   end
 
+  # Category Management
+  get '/categories' do
+    @categories = Category.all.order(:name)
+    erb :'admin/categories', layout: :layout
+  end
+
+  post '/categories' do
+    category = Category.new(
+      name: params[:name],
+      icon: params[:icon],
+      color: params[:color]
+    )
+
+    if category.save
+      set_flash('success', 'Category created successfully!')
+    else
+      set_flash('error', 'Error creating category: ' + category.errors.full_messages.join(', '))
+    end
+    redirect '/admin/categories'
+  end
+
+  put '/categories/:id' do
+    category = Category.find(params[:id])
+    if category.update(
+      name: params[:name],
+      icon: params[:icon],
+      color: params[:color]
+    )
+      set_flash('success', 'Category updated successfully!')
+    else
+      set_flash('error', 'Error updating category: ' + category.errors.full_messages.join(', '))
+    end
+    redirect '/admin/categories'
+  end
+
+  delete '/categories/:id' do
+    category = Category.find(params[:id])
+    if category.task_templates.count == 0 && category.tasks.count == 0
+      category.destroy
+      set_flash('success', 'Category deleted successfully!')
+    else
+      set_flash('error', 'Cannot delete category with associated tasks or templates')
+    end
+    redirect '/admin/categories'
+  end
+
   post '/settings' do
     # Checkbox only sends param if checked
     allow = params[:allow_member_signup] == 'true' || params[:allow_member_signup] == 'on'

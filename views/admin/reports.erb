@@ -204,9 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(pointsCtx, {
         type: 'pie',
         data: {
-            labels: <%= raw @member_stats.map { |s| s[:member].name }.to_json %>,
+            labels: <%= @member_stats.map { |s| s[:member].name }.to_json %>,
             datasets: [{
-                data: <%= raw @member_stats.map { |s| s[:points] }.to_json %>,
+                data: <%= @member_stats.map { |s| s[:points] }.to_json %>,
                 backgroundColor: [
                     '#FF6384',
                     '#36A2EB',
@@ -227,10 +227,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(completionCtx, {
         type: 'bar',
         data: {
-            labels: <%= raw @member_stats.map { |s| s[:member].name }.to_json %>,
+            labels: <%= @member_stats.map { |s| s[:member].name }.to_json %>,
             datasets: [{
                 label: 'Tasks Completed',
-                data: <%= raw @member_stats.map { |s| s[:completions] }.to_json %>,
+                data: <%= @member_stats.map { |s| s[:completions] }.to_json %>,
                 backgroundColor: '#36A2EB'
             }]
         },

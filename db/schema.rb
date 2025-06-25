@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_06_23_190000) do
+ActiveRecord::Schema[8.0].define(version: 2024_06_23_193000) do
   create_table "admins", force: :cascade do |t|
     t.string "username", null: false
     t.string "password_digest", null: false
@@ -22,6 +22,8 @@ ActiveRecord::Schema[8.0].define(version: 2024_06_23_190000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "icon", default: "folder"
+    t.string "color", default: "#6c757d"
   end
 
   create_table "data_migrations", force: :cascade do |t|
