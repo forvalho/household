@@ -177,3 +177,7 @@ end
 - The admin UI (Settings page) allows toggling which DiceBear styles are available.
 - Styles currently in use by any member are locked and cannot be disabled (UI and backend enforced).
 - The avatar selector only shows enabled styles, but always includes the member's current style (even if disabled, marked as such).
+
+### Git & Version Control
+
+**Note:** The authoritative commit message policy is now documented in the Cursor Rules section (.cursorrules). Please refer to that file for the current policy and requirements.

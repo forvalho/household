@@ -109,7 +109,7 @@ end
 
 ### Git & Version Control
 - **Meaningful commits**: Write clear, descriptive commit messages
-- **Commit message accuracy**: Commit messages must be descriptive of the actual staged changes as they stand at the time of commit, and should not reference changes that were added and removed within the same set of changes.
+- **Commit message accuracy**: Commit messages must be descriptive of the actual staged changes as they stand at the time of commit, and should not reference changes that were added and removed within the same set of changes. (This is the authoritative policy; see also ARCHITECTURE.md for reference.)
 - **Feature branches**: Create feature branches for new development
 - **Pull requests**: Use pull requests for code review and integration
 
