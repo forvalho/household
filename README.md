@@ -13,6 +13,7 @@ A Sinatra-based web application for managing household chores and tasks among me
 ## Member Dashboard Features
 
 - **Sidebar with Date Filter & Available Tasks**: The left sidebar contains a collapsible date filter (with presets like Today, This Week, Custom Range, etc.) and a collapsible list of available task templates. The sidebar is narrower for a modern look.
+- **Task Templates Ordering**: Task templates are shown alphabetically by title, with the generic task always at the bottom.
 - **Date Filtering**: Instantly filter your board by date range. The filter auto-submits on change, and custom ranges require both a start and end date. Only custom range params are included in the URL when selected.
 - **Kanban Board**: The main area displays your tasks in a kanban board, grouped by day and status (To Do, In Progress, Done). Empty columns are always shown for clarity.
 - **Collapsible Boxes**: Both the filter and available tasks boxes are collapsible, with chevron toggles and consistent icon styling.

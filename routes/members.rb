@@ -66,7 +66,7 @@ get '/dashboard' do
   @start_date = start_date
   @end_date = end_date
 
-  @task_templates = TaskTemplate.all.order(:category, :title)
+  @task_templates = TaskTemplate.ordered_for_dashboard
   erb :'member/dashboard'
 end
 

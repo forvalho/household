@@ -6,6 +6,10 @@ class TaskTemplate < ActiveRecord::Base
   validates :difficulty, inclusion: { in: %w[bronze silver gold] }
   validates :category, presence: true
 
+  scope :ordered_for_dashboard, -> {
+    all.sort_by { |t| t.generic_task? ? [1, t.title.downcase] : [0, t.title.downcase] }
+  }
+
   def points_value
     case difficulty
     when 'bronze' then 1

@@ -50,7 +50,7 @@ RSpec.describe 'Member Routes', type: :request do
       task2.update!(updated_at: 1.day.ago)
       task3.update!(updated_at: Date.today)
 
-      get '/dashboard'
+      get '/dashboard', { date_filter: 'this_week' }
       expect(last_response).to be_ok
       expect(last_response.body).to include('Task 1')
       expect(last_response.body).to include('Task 2')

@@ -180,4 +180,16 @@ RSpec.describe TaskTemplate, type: :model do
       end
     end
   end
+
+  describe '.ordered_for_dashboard' do
+    it 'orders templates alphabetically by title, with Generic Task at the bottom' do
+      cat = Category.find_or_create_by!(name: 'General')
+      t1 = TaskTemplate.create!(title: 'B Task', difficulty: 'bronze', category: cat)
+      t2 = TaskTemplate.create!(title: 'A Task', difficulty: 'bronze', category: cat)
+      t3 = TaskTemplate.create!(title: 'Generic Task', difficulty: 'bronze', category: cat)
+      t4 = TaskTemplate.create!(title: 'Z Task', difficulty: 'bronze', category: cat)
+      ordered = TaskTemplate.where(id: [t1.id, t2.id, t3.id, t4.id]).ordered_for_dashboard
+      expect(ordered.map(&:title)).to eq(['A Task', 'B Task', 'Z Task', 'Generic Task'])
+    end
+  end
 end
