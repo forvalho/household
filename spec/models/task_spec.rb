@@ -55,6 +55,59 @@ RSpec.describe Task, type: :model do
     it { should have_many(:task_completions) }
   end
 
+  describe 'state machine' do
+    let(:task) { Task.create!(title: 'Test Task', member: member, difficulty: 'bronze', status: 'todo') }
+
+    describe '#valid_status_transitions' do
+      it 'returns correct transitions for todo status' do
+        expect(task.valid_status_transitions).to match_array(%w[in_progress done])
+      end
+
+      it 'returns correct transitions for in_progress status' do
+        task.update!(status: 'in_progress')
+        expect(task.valid_status_transitions).to match_array(%w[done todo])
+      end
+
+      it 'returns empty array for done status' do
+        task.update!(status: 'done')
+        expect(task.valid_status_transitions).to eq([])
+      end
+    end
+
+    describe '#can_transition_to?' do
+      it 'returns true for valid transitions from todo' do
+        expect(task.can_transition_to?('in_progress')).to be true
+        expect(task.can_transition_to?('done')).to be true
+      end
+
+      it 'returns false for invalid transitions from todo' do
+        expect(task.can_transition_to?('todo')).to be false
+      end
+
+      it 'returns true for valid transitions from in_progress' do
+        task.update!(status: 'in_progress')
+        expect(task.can_transition_to?('done')).to be true
+        expect(task.can_transition_to?('todo')).to be true
+      end
+
+      it 'returns false for invalid transitions from done' do
+        task.update!(status: 'done')
+        expect(task.can_transition_to?('todo')).to be false
+        expect(task.can_transition_to?('in_progress')).to be false
+      end
+    end
+
+    describe '#transition_to!' do
+      it 'successfully transitions to valid status' do
+        expect { task.transition_to!('done') }.to change { task.reload.status }.from('todo').to('done')
+      end
+
+      it 'raises error for invalid transition' do
+        expect { task.transition_to!('invalid_status') }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
   describe '#points_value' do
     it 'returns correct points for bronze difficulty' do
       task = Task.create!(title: 'Bronze Task', member: member, difficulty: 'bronze')

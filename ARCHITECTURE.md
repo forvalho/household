@@ -66,7 +66,7 @@ Routes are organized into separate files by feature:
 
 1. **Template Creation**: Admins create reusable task templates
 2. **Task Assignment**: Members assign templates to themselves (creates individual tasks)
-3. **Task Progression**: Tasks move through statuses: todo → in_progress → done
+3. **Task Progression**: Tasks can move flexibly between statuses: todo ↔ in_progress ↔ done (including direct todo → done)
 4. **Task Unassignment**: Tasks are destroyed when unassigned, can be re-picked up from templates
 
 ### Points System
@@ -142,6 +142,25 @@ Routes are organized into separate files by feature:
 
 ## Architectural Decisions
 
+### State Machine in Models
+**Decision:** Task state transitions are managed in the Task model, not in views.
+
+**Context:** Initially, the valid status transitions were hardcoded in the view template, which violated separation of concerns and made the logic harder to test and maintain.
+
+**Implementation:**
+- Added `valid_status_transitions` method to Task model that returns allowed transitions for current status
+- Added `can_transition_to?(new_status)` method for validation
+- Added `transition_to!(new_status)` method for safe state changes
+- Updated view to use `task.valid_status_transitions` instead of hardcoded logic
+- Added comprehensive model tests for state machine functionality
+
+**Benefits:**
+- ✅ Business logic is in the model where it belongs
+- ✅ Easier to test state transitions
+- ✅ Reusable across different views and API endpoints
+- ✅ Clear separation of concerns
+- ✅ More maintainable and extensible
+
 ### Admin Area as a Sinatra Extension Plugin
 
 **Decision:** The "Admin" feature set has been decoupled from the main application into a self-contained Sinatra Extension, located in the `plugins/admin/` directory.
@@ -190,35 +209,6 @@ The main application initializes an `@nav_links` array on each request. Plugins 
 - ✅ Plugins can add navigation without modifying main app
 - ❌ Slightly more complex than direct navigation in views
 - ❌ Migrations and tests remain coupled to main app (avoiding over-engineering)
-
-## Method Signatures
-
-### Named Arguments Preference
-We prefer named arguments over positional arguments for better code clarity and maintainability. This is especially important for methods that may have multiple optional parameters.
-
-**Example:**
-```ruby
-# Preferred - All arguments named
-def create_task_for(member:, custom_title: nil, custom_difficulty: nil)
-  # implementation
-end
-
-# Avoid - Mixed positional and named
-def create_task_for(member, custom_title: nil, custom_difficulty: nil)
-  # implementation
-end
-
-# Avoid - All positional
-def create_task_for(member, title, difficulty)
-  # implementation
-end
-```
-
-**Rationale:**
-- Makes method calls more readable
-- Reduces errors from parameter order confusion
-- Easier to add new optional parameters in the future
-- Self-documenting code
 
 ## Route Loading Strategy
 

@@ -36,4 +36,30 @@ class Task < ActiveRecord::Base
   def custom_task?
     task_template_id.nil?
   end
+
+  # State machine methods
+  def valid_status_transitions
+    case status
+    when 'todo'
+      %w[in_progress done]
+    when 'in_progress'
+      %w[done todo]
+    when 'done'
+      []
+    else
+      []
+    end
+  end
+
+  def can_transition_to?(new_status)
+    valid_status_transitions.include?(new_status)
+  end
+
+  def transition_to!(new_status)
+    if can_transition_to?(new_status)
+      update!(status: new_status)
+    else
+      raise ArgumentError, "Invalid transition from #{status} to #{new_status}"
+    end
+  end
 end

@@ -1,0 +1,186 @@
+# Cursor Rules for Household Task Management App
+
+## Project Overview
+This is a Sinatra-based web application for managing household chores and tasks among family members. The app uses a modular plugin architecture and follows modern Ruby development practices.
+
+## Architectural Compliance
+- **Respect architectural decisions**: Always refer to and follow the architectural decisions documented in `ARCHITECTURE.md`
+- **State machine in models**: Task state transitions must be managed in the Task model, not in views
+- **Plugin architecture**: Follow the established plugin patterns for new features
+- **Route loading strategy**: Use the single App class with route files pattern
+- **Test execution**: Always use the `bin/rspec` script for running tests
+
+## Code Style & Standards
+
+### General Principles
+- Follow Ruby conventions and best practices
+- Use meaningful variable and method names
+- Write clear, readable code with appropriate comments
+- Maintain consistency with existing code patterns
+
+### Method Signatures - Named Arguments Preference
+**Prefer named arguments over positional arguments** for better code clarity and maintainability, especially for methods with multiple optional parameters.
+
+**Example:**
+```ruby
+# Preferred - All arguments named
+def create_task_for(member:, custom_title: nil, custom_difficulty: nil)
+  # implementation
+end
+
+# Avoid - Mixed positional and named
+def create_task_for(member, custom_title: nil, custom_difficulty: nil)
+  # implementation
+end
+
+# Avoid - All positional
+def create_task_for(member, title, difficulty)
+  # implementation
+end
+```
+
+**Rationale:**
+- Makes method calls more readable
+- Reduces errors from parameter order confusion
+- Easier to add new optional parameters in the future
+- Self-documenting code
+
+### Testing Requirements
+- **Comprehensive testing**: All new features must include appropriate tests
+- **Test organization**:
+  - Feature tests in `spec/features/`
+  - Request tests in `spec/requests/`
+  - Model tests in `spec/models/`
+- **Test coverage**: Maintain high test coverage for critical functionality
+- **Test database**: Use the provided `bin/rspec` script to ensure proper test database setup
+- **Test data management**: Clean database between test runs
+- **Coverage reporting**: SimpleCov integration for test coverage tracking
+
+### Database & Models
+- **Validations**: Always include appropriate model validations
+- **Associations**: Use proper ActiveRecord associations
+- **Migrations**: Create migrations for schema changes, data migrations for data changes
+- **Seeds**: Use `db/seeds.rb` for sample data, data migrations for required data
+- **Database deletion policy**: Never delete any database without explicit user confirmation
+
+### Frontend & Views
+- **Bootstrap**: Use Bootstrap classes for styling and layout
+- **FontAwesome**: Use FontAwesome icons for UI elements
+- **Responsive design**: Ensure views work on different screen sizes
+- **Accessibility**: Consider accessibility in UI design
+- **Modal dialogs**: Use for task creation and custom task assignment
+
+## Task Management Specific Rules
+
+### Task State Management
+- **State machine in model**: Task state transitions are managed in the Task model, not in views
+- **Flexible state transitions**: Tasks can move between states as needed (todo ↔ in_progress ↔ done)
+- **Direct completion**: Tasks can be moved directly from "todo" to "done" without going through "in_progress"
+- **Permission-based actions**: Only admins or assigned members can change task status
+- **Status validation**: Ensure task status changes are properly validated using model methods
+
+### Task Assignment
+- **Member assignment**: Tasks can be assigned to specific members
+- **Admin override**: Admins can assign tasks to any member
+- **Self-assignment**: Members can assign unassigned tasks to themselves
+- **Unassignment**: Members can unassign themselves from tasks
+
+### Task Templates
+- **Reusable templates**: Create templates for common household tasks
+- **Generic tasks**: Support custom tasks with flexible titles and difficulties
+- **Category organization**: Group templates by categories for better organization
+
+## Security & Permissions
+
+### Authentication & Authorization
+- **Admin privileges**: Admins have full access to all features
+- **Member permissions**: Members can only manage their own tasks
+- **Session management**: Proper session handling for user authentication
+- **Permission checks**: Always verify permissions before allowing actions
+
+### Data Protection
+- **Input validation**: Validate all user inputs
+- **SQL injection prevention**: Use parameterized queries
+- **XSS prevention**: Sanitize user-generated content
+- **CSRF protection**: Use proper CSRF tokens for forms
+- **BCrypt password hashing**: Use for secure admin password storage
+
+## Development Workflow
+
+### Git & Version Control
+- **Meaningful commits**: Write clear, descriptive commit messages
+- **Feature branches**: Create feature branches for new development
+- **Pull requests**: Use pull requests for code review and integration
+
+### Documentation
+- **Code comments**: Add comments for complex logic
+- **README updates**: Keep README.md current with setup instructions
+- **Architecture docs**: Update ARCHITECTURE.md for significant changes
+- **TODO tracking**: Keep TODO.md updated with planned features
+
+### Performance & Optimization
+- **Database queries**: Optimize database queries and avoid N+1 problems
+- **Caching**: Consider caching for frequently accessed data
+- **Asset optimization**: Minimize and optimize CSS/JS assets
+- **Page load times**: Monitor and optimize page load performance
+- **Minimal dependencies**: Only include essential gems
+
+## Plugin Development
+
+### Plugin Structure
+- **Self-contained**: Plugins should be self-contained with their own routes, views, and assets
+- **Configuration**: Use environment variables for plugin configuration
+- **Dependencies**: Minimize external dependencies in plugins
+- **Documentation**: Document plugin functionality and configuration
+
+### Plugin Integration
+- **Main app integration**: Plugins should integrate seamlessly with the main application
+- **Asset management**: Proper asset organization within plugins
+- **Route management**: Avoid route conflicts between plugins
+- **Database isolation**: Consider plugin-specific database tables when appropriate
+
+### Admin Plugin Pattern
+- **Sinatra Extension**: Admin functionality is implemented as a Sinatra Extension in `plugins/admin/`
+- **Helper isolation**: Admin helpers are defined in `Household::Admin::Helpers` module
+- **Navigation registry**: Plugins register navigation links with main app via `@nav_links` collection
+- **Partial decoupling**: Runtime logic is decoupled, but migrations/tests remain in main app for simplicity
+
+## Environment & Deployment
+
+### Environment Configuration
+- **Environment variables**: Use environment variables for configuration
+- **Database configuration**: Proper database setup for different environments
+- **Asset compilation**: Ensure assets are properly compiled for production
+- **Error handling**: Implement proper error handling and logging
+
+### Production Considerations
+- **Security**: Ensure production security best practices
+- **Performance**: Optimize for production performance
+- **Monitoring**: Implement proper monitoring and logging
+- **Backup**: Ensure proper database backup procedures
+- **Raspberry Pi ready**: Lightweight dependencies and SQLite database
+
+## Code Review Guidelines
+
+### Review Checklist
+- [ ] Code follows project conventions and style
+- [ ] Tests are included and passing
+- [ ] Documentation is updated
+- [ ] Security considerations are addressed
+- [ ] Performance impact is considered
+- [ ] Error handling is appropriate
+- [ ] Accessibility is considered
+- [ ] State machine logic is in models, not views
+- [ ] Named arguments are used for multi-parameter methods
+- [ ] Route files contain only route definitions
+- [ ] Architectural decisions from ARCHITECTURE.md are respected
+
+### Quality Standards
+- **Readability**: Code should be easy to read and understand
+- **Maintainability**: Code should be easy to maintain and modify
+- **Testability**: Code should be testable and well-tested
+- **Scalability**: Consider future growth and scalability needs
+
+---
+
+**Remember**: This is a family-focused application. Prioritize simplicity, usability, and reliability over complex features. The goal is to make household task management easier and more engaging for families.

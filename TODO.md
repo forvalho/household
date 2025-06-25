@@ -381,7 +381,6 @@ Additional gamification features:
 - Add optional PIN/password to member profiles for secure access.
 
 #### Task & Board Enhancements
-- Loosen task state management: allow tasks to be moved directly from "todo" to "done".
 - Allow setting a completion percentage when completing a task (e.g., "folded half the laundry").
 - Split each member's board columns by day, so daily progress is visible.
 - Order task templates alphabetically in member boards, with the generic task always at the bottom.

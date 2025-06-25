@@ -95,12 +95,7 @@
                 <!-- Action Dropdown -->
                 <%
                   can_change_status = admin_logged_in? || (member_selected? && task.member_id == current_member.id)
-                  valid_statuses = {
-                    'todo' => ['in_progress'],
-                    'in_progress' => ['done', 'todo'],
-                    'done' => []
-                  }
-                  available_actions = valid_statuses[task.status] || []
+                  available_actions = task.valid_status_transitions
                 %>
                 <div class="action-dropdown dropdown" data-testid="action-dropdown-<%= task.id %>">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
