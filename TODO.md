@@ -356,3 +356,48 @@ Additional gamification features:
 - [ ] **(Future)** Fully decouple plugin tests. Configure RSpec to discover and run tests from within each plugin's directory (`plugins/admin/spec/`) in addition to the main `spec/` folder.
 - [ ] **(Future)** Fully decouple plugin seeding. Create a mechanism for plugins to register their own seed tasks that can be called by the main `db:seed` Rake task.
 - [ ] Evaluate replacing the custom data migration system with a more robust, existing gem if the need arises.
+
+## User's New Feature and Improvement List
+
+### 🛠️ Core Improvements & Refactors
+**Status**: Planned
+**Priority**: High
+
+#### Admin System Overhaul
+- Replace the current admin model with member-based admin privileges:
+  - Members can have optional PINs or passwords.
+  - Admin privileges are granted to members (no separate admin model).
+  - A default admin member is created in each environment with a default PIN/password (e.g., 0000 or "password").
+  - Admin login becomes a simplified landing page showing only admin members, where PIN/password is required for access.
+  - Admin login state is isolated: admin members are logged out when leaving the admin area to prevent accidental misuse.
+- Redesign the admin area for improved usability and appearance.
+- Replace all admin functionality to work with the new member-admin model.
+
+#### Member Management
+- Add the ability to pause/unpause members or set them as active/away:
+  - Inactive/away time is not counted toward performance or leaderboard.
+  - XP/points can be adjusted based on activity percentage (e.g., double XP for 50% activity).
+- Optionally allow non-admins to create member profiles (feature flag, already implemented).
+- Add optional PIN/password to member profiles for secure access.
+
+#### Task & Board Enhancements
+- Loosen task state management: allow tasks to be moved directly from "todo" to "done".
+- Allow setting a completion percentage when completing a task (e.g., "folded half the laundry").
+- Split each member's board columns by day, so daily progress is visible.
+- Order task templates alphabetically in member boards, with the generic task always at the bottom.
+- Group task templates by category in member boards:
+  - Display one entry per category, expandable to show templates within.
+  - Simplify task template cards to show less information; clicking a card assigns the task to the member.
+  - Admins should still be able to assign tasks to others easily from this view.
+
+#### Testing & Quality
+- Fix all pending and skipped tests to ensure full test coverage and reliability.
+
+### 📝 Project Tooling
+**Status**: Planned
+**Priority**: Medium
+
+#### Cursor AI Rules
+- Create and document Cursor rules for this project to guide AI assistance and code reviews.
+
+---
