@@ -135,7 +135,7 @@
             <!-- Tags: Category & Due Date -->
             <div class="task-tags">
                 <% if task.category.present? %>
-                    <span class="badge bg-secondary"><%= task.category %></span>
+                    <span class="badge bg-secondary"><%= task.category.name %></span>
                 <% end %>
                 <% if task.due_date %>
                     <span class="badge <%= task.due_date < Date.today ? 'bg-danger' : 'bg-info' %>">
