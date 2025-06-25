@@ -18,6 +18,13 @@ A Sinatra-based web application for managing household chores and tasks among me
 - **Collapsible Boxes**: Both the filter and available tasks boxes are collapsible, with chevron toggles and consistent icon styling.
 - **Responsive & Accessible**: The layout is fully responsive and uses accessible markup and icons.
 
+## Avatar Style Configuration
+
+Admins can control which DiceBear avatar styles are available for members to select. This is managed in the Admin Settings page:
+- Enable or disable any style with a simple toggle.
+- Styles currently in use by members are locked and cannot be disabled.
+- The avatar selector only shows enabled styles (plus the member's current style if it is disabled).
+
 ## Architecture
 
 This application follows a modern, modular Sinatra architecture. Key features are encapsulated into self-contained **Plugins** located in the `plugins/` directory.

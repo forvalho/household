@@ -203,6 +203,20 @@ namespace '/admin' do
     redirect '/admin/settings'
   end
 
+  post '/settings/avatar_styles' do
+    require_admin_login
+    enabled = Array(params[:enabled_styles]).map(&:to_s)
+    in_use = avatar_style_in_use_counts.keys
+    # Prevent disabling any style in use
+    if (in_use - enabled).any?
+      set_flash('error', 'Cannot disable avatar styles that are currently in use by members.')
+      redirect '/admin/settings'
+    end
+    Setting.set('enabled_avatar_styles', enabled.to_json)
+    set_flash('success', 'Avatar style settings updated!')
+    redirect '/admin/settings'
+  end
+
   delete '/admin/tasks/:id/reject' do
     require_admin_login
     task = Task.find_by(id: params[:id])

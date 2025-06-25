@@ -90,4 +90,25 @@ RSpec.describe 'Admin Management', type: :request do
       expect(last_response).to be_redirect
     end
   end
+
+  describe 'POST /admin/settings/avatar_styles' do
+    let!(:member) { Member.create!(name: 'Avatar User', avatar_url: 'https://api.dicebear.com/8.x/shapes/svg?seed=foo') }
+
+    it 'updates enabled avatar styles' do
+      post '/admin/settings/avatar_styles', { enabled_styles: ['adventurer', 'shapes'] }
+      expect(last_response).to be_redirect
+      follow_redirect!
+      expect(last_response.body).to include('Avatar style settings updated')
+      expect(Setting.get('enabled_avatar_styles')).to include('adventurer')
+    end
+
+    it 'prevents disabling a style in use' do
+      post '/admin/settings/avatar_styles', { enabled_styles: ['adventurer'] }
+      expect(last_response).to be_redirect
+      follow_redirect!
+      expect(last_response.body).to include('Cannot disable avatar styles that are currently in use')
+      # Should not update settings
+      expect(Setting.get('enabled_avatar_styles')).not_to eq(['adventurer'].to_json)
+    end
+  end
 end

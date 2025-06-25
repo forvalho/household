@@ -7,18 +7,21 @@ module ApplicationHelper
   ].freeze
 
   AVATAR_STYLES = [
-    'https://i.pravatar.cc/150?img=1',
-    'https://i.pravatar.cc/150?img=2',
-    'https://i.pravatar.cc/150?img=3',
-    'https://i.pravatar.cc/150?img=4',
-    'https://i.pravatar.cc/150?img=5',
-    'https://i.pravatar.cc/150?img=6',
-    'https://i.pravatar.cc/150?img=7',
-    'https://i.pravatar.cc/150?img=8',
-    'https://i.pravatar.cc/150?img=9',
-    'https://i.pravatar.cc/150?img=10',
-    'https://i.pravatar.cc/150?img=11',
-    'https://i.pravatar.cc/150?img=12'
+    'adventurer',
+    'avataaars',
+    'avataaars-neutral',
+    'bottts',
+    'croodles',
+    'croodles-neutral',
+    'identicon',
+    'initials',
+    'micah',
+    'miniavs',
+    'open-peeps',
+    'personas',
+    'pixel-art',
+    'pixel-art-neutral',
+    'shapes'
   ].freeze
 
   # Flash message helpers
@@ -62,5 +65,48 @@ module ApplicationHelper
   def truncate(text, length: 50)
     return text if text.length <= length
     text[0...length] + "..."
+  end
+
+  # Full list of available DiceBear styles
+  def all_dicebear_styles
+    [
+      'adventurer', 'adventurer-neutral', 'avataaars', 'avataaars-neutral',
+      'big-ears', 'big-ears-neutral', 'big-smile', 'bottts', 'bottts-neutral',
+      'croodles', 'croodles-neutral', 'fun-emoji', 'icons',
+      'identicon', 'initials', 'lorelei', 'lorelei-neutral', 'micah', 'miniavs',
+      'notionists', 'notionists-neutral', 'open-peeps', 'personas',
+      'pixel-art', 'pixel-art-neutral', 'rings', 'shapes', 'thumbs'
+    ]
+  end
+
+  # Default enabled styles (safe, popular, and legacy)
+  def default_enabled_avatar_styles
+    [
+      'adventurer', 'avataaars', 'avataaars-neutral', 'bottts', 'croodles',
+      'croodles-neutral', 'identicon', 'initials', 'micah', 'miniavs',
+      'open-peeps', 'personas', 'pixel-art', 'pixel-art-neutral', 'shapes'
+    ]
+  end
+
+  # Returns the enabled avatar styles from settings, or the default if not set
+  def enabled_avatar_styles
+    styles = Setting.get('enabled_avatar_styles')
+    if styles.present?
+      JSON.parse(styles)
+    else
+      default_enabled_avatar_styles
+    end
+  end
+
+  # Returns a hash: style => count of members using that style
+  def avatar_style_in_use_counts
+    counts = Hash.new(0)
+    Member.where.not(avatar_url: [nil, '']).find_each do |member|
+      if member.avatar_url =~ /api\.dicebear\.com\/8\.x\/([\w-]+)\//
+        style = $1
+        counts[style] += 1
+      end
+    end
+    counts
   end
 end

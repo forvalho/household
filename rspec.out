@@ -1,0 +1,154 @@
+==> Preparing test database...
+==> Running RSpec...
+**************Capybara starting Puma...
+* Version 6.6.0, codename: Return to Forever
+* Min threads: 0, max threads: 4
+* Listening on http://127.0.0.1:60650
+.****.Found button: In Progress
+Button visible: true
+Button disabled: false
+Task status after click: in_progress
+......................................................................FF...................*.****.*......*..........*...*
+
+Pending: (Failures listed here are expected and do not affect your suite's status)
+
+  1) Admin Login allows an admin to log in and see the dashboard
+     # Temporarily skipped with xit
+     # ./spec/features/admin_login_spec.rb:12
+
+  2) Admin Login shows an error with invalid credentials
+     # Temporarily skipped with xit
+     # ./spec/features/admin_login_spec.rb:20
+
+  3) Leaderboard displays leaderboard with member rankings
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:15
+
+  4) Leaderboard allows switching between time periods
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:25
+
+  5) Leaderboard shows performance scores
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:34
+
+  6) Leaderboard displays medals correctly
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:41
+
+  7) Leaderboard allows clicking on a member row to navigate to their dashboard
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:49
+
+  8) Leaderboard allows clicking on another member row to navigate to their dashboard
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:57
+
+  9) Leaderboard shows task templates in the member dashboard after clicking leaderboard row
+     # Temporarily skipped with xit
+     # ./spec/features/leaderboard_spec.rb:65
+
+  10) Member Dashboard displays the member dashboard
+     # Temporarily skipped with xit
+     # ./spec/features/member_dashboard_spec.rb:15
+
+  11) Member Dashboard shows the member their assigned tasks
+     # Temporarily skipped with xit
+     # ./spec/features/member_dashboard_spec.rb:21
+
+  12) Member Dashboard allows a member to complete a task
+     # Temporarily skipped with xit
+     # ./spec/features/member_dashboard_spec.rb:28
+
+  13) Member Dashboard shows available task templates
+     # Temporarily skipped with xit
+     # ./spec/features/member_dashboard_spec.rb:42
+
+  14) Member Dashboard allows a member to assign a task template to themselves
+     # Temporarily skipped with xit
+     # ./spec/features/member_dashboard_spec.rb:48
+
+  15) Task Assignment as an admin can assign a task to a member
+     # Temporarily skipped with xit
+     # ./spec/features/task_assignment_spec.rb:20
+
+  16) Task Assignment as an admin can unassign a task (which deletes it)
+     # Temporarily skipped with xit
+     # ./spec/features/task_assignment_spec.rb:31
+
+  17) Task Assignment as a member can claim an unassigned task
+     # Temporarily skipped with xit
+     # ./spec/features/task_assignment_spec.rb:49
+
+  18) Task Assignment as a member can unassign themselves from a task
+     # Temporarily skipped with xit
+     # ./spec/features/task_assignment_spec.rb:57
+
+  19) Session-dependent helpers admin_logged_in? correctly identifies an admin
+     # Temporarily skipped with xit
+     # ./spec/requests/session_helpers_spec.rb:19
+
+  20) Task Coverage GET /admin/reports displays member completion rates
+     # Temporarily skipped with xit
+     # ./spec/requests/task_coverage_spec.rb:14
+
+  21) Task Coverage GET /admin/reports handles members with no tasks
+     # Temporarily skipped with xit
+     # ./spec/requests/task_coverage_spec.rb:25
+
+  22) Task Coverage GET /admin/reports displays points and medals
+     # Temporarily skipped with xit
+     # ./spec/requests/task_coverage_spec.rb:32
+
+  23) Task Coverage GET /admin/reports filters by date range
+     # Temporarily skipped with xit
+     # ./spec/requests/task_coverage_spec.rb:49
+
+  24) Task Coverage GET /leaderboard handles members with no points
+     # Temporarily skipped with xit
+     # ./spec/requests/task_coverage_spec.rb:84
+
+  25) Task Template Routes DELETE /admin/task-templates/:id when admin is logged in deletes the task template
+     # Temporarily skipped with xit
+     # ./spec/requests/task_templates_spec.rb:118
+
+  26) PUT /tasks/:id/status denies permission for non-admin/non-assigned member (JSON) when not logged in
+     # Temporarily skipped with xit
+     # ./spec/requests/tasks/status_spec.rb:17
+
+  27) PUT /tasks/:id/status denies permission for non-admin/non-assigned member (HTML) redirects
+      # TODO: Fix content negotiation for HTML response
+      Failure/Error: expect(last_response).to be_redirect
+        expected `#<Rack::MockResponse:0x00000001250511a0 @original_headers={"Content-Type"=>"application/json", "Conte...ck=nil, @body=["{\"success\":false,\"message\":\"Permission denied\"}"], @buffered=true, @length=47>.redirect?` to be truthy, got false
+      # ./spec/requests/tasks/status_spec.rb:13:in `block (3 levels) in <top (required)>'
+
+Failures:
+
+  1) Admin Management GET /admin/reports loads the reports page successfully
+     Failure/Error: get '/admin/reports'
+
+     NoMethodError:
+       undefined method `raw' for #<App:0x0000000121297440>
+     # ./views/admin/reports.erb:207:in `__tilt_3280'
+     # ./routes/admin.rb:119:in `block (3 levels) in <class:App>'
+     # ./spec/requests/admin_management_spec.rb:52:in `block (3 levels) in <top (required)>'
+
+  2) Admin Management GET /admin/reports loads reports with custom period
+     Failure/Error: get '/admin/reports?period=7'
+
+     NoMethodError:
+       undefined method `raw' for #<App:0x0000000121292bc0>
+     # ./views/admin/reports.erb:207:in `__tilt_3280'
+     # ./routes/admin.rb:119:in `block (3 levels) in <class:App>'
+     # ./spec/requests/admin_management_spec.rb:63:in `block (3 levels) in <top (required)>'
+
+Finished in 14.39 seconds (files took 1.01 seconds to load)
+141 examples, 2 failures, 27 pending
+
+Failed examples:
+
+rspec ./spec/requests/admin_management_spec.rb:46 # Admin Management GET /admin/reports loads the reports page successfully
+rspec ./spec/requests/admin_management_spec.rb:57 # Admin Management GET /admin/reports loads reports with custom period
+
+Coverage report generated for RSpec to /Users/francisoorvalho/workspace/household/coverage.
+Line Coverage: 97.12% (202 / 208)

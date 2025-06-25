@@ -9,6 +9,7 @@
 - [x] Implement custom date range filter as modal
 - [x] Remove per-day grouping from Kanban board
 - [x] Reintegrate admin plugin back into main app
+- [x] Member profile pictures/avatars (with admin-configurable DiceBear styles)
 
 ## High Priority 🎯
 
@@ -50,7 +51,6 @@
 - [ ] Task assignment notifications
 
 ### Member Management
-- [ ] Member profile pictures/avatars
 - [ ] Optional PIN/password for member profiles
 - [ ] Member activity tracking and analytics
 
@@ -83,13 +83,13 @@
 - [ ] Enhanced leaderboards and statistics
 
 ### Quality & Documentation
+- [ ] Accessibility testing and compliance
 - [ ] Comprehensive error handling
 - [ ] Proper logging system
 - [ ] API rate limiting
 - [ ] Security audit
 - [ ] API documentation
 - [ ] User and developer guides
-- [ ] Accessibility testing and compliance
 
 ## Technical Debt 🔧
 
@@ -123,3 +123,9 @@
 - **Dependencies**: Some features depend on others (e.g., mobile app needs API)
 - **User feedback**: Priorities may change based on user feedback and usage patterns
 - **Technical constraints**: Some features may require additional infrastructure or services
+
+## High Priority 🎯
+- [ ] **Accessibility audit and improvement:**
+    - Perform a full accessibility sweep using a standard tool (e.g., Lighthouse, axe-core).
+    - Set a compliance goal (e.g., WCAG 2.1 AA, Lighthouse score ≥ 90).
+    - Track and improve accessibility issues across the app.

@@ -170,3 +170,10 @@ end
 - Mobile app integration
 - Real-time notifications
 - Advanced reporting and analytics
+
+## Avatar Style Management
+
+- Enabled avatar styles are stored as a JSON array in the `settings` table (key: `enabled_avatar_styles`).
+- The admin UI (Settings page) allows toggling which DiceBear styles are available.
+- Styles currently in use by any member are locked and cannot be disabled (UI and backend enforced).
+- The avatar selector only shows enabled styles, but always includes the member's current style (even if disabled, marked as such).

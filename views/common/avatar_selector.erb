@@ -1,19 +1,35 @@
 <!-- Hidden input to store the final avatar URL -->
-<input type="hidden" class="avatar-url-input" name="avatar_url" value="<%= locals[:avatar_url] || '' %>">
+<%
+  enabled = enabled_avatar_styles
+  current_style = nil
+  if locals[:avatar_url].present? && locals[:avatar_url] =~ /api\.dicebear\.com\/8\.x\/([\w-]+)\//
+    current_style = $1
+  end
+  styles = enabled.dup
+  styles << current_style if current_style && !styles.include?(current_style)
+  styles = styles.uniq
+  # Pick the first enabled style as default if no avatar_url is provided
+  default_style = current_style || styles.first
+  default_seed = locals[:seed_name] || 'default'
+  default_url = "https://api.dicebear.com/9.x/#{default_style}/svg?seed=#{default_seed}&radius=50"
+%>
+<input type="hidden" class="avatar-url-input" name="avatar_url" value="<%= locals[:avatar_url].presence || default_url %>">
 
 <div class="avatar-creator-grid">
     <!-- Left Panel: Style List -->
     <div class="style-list-container">
         <h5 class="mb-3">Style</h5>
         <ul class="style-list">
-            <% AVATAR_STYLES.each_with_index do |style, i| %>
+            <% styles.each_with_index do |style, i| %>
                 <%
-                    # Generate a more interesting seed for each preview
                     preview_seed = locals[:seed_name] ? Digest::MD5.hexdigest(locals[:seed_name])[i*2, 2] : "style-#{i}"
                 %>
                 <li class="style-list-item" data-style="<%= style %>">
-                    <img src="https://api.dicebear.com/8.x/<%= style %>/svg?seed=<%= preview_seed %>&radius=50" alt="<%= style %> preview">
+                    <img src="https://api.dicebear.com/9.x/<%= style %>/svg?seed=<%= preview_seed %>&radius=50" alt="<%= style %> preview">
                     <span><%= style.gsub('-', ' ').capitalize %></span>
+                    <% if !enabled.include?(style) %>
+                      <span class="badge bg-warning ms-2" title="This style is currently disabled for new selections">Disabled</span>
+                    <% end %>
                 </li>
             <% end %>
         </ul>
@@ -70,7 +86,7 @@ window.initializeAvatarSelector = function(container, existingUrl, seedName) {
 
     // --- Functions ---
     function generateAvatarUrl() {
-        let url = `https://api.dicebear.com/8.x/${currentStyle}/svg?seed=${encodeURIComponent(currentSeed)}`;
+        let url = `https://api.dicebear.com/9.x/${currentStyle}/svg?seed=${encodeURIComponent(currentSeed)}`;
         if (currentBgColor && currentBgColor !== '#ffffff') {
             url += `&backgroundColor=${currentBgColor.substring(1)}`;
         }

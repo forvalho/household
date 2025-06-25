@@ -54,4 +54,37 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(helper.admin_logged_in?).to be true
     end
   end
+
+  describe 'avatar style helpers' do
+    before do
+      # Clean up members
+      Member.destroy_all
+    end
+
+    it 'returns all dicebear styles' do
+      expect(helper.all_dicebear_styles).to include('adventurer', 'avataaars', 'shapes', 'pixel-art')
+    end
+
+    it 'returns the default enabled avatar styles' do
+      expect(helper.default_enabled_avatar_styles).to include('adventurer', 'avataaars', 'shapes')
+    end
+
+    it 'returns enabled avatar styles from settings if set' do
+      allow(Setting).to receive(:get).with('enabled_avatar_styles').and_return(["adventurer", "shapes"].to_json)
+      expect(helper.enabled_avatar_styles).to eq(["adventurer", "shapes"])
+    end
+
+    it 'returns default enabled avatar styles if settings is not set' do
+      allow(Setting).to receive(:get).with('enabled_avatar_styles').and_return(nil)
+      expect(helper.enabled_avatar_styles).to eq(helper.default_enabled_avatar_styles)
+    end
+
+    it 'counts avatar styles in use by members' do
+      Member.create!(name: 'A', avatar_url: 'https://api.dicebear.com/8.x/adventurer/svg?seed=foo')
+      Member.create!(name: 'B', avatar_url: 'https://api.dicebear.com/8.x/shapes/svg?seed=bar')
+      counts = helper.avatar_style_in_use_counts
+      expect(counts['adventurer']).to eq(1)
+      expect(counts['shapes']).to eq(1)
+    end
+  end
 end
