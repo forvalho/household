@@ -1,65 +1,58 @@
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1><i class="fas fa-users"></i> Members</h1>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newMemberModal">
-                <i class="fas fa-plus"></i> Add New Member
-            </button>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-users"></i> Members</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newMemberModal">
+                    <i class="fas fa-plus"></i> Add New Member
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-list"></i> Household Members
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% @members.each do |member| %>
                             <tr>
-                                <th>Member</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= member.avatar_url %>" alt="<%= member.name %>'s avatar" class="me-3" style="width: 45px; height: 45px; border-radius: 50%;">
+                                        <strong><%= member.name %></strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge <%= member.active? ? 'bg-success' : 'bg-secondary' %>">
+                                        <%= member.active? ? 'Active' : 'Inactive' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary edit-member-btn"
+                                            data-bs-toggle="modal" data-bs-target="#editMemberModal"
+                                            data-member-id="<%= member.id %>"
+                                            data-member-name="<%= member.name %>"
+                                            data-member-avatar-url="<%= member.avatar_url %>">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning" onclick="toggleMemberStatus(<%= member.id %>)" title="Toggle Active Status">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% @members.each do |member| %>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="<%= member.avatar_url %>" alt="<%= member.name %>'s avatar" class="me-3" style="width: 45px; height: 45px; border-radius: 50%;">
-                                            <strong><%= member.name %></strong>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge <%= member.active? ? 'bg-success' : 'bg-secondary' %>">
-                                            <%= member.active? ? 'Active' : 'Inactive' %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-outline-primary edit-member-btn"
-                                                data-bs-toggle="modal" data-bs-target="#editMemberModal"
-                                                data-member-id="<%= member.id %>"
-                                                data-member-name="<%= member.name %>"
-                                                data-member-avatar-url="<%= member.avatar_url %>">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-outline-warning" onclick="toggleMemberStatus(<%= member.id %>)" title="Toggle Active Status">
-                                                <i class="fas fa-power-off"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% end %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% end %>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -198,33 +191,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Only mark the edit selector for re-initialization.
         avatarSelectorContainer.dataset.initialized = 'false';
-
-        // Reset view to show the button, not the selector
-        avatarSelectorContainer.classList.add('d-none');
-        avatarContainer.classList.remove('d-none');
-    });
-
-    const newMemberModal = document.getElementById('newMemberModal');
-    newMemberModal.addEventListener('show.bs.modal', function() {
-        const nameInput = document.getElementById('newMemberName');
-        const selectorContainer = document.getElementById('newAvatarSelector');
-
-        // Reset form
-        nameInput.value = '';
-
-        // Mark the selector for re-initialization so previews are always fresh
-        selectorContainer.dataset.initialized = 'false';
-
-        // Initialize the selector for a new member every time.
-        const seed = `new-member-${Math.random().toString(36).substring(2, 9)}`;
-        window.initializeAvatarSelector(selectorContainer, '', seed);
     });
 });
 
 function toggleMemberStatus(memberId) {
-    if (confirm('Are you sure you want to toggle this member\'s status?')) {
-        // TODO: Implement toggle member status functionality
-        alert('Toggle member status functionality coming soon!');
+    if (confirm('Are you sure you want to toggle this member\'s active status?')) {
+        fetch(`/admin/members/${memberId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error toggling member status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error toggling member status');
+        });
     }
 }
 </script>
