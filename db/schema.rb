@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_06_12_000000) do
+ActiveRecord::Schema[8.0].define(version: 2024_06_23_190000) do
   create_table "admins", force: :cascade do |t|
     t.string "username", null: false
     t.string "password_digest", null: false
@@ -35,6 +35,13 @@ ActiveRecord::Schema[8.0].define(version: 2024_06_12_000000) do
     t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "value"
+    t.datetime "updated_at", precision: nil
+    t.index ["key"], name: "index_settings_on_key", unique: true
   end
 
   create_table "task_completions", force: :cascade do |t|

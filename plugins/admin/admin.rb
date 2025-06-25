@@ -205,6 +205,20 @@ module Household
           set_flash('success', 'Task template deleted!')
           redirect '/admin/task-templates'
         end
+
+        # Admin Settings
+        get '/settings' do
+          erb :settings, views: plugin_views_path, layout: :layout, layout_options: { views: File.join(Household::ROOT, 'views') }
+        end
+
+        post '/settings' do
+          # Checkbox only sends param if checked
+          allow = params[:allow_member_signup] == 'true' || params[:allow_member_signup] == 'on'
+          Setting.set('allow_member_signup', allow.to_s)
+          settings.allow_member_signup = allow
+          set_flash('success', 'Settings updated!')
+          redirect '/admin/settings'
+        end
       end
     end
   end

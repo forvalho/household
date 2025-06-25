@@ -32,6 +32,17 @@ class App < Sinatra::Base
   enable :sessions
   enable :method_override
 
+  # On boot, load allow_member_signup from settings table (default true)
+  allow_signup = true
+  begin
+    require_relative 'models/setting'
+    db_value = Setting.get('allow_member_signup')
+    allow_signup = db_value.nil? ? true : db_value == 'true'
+  rescue => e
+    puts "[WARN] Could not load allow_member_signup from settings: #{e}"
+  end
+  set :allow_member_signup, allow_signup
+
   # Helpers
   helpers ApplicationHelper
   helpers DataHelper

@@ -13,6 +13,15 @@
             </div>
         </a>
     <% end %>
+
+    <% if settings.allow_member_signup %>
+        <a href="/members/new" class="profile-card new-profile-card">
+            <div class="profile-avatar new" style="display: flex; align-items: center; justify-content: center; background: #f7f8fa;">
+                <i class="fas fa-plus" style="font-size: 4rem; color: #222;"></i>
+            </div>
+            <div class="profile-name">Create New Profile</div>
+        </a>
+    <% end %>
 </div>
 
 <script>
