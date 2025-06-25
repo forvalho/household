@@ -117,6 +117,11 @@ end
 - **README updates**: Keep README.md current with setup instructions
 - **Architecture docs**: Update ARCHITECTURE.md for significant changes
 - **TODO tracking**: Keep TODO.md updated with planned features
+- **Feature completion checklist**: Before considering any feature complete, ensure:
+  - Remove completed items from TODO.md
+  - Update README.md with new features/changes
+  - Update ARCHITECTURE.md if architectural changes were made
+  - All documentation reflects the current state of the implementation
 
 ### Performance & Optimization
 - **Database queries**: Optimize database queries and avoid N+1 problems

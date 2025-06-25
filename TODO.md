@@ -382,7 +382,6 @@ Additional gamification features:
 
 #### Task & Board Enhancements
 - Allow setting a completion percentage when completing a task (e.g., "folded half the laundry").
-- Order task templates alphabetically in member boards, with the generic task always at the bottom.
 - Group task templates by category in member boards:
   - Display one entry per category, expandable to show templates within.
   - Simplify task template cards to show less information; clicking a card assigns the task to the member.
