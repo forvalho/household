@@ -36,6 +36,26 @@ RSpec.describe 'Member Routes', type: :request do
       expect(last_response).to be_ok
       expect(last_response.body).to include('Test Template')
     end
+
+    it 'groups tasks by day based on updated_at' do
+      get "/members/#{member.id}/select"
+
+      # Create tasks with different updated_at dates
+      task1 = Task.create!(title: 'Task 1', member: member, difficulty: 'bronze', status: 'todo')
+      task2 = Task.create!(title: 'Task 2', member: member, difficulty: 'bronze', status: 'in_progress')
+      task3 = Task.create!(title: 'Task 3', member: member, difficulty: 'bronze', status: 'done')
+
+      # Update tasks to different dates
+      task1.update!(updated_at: 2.days.ago)
+      task2.update!(updated_at: 1.day.ago)
+      task3.update!(updated_at: Date.today)
+
+      get '/dashboard'
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('Task 1')
+      expect(last_response.body).to include('Task 2')
+      expect(last_response.body).to include('Task 3')
+    end
   end
 
   describe 'GET /profile/edit' do

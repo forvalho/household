@@ -10,6 +10,14 @@ A Sinatra-based web application for managing household chores and tasks among me
 - **Task Completions**: Records when a `Member` completes a `Task`, awarding points based on difficulty.
 - **Leaderboard**: A ranked list of members based on points earned over a specific period.
 
+## Member Dashboard Features
+
+- **Sidebar with Date Filter & Available Tasks**: The left sidebar contains a collapsible date filter (with presets like Today, This Week, Custom Range, etc.) and a collapsible list of available task templates. The sidebar is narrower for a modern look.
+- **Date Filtering**: Instantly filter your board by date range. The filter auto-submits on change, and custom ranges require both a start and end date. Only custom range params are included in the URL when selected.
+- **Kanban Board**: The main area displays your tasks in a kanban board, grouped by day and status (To Do, In Progress, Done). Empty columns are always shown for clarity.
+- **Collapsible Boxes**: Both the filter and available tasks boxes are collapsible, with chevron toggles and consistent icon styling.
+- **Responsive & Accessible**: The layout is fully responsive and uses accessible markup and icons.
+
 ## Architecture
 
 This application follows a modern, modular Sinatra architecture. Key features are encapsulated into self-contained **Plugins** located in the `plugins/` directory.

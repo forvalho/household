@@ -382,7 +382,6 @@ Additional gamification features:
 
 #### Task & Board Enhancements
 - Allow setting a completion percentage when completing a task (e.g., "folded half the laundry").
-- Split each member's board columns by day, so daily progress is visible.
 - Order task templates alphabetically in member boards, with the generic task always at the bottom.
 - Group task templates by category in member boards:
   - Display one entry per category, expandable to show templates within.

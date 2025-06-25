@@ -18,127 +18,214 @@
     </div>
 </div>
 
-<!-- Tasks Board -->
-<div class="row gap-3 kanban-board">
-    <div class="col">
-        <div class="kanban-column">
-            <h5 class="text-center mb-3">
-                <i class="fas fa-clipboard-list text-info"></i> Available Tasks
-            </h5>
-            <div id="templates-column" class="task-list">
-                <% @task_templates.each do |template| %>
-                    <div class="task-card difficulty-<%= template.medal %>" data-template-id="<%= template.id %>">
-                        <div class="card-body d-flex flex-column">
-                            <!-- Top Section: Title & Points -->
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="mb-0 fw-bold"><%= template.title %></h6>
-                                <% if template.generic_task? %>
-                                    <span class="badge bg-secondary" title="Custom difficulty">
-                                        <i class="fas fa-edit"></i> Custom
-                                    </span>
-                                <% else %>
-                                    <span class="medal-badge" title="<%= pluralize(template.points_value, 'point') %>">
-                                        <i class="fas fa-medal medal-<%= template.medal %>"></i>
-                                    </span>
-                                <% end %>
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+        <!-- Date Filter (Collapsible) -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#dateFilterCollapse" style="cursor:pointer;">
+                <span>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <%# Dynamic title for filter box %>
+                    <% case @current_date_filter
+                       when 'today' %>
+                        Today
+                    <% when 'yesterday' %>
+                        Yesterday
+                    <% when 'this_week' %>
+                        This week
+                    <% when 'last_week' %>
+                        Last week
+                    <% when 'this_month' %>
+                        This month
+                    <% when 'last_month' %>
+                        Last month
+                    <% when 'custom' %>
+                        <small class="text-muted">
+                            (<%= @start_date.strftime('%d/%m/%Y') %>–<%= @end_date.strftime('%d/%m/%Y') %>)
+                        </small>
+                    <% end %>
+                </span>
+                <i class="fas fa-chevron-right" id="dateFilterChevron"></i>
+            </div>
+            <div class="collapse" id="dateFilterCollapse">
+                <div class="card-body">
+                    <form method="GET" action="/dashboard" class="row g-3 align-items-end" id="date-filter-form">
+                        <div class="col-12">
+                            <select class="form-select" id="date_filter" name="date_filter" onchange="autoSubmitDateFilter()">
+                                <option value="today" <%= 'selected' if @current_date_filter == 'today' %>>Show today</option>
+                                <option value="yesterday" <%= 'selected' if @current_date_filter == 'yesterday' %>>Show yesterday</option>
+                                <option value="this_week" <%= 'selected' if @current_date_filter == 'this_week' %>>Show this week</option>
+                                <option value="last_week" <%= 'selected' if @current_date_filter == 'last_week' %>>Show last week</option>
+                                <option value="this_month" <%= 'selected' if @current_date_filter == 'this_month' %>>Show this month</option>
+                                <option value="last_month" <%= 'selected' if @current_date_filter == 'last_month' %>>Show last month</option>
+                                <option value="custom" <%= 'selected' if @current_date_filter == 'custom' %>>Custom range</option>
+                            </select>
+                        </div>
+                        <div class="col-12" id="custom_date_container" style="display: <%= @current_date_filter == 'custom' ? 'flex' : 'none' %>; gap: 0.5rem; align-items: end;">
+                            <div class="flex-fill">
+                                <label for="custom_date_from" class="form-label">From</label>
+                                <input type="date" class="form-control" id="custom_date_from" name="custom_date_from" value="<%= @current_custom_date_from %>" onchange="autoSubmitDateFilter()">
                             </div>
-
-                            <!-- Optional Description -->
-                            <% if template.generic_task? %>
-                                <p class="small text-muted mb-2">Create your own task with custom title and difficulty</p>
-                            <% elsif template.description.present? %>
-                                <p class="small text-muted mb-2"><%= template.description %></p>
-                            <% end %>
-
-                            <!-- Bottom Section: Actions & Tags -->
-                            <div class="mt-auto">
-                                <!-- Actions: Assign Template -->
-                                <div class="task-actions-container mb-2">
-                                    <% if template.generic_task? %>
-                                        <!-- Generic Task: Show modal button -->
-                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#genericTaskModal">
-                                            <i class="fas fa-user-plus"></i>
-                                            <span class="ms-2">Assign Task</span>
-                                        </button>
-                                    <% else %>
-                                        <!-- Regular Template: Show dropdown -->
-                                        <!-- Assignee Dropdown -->
-                                        <div class="assignee-selector dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-user-plus"></i>
-                                                <span class="ms-2">Assign Task</span>
-                                            </button>
-                                            <ul class="dropdown-menu assignee-dropdown-menu">
-                                                <% Member.all.order(:name).each do |member| %>
-                                                    <li>
-                                                        <form action="/task-templates/<%= template.id %>/assign" method="post" class="assignee-form">
-                                                            <input type="hidden" name="member_id" value="<%= member.id %>">
-                                                            <button type="submit" class="dropdown-item" <%= 'disabled' unless admin_logged_in? || member.id == current_member.id %>>
-                                                                <% if member.avatar_url.present? %>
-                                                                    <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
-                                                                <% else %>
-                                                                    <div class="user-avatar me-2"><%= member.name.first.upcase %></div>
-                                                                <% end %>
-                                                                <%= member.name %>
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                <% end %>
-                                            </ul>
+                            <div class="flex-fill">
+                                <label for="custom_date_to" class="form-label">To</label>
+                                <input type="date" class="form-control" id="custom_date_to" name="custom_date_to" value="<%= @current_custom_date_to %>" onchange="autoSubmitDateFilter()">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Available Tasks (Collapsible) -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#availableTasksCollapse" style="cursor:pointer;">
+                <span><i class="fas fa-clipboard-list fa-lg me-2"></i> Available Tasks</span>
+                <i class="fas fa-chevron-down" id="availableTasksChevron"></i>
+            </div>
+            <div class="collapse show" id="availableTasksCollapse">
+                <div class="card-body">
+                    <div class="row">
+                        <% @task_templates.each do |template| %>
+                            <div class="col-12 mb-3">
+                                <div class="task-card difficulty-<%= template.medal %>" data-template-id="<%= template.id %>">
+                                    <div class="card-body d-flex flex-column">
+                                        <!-- Top Section: Title & Points -->
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="mb-0 fw-bold"><%= template.title %></h6>
+                                            <% if template.generic_task? %>
+                                                <span class="badge bg-secondary" title="Custom difficulty">
+                                                    <i class="fas fa-edit"></i> Custom
+                                                </span>
+                                            <% else %>
+                                                <span class="medal-badge" title="<%= pluralize(template.points_value, 'point') %>">
+                                                    <i class="fas fa-medal medal-<%= template.medal %>"></i>
+                                                </span>
+                                            <% end %>
                                         </div>
+
+                                        <!-- Optional Description -->
+                                        <% if template.generic_task? %>
+                                            <p class="small text-muted mb-2">Create your own task with custom title and difficulty</p>
+                                        <% elsif template.description.present? %>
+                                            <p class="small text-muted mb-2"><%= template.description %></p>
+                                        <% end %>
+
+                                        <!-- Bottom Section: Actions & Tags -->
+                                        <div class="mt-auto">
+                                            <!-- Actions: Assign Template -->
+                                            <div class="task-actions-container mb-2">
+                                                <% if template.generic_task? %>
+                                                    <!-- Generic Task: Show modal button -->
+                                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#genericTaskModal">
+                                                        <i class="fas fa-user-plus"></i>
+                                                        <span class="ms-2">Assign Task</span>
+                                                    </button>
+                                                <% else %>
+                                                    <!-- Regular Template: Show dropdown -->
+                                                    <!-- Assignee Dropdown -->
+                                                    <div class="assignee-selector dropdown">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle assignee-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fas fa-user-plus"></i>
+                                                            <span class="ms-2">Assign Task</span>
+                                                        </button>
+                                                        <ul class="dropdown-menu assignee-dropdown-menu">
+                                                            <% Member.all.order(:name).each do |member| %>
+                                                                <li>
+                                                                    <form action="/task-templates/<%= template.id %>/assign" method="post" class="assignee-form">
+                                                                        <input type="hidden" name="member_id" value="<%= member.id %>">
+                                                                        <button type="submit" class="dropdown-item" <%= 'disabled' unless admin_logged_in? || member.id == current_member.id %>>
+                                                                            <% if member.avatar_url.present? %>
+                                                                                <img src="<%= member.avatar_url %>" class="user-avatar me-2" alt="<%= member.name %>">
+                                                                            <% else %>
+                                                                                <div class="user-avatar me-2"><%= member.name.first.upcase %></div>
+                                                                            <% end %>
+                                                                            <%= member.name %>
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            <% end %>
+                                                        </ul>
+                                                    </div>
+                                                <% end %>
+                                            </div>
+
+                                            <!-- Tags: Category -->
+                                            <div class="task-tags">
+                                                <% if template.category.present? %>
+                                                    <span class="badge bg-secondary"><%= template.category %></span>
+                                                <% end %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content: Kanban Board -->
+    <div class="col-md-9">
+        <div class="row g-3">
+            <% @tasks_by_day = @tasks_by_day.presence || { Date.today => { todo: [], in_progress: [], done: [] } } %>
+            <% @tasks_by_day.each do |date, day_tasks| %>
+                <div class="col-12 mb-2">
+                    <div class="row">
+                        <div class="col">
+                            <div class="kanban-column">
+                                <h6 class="text-center mb-3">
+                                    <i class="fas fa-list text-primary"></i> To Do
+                                    <span class="badge bg-primary ms-1"><%= day_tasks[:todo].count %></span>
+                                </h6>
+                                <div class="task-list" data-status="todo" data-date="<%= date %>">
+                                    <% if day_tasks[:todo].any? %>
+                                        <% day_tasks[:todo].each do |task| %>
+                                            <%= erb :'common/task_card', locals: { task: task } %>
+                                        <% end %>
+                                    <% else %>
+                                        <div class="text-center text-muted">No tasks</div>
                                     <% end %>
                                 </div>
-
-                                <!-- Tags: Category -->
-                                <div class="task-tags">
-                                    <% if template.category.present? %>
-                                        <span class="badge bg-secondary"><%= template.category %></span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="kanban-column">
+                                <h6 class="text-center mb-3">
+                                    <i class="fas fa-spinner text-warning"></i> In Progress
+                                    <span class="badge bg-warning text-dark ms-1"><%= day_tasks[:in_progress].count %></span>
+                                </h6>
+                                <div class="task-list" data-status="in_progress" data-date="<%= date %>">
+                                    <% if day_tasks[:in_progress].any? %>
+                                        <% day_tasks[:in_progress].each do |task| %>
+                                            <%= erb :'common/task_card', locals: { task: task } %>
+                                        <% end %>
+                                    <% else %>
+                                        <div class="text-center text-muted">No tasks</div>
+                                    <% end %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="kanban-column">
+                                <h6 class="text-center mb-3">
+                                    <i class="fas fa-check-circle text-success"></i> Done
+                                    <span class="badge bg-success ms-1"><%= day_tasks[:done].count %></span>
+                                </h6>
+                                <div class="task-list" data-status="done" data-date="<%= date %>">
+                                    <% if day_tasks[:done].any? %>
+                                        <% day_tasks[:done].each do |task| %>
+                                            <%= erb :'common/task_card', locals: { task: task } %>
+                                        <% end %>
+                                    <% else %>
+                                        <div class="text-center text-muted">No tasks</div>
                                     <% end %>
                                 </div>
                             </div>
                         </div>
                     </div>
-                <% end %>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="kanban-column">
-            <h5 class="text-center mb-3">
-                <i class="fas fa-list text-primary"></i> To Do
-            </h5>
-            <div id="todo-column" class="task-list" data-status="todo">
-                <% @member_tasks.select { |t| t.status == 'todo' }.each do |task| %>
-                    <%= erb :'common/task_card', locals: { task: task } %>
-                <% end %>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="kanban-column">
-            <h5 class="text-center mb-3">
-                <i class="fas fa-spinner text-warning"></i> In Progress
-            </h5>
-            <div id="in-progress-column" class="task-list" data-status="in_progress">
-                <% @member_tasks.select { |t| t.status == 'in_progress' }.each do |task| %>
-                    <%= erb :'common/task_card', locals: { task: task } %>
-                <% end %>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="kanban-column">
-            <h5 class="text-center mb-3">
-                <i class="fas fa-check-circle text-success"></i> Done
-            </h5>
-            <div id="done-column" class="task-list" data-status="done">
-                <% @member_tasks.select { |t| t.status == 'done' }.each do |task| %>
-                    <%= erb :'common/task_card', locals: { task: task } %>
-                <% end %>
-            </div>
+                </div>
+            <% end %>
         </div>
     </div>
 </div>
@@ -363,6 +450,102 @@
         });
     });
 
+    // Collapse chevron toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        var dateFilterHeader = document.querySelector('[data-bs-target=\"#dateFilterCollapse\"]');
+        var dateFilterChevron = document.getElementById('dateFilterChevron');
+        var dateFilterCollapse = document.getElementById('dateFilterCollapse');
+        var urlParams = new URLSearchParams(window.location.search);
+        // Open filter if any filter param is present
+        var filterParams = ['date_filter', 'custom_date_from', 'custom_date_to'];
+        var shouldOpen = filterParams.some(function(p) { return urlParams.has(p) && urlParams.get(p) !== '' && urlParams.get(p) !== 'today'; });
+        if (dateFilterCollapse) {
+            if (shouldOpen) {
+                dateFilterCollapse.classList.add('show', 'no-transition');
+                var bsCollapse = bootstrap.Collapse.getOrCreateInstance(dateFilterCollapse, {toggle: false});
+                bsCollapse.show();
+                // Remove no-transition after first paint
+                setTimeout(function() {
+                    dateFilterCollapse.classList.remove('no-transition');
+                }, 10);
+            } else {
+                dateFilterCollapse.classList.remove('show');
+                var bsCollapse = bootstrap.Collapse.getOrCreateInstance(dateFilterCollapse, {toggle: false});
+                bsCollapse.hide();
+            }
+        }
+        if (dateFilterHeader && dateFilterChevron && dateFilterCollapse) {
+            dateFilterCollapse.addEventListener('show.bs.collapse', function() {
+                dateFilterChevron.classList.remove('fa-chevron-right');
+                dateFilterChevron.classList.add('fa-chevron-down');
+            });
+            dateFilterCollapse.addEventListener('hide.bs.collapse', function() {
+                dateFilterChevron.classList.remove('fa-chevron-down');
+                dateFilterChevron.classList.add('fa-chevron-right');
+            });
+        }
+        var availableTasksHeader = document.querySelector('[data-bs-target="#availableTasksCollapse"]');
+        var availableTasksChevron = document.getElementById('availableTasksChevron');
+        var availableTasksCollapse = document.getElementById('availableTasksCollapse');
+        if (availableTasksHeader && availableTasksChevron && availableTasksCollapse) {
+            availableTasksCollapse.addEventListener('show.bs.collapse', function() {
+                availableTasksChevron.classList.remove('fa-chevron-right');
+                availableTasksChevron.classList.add('fa-chevron-down');
+            });
+            availableTasksCollapse.addEventListener('hide.bs.collapse', function() {
+                availableTasksChevron.classList.remove('fa-chevron-down');
+                availableTasksChevron.classList.add('fa-chevron-right');
+            });
+        }
+
+        // Date range validation for custom range
+        var fromInput = document.getElementById('custom_date_from');
+        var toInput = document.getElementById('custom_date_to');
+        if (fromInput && toInput) {
+            fromInput.addEventListener('change', function() {
+                if (toInput.value && fromInput.value > toInput.value) {
+                    toInput.value = fromInput.value;
+                }
+                toInput.min = fromInput.value;
+            });
+            toInput.addEventListener('change', function() {
+                if (fromInput.value && toInput.value < fromInput.value) {
+                    fromInput.value = toInput.value;
+                }
+                fromInput.max = toInput.value;
+            });
+        }
+    });
+
+    // Function to toggle custom date field visibility and auto-submit
+    function autoSubmitDateFilter() {
+        var dateFilter = document.getElementById('date_filter');
+        var customDateContainer = document.getElementById('custom_date_container');
+        var fromInput = document.getElementById('custom_date_from');
+        var toInput = document.getElementById('custom_date_to');
+        var form = document.getElementById('date-filter-form');
+        if (dateFilter.value === 'custom') {
+            customDateContainer.style.display = 'flex';
+            // Only submit if both dates are present and valid
+            if (fromInput.value && toInput.value && fromInput.value <= toInput.value) {
+                // Only include custom params if filter is custom
+                fromInput.disabled = false;
+                toInput.disabled = false;
+                form.submit();
+            } else {
+                // Don't submit or include incomplete params
+                fromInput.disabled = false;
+                toInput.disabled = false;
+            }
+        } else {
+            customDateContainer.style.display = 'none';
+            // Remove custom params from the form before submitting
+            fromInput.disabled = true;
+            toInput.disabled = true;
+            form.submit();
+        }
+    }
+
     // JavaScript for the custom task modal
     document.addEventListener('DOMContentLoaded', function() {
         const customTaskModal = document.getElementById('genericTaskModal');
@@ -376,3 +559,10 @@
         }
     });
 </script>
+
+<style>
+/* Instantly show/hide collapse if .no-transition is present */
+.no-transition.collapse {
+  transition: none !important;
+}
+</style>

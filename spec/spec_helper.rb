@@ -11,12 +11,15 @@ require 'capybara/dsl'
 require 'rack/test'
 require 'sinatra/base'
 require_relative '../app'
+require 'selenium/webdriver'
 
 # Load all helpers and models
 Dir[File.join(__dir__, '..', 'helpers', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, '..', 'models', '*.rb')].each { |file| require file }
 
 Capybara.app = App
+Capybara.default_driver = :rack_test
+Capybara.javascript_driver = :selenium_chrome_headless
 
 RSpec.configure do |config|
   config.include Capybara::DSL
@@ -55,3 +58,7 @@ RSpec.configure do |config|
     env 'rack.session', rack_session
   end
 end
+
+# Usage:
+#   it 'does something', js: true do ... end
+# will run with Selenium and JS enabled.
