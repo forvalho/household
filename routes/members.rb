@@ -12,6 +12,30 @@ get '/dashboard' do
   custom_date_from = params[:custom_date_from]
   custom_date_to = params[:custom_date_to]
 
+  # Backend validation for custom date range
+  if date_filter == 'custom'
+    today = Date.today
+    if custom_date_from.blank? || custom_date_to.blank?
+      set_flash('error', 'Both dates are required for a custom range.')
+      redirect '/dashboard'
+    end
+    begin
+      from_date = Date.parse(custom_date_from)
+      to_date = Date.parse(custom_date_to)
+    rescue ArgumentError
+      set_flash('error', 'Invalid date format for custom range.')
+      redirect '/dashboard'
+    end
+    if from_date > today || to_date > today
+      set_flash('error', 'Dates cannot be in the future.')
+      redirect '/dashboard'
+    end
+    if from_date > to_date
+      set_flash('error', 'The start date must be before or equal to the end date.')
+      redirect '/dashboard'
+    end
+  end
+
   # Determine the date range based on filter
   start_date, end_date = case date_filter
   when 'today'
@@ -46,18 +70,13 @@ get '/dashboard' do
   all_tasks = Task.where(member: current_member)
                   .includes(:member, :category)
                   .where(updated_at: start_date.beginning_of_day..end_date.end_of_day)
-                  .order(:created_at)
+                  .order(updated_at: :desc, title: :asc)
 
-  # Group tasks by day based on updated_at
-  @tasks_by_day = {}
+  # Group tasks by status for the board (no longer by day)
+  @tasks_by_status = { todo: [], in_progress: [], done: [] }
   all_tasks.each do |task|
-    day_key = task.updated_at.to_date
-    @tasks_by_day[day_key] ||= { todo: [], in_progress: [], done: [] }
-    @tasks_by_day[day_key][task.status.to_sym] << task
+    @tasks_by_status[task.status.to_sym] << task
   end
-
-  # Sort days in descending order (most recent first)
-  @tasks_by_day = @tasks_by_day.sort.reverse.to_h
 
   # Store filter state for the view
   @current_date_filter = date_filter
@@ -67,6 +86,7 @@ get '/dashboard' do
   @end_date = end_date
 
   @task_templates = TaskTemplate.ordered_for_dashboard
+  @task_templates_by_category = @task_templates.group_by { |t| t.category }
   erb :'member/dashboard'
 end
 

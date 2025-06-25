@@ -90,9 +90,6 @@ RSpec.describe 'Member Dashboard', type: :feature do
     visit "/members/#{member.id}/select"
     expect(page).to have_current_path('/dashboard')
 
-    # Expand the filter box so the select is visible
-    find('div.card-header', text: /Today|Yesterday|This week|Last week|This month|Last month|\(\d{2}\/\d{2}\/\d{4}/).click
-
     # Should show only today's tasks by default
     expect(page).to have_content("Today's Task")
     expect(page).not_to have_content("Yesterday's Task")

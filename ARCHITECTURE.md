@@ -77,7 +77,7 @@ Routes are organized into separate files by feature:
 
 ### UI/UX Decisions
 
-- **Kanban board**: Visual task management with drag-and-drop columns
+- **Kanban board**: Visual task management with columns for each status (To Do, In Progress, Done). The date filter controls which tasks are shown.
 - **Avatar-based member selection**: Visual, family-friendly login experience
 - **Responsive design**: Bootstrap 5 for mobile-friendly interface
 - **Modal dialogs**: For task creation and custom task assignment
@@ -225,5 +225,8 @@ All routes are defined within a single `App` class. Route files are loaded withi
 - Shared helpers and configuration
 - Clean separation of concerns
 - Easy to understand and maintain
+
+## Cursor Rules
+- When the user requests an update to any documentation (e.g., TODO, README, ARCHITECTURE), always polish the language and formatting to match the document's standards. Never add rough or placeholder sentences. Summarize and clarify as needed for clarity and professionalism.
 
 ---

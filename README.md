@@ -14,7 +14,7 @@ A Sinatra-based web application for managing household chores and tasks among me
 
 - **Sidebar with Date Filter & Available Tasks**: The left sidebar contains a collapsible date filter (with presets like Today, This Week, Custom Range, etc.) and a collapsible list of available task templates. The sidebar is narrower for a modern look. The filter auto-submits on change, and custom ranges require both a start and end date. Only custom range params are included in the URL when selected.
 - **Task Templates Ordering**: Task templates are shown alphabetically by title, with the generic task always at the bottom.
-- **Kanban Board**: The main area displays your tasks in a kanban board, grouped by day and status (To Do, In Progress, Done). Empty columns are always shown for clarity.
+- **Kanban Board**: The main area displays your tasks in a kanban board, grouped by status (To Do, In Progress, Done). The date filter controls which tasks are shown. Empty columns are always shown for clarity.
 - **Collapsible Boxes**: Both the filter and available tasks boxes are collapsible, with chevron toggles and consistent icon styling.
 - **Responsive & Accessible**: The layout is fully responsive and uses accessible markup and icons.
 

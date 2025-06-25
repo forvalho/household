@@ -47,8 +47,7 @@ Sync with Google Calendar to track when children are at different houses:
 
 Implement daily and weekly minimum point requirements per member:
 
-- **Daily quotas**: Minimum points required per day
-- **Weekly quotas**: Minimum points required per week
+- **Quotas**: Minimum points required per selected date range (e.g., daily, weekly, or custom range)
 - **Quota tracking**: Visual indicators of progress toward quotas
 - **Quota notifications**: Reminders when quotas aren't met
 - **Flexible quotas**: Different quotas for different members/ages
@@ -259,13 +258,10 @@ Enhanced reporting and analytics:
 **Status**: Future
 **Priority**: Low
 
-User interface improvements:
-
-- **Dark mode**: Alternative color scheme
-- **Custom themes**: Personalized appearance
-- **Drag and drop**: Enhanced Kanban board interactions
-- **Keyboard shortcuts**: Power user features
-- **Accessibility**: Screen reader support and keyboard navigation
+- **Category visual customization**: Allow each category to have a unique icon and color for improved visual distinction and usability.
+  - Admins can select an icon (FontAwesome) and color for each category
+  - Display the chosen icon and color in all category listings and task template groupings
+  - Ensure accessibility and maintain a consistent, attractive UI
 
 ### 🤖 AI-Powered Features
 **Status**: Future
@@ -382,10 +378,6 @@ Additional gamification features:
 
 #### Task & Board Enhancements
 - Allow setting a completion percentage when completing a task (e.g., "folded half the laundry").
-- Group task templates by category in member boards:
-  - Display one entry per category, expandable to show templates within.
-  - Simplify task template cards to show less information; clicking a card assigns the task to the member.
-  - Admins should still be able to assign tasks to others easily from this view.
 
 #### Testing & Quality
 - Fix all pending and skipped tests to ensure full test coverage and reliability.
@@ -396,5 +388,17 @@ Additional gamification features:
 
 #### Cursor AI Rules
 - Create and document Cursor rules for this project to guide AI assistance and code reviews.
+
+### 🎨 Enhanced UI/UX
+**Status**: Future
+**Priority**: Low
+
+- **Category visual customization**: Allow each category to have a unique icon and color for improved visual distinction and usability.
+  - Admins can select an icon (FontAwesome) and color for each category
+  - Display the chosen icon and color in all category listings and task template groupings
+  - Ensure accessibility and maintain a consistent, attractive UI
+
+- **Task Template UI/UX**:
+  - Admins should still be able to assign tasks to others easily from the member dashboard view.
 
 ---
