@@ -108,8 +108,3 @@ post '/profile' do
     erb :'member/edit_profile'
   end
 end
-
-get '/members/new' do
-  halt 403, 'Member signup is disabled' unless settings.allow_member_signup
-  erb :'members/new'
-end
