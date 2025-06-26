@@ -14,6 +14,9 @@ require_relative '../app'
 require 'selenium/webdriver'
 require 'database_cleaner/active_record'
 
+ENV['SINATRA_ENV'] = 'test'
+ENV['RACK_ENV'] = 'test'
+
 # Load all helpers and models
 Dir[File.join(__dir__, '..', 'helpers', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, '..', 'models', '*.rb')].each { |file| require file }
@@ -21,6 +24,7 @@ Dir[File.join(__dir__, '..', 'models', '*.rb')].each { |file| require file }
 Capybara.app = App
 Capybara.default_driver = :rack_test
 Capybara.javascript_driver = :selenium_chrome_headless
+Capybara.server = :puma, { Silent: true }
 
 RSpec.configure do |config|
   config.include Capybara::DSL

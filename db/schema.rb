@@ -49,7 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_06_23_193000) do
   create_table "task_completions", force: :cascade do |t|
     t.integer "task_id", null: false
     t.integer "member_id", null: false
-    t.datetime "completed_at", null: false
+    t.datetime "completed_at", precision: nil, null: false
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

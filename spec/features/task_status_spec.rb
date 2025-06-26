@@ -23,15 +23,8 @@ RSpec.describe 'Task Status Management', type: :feature do
     it 'can change a task from todo to in_progress' do
       within "[data-testid='task-card-#{another_task.id}']" do
         find("[data-testid='action-dropdown-#{another_task.id}'] .dropdown-toggle").click
-        # Debug: Check if the button exists and is visible
-        button = find("button[type='submit']", text: 'In Progress')
-        puts "Found button: #{button.text}"
-        puts "Button visible: #{button.visible?}"
-        puts "Button disabled: #{button.disabled?}"
-        button.click
+        find("button[type='submit']", text: 'In Progress').click
       end
-      # Debug: Check the task status after clicking
-      puts "Task status after click: #{Task.find(another_task.id).status}"
       expect(Task.find(another_task.id).status).to eq('in_progress')
     end
 
