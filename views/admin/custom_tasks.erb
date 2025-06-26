@@ -145,7 +145,7 @@
             <form method="POST" action="/tasks/assign-template">
                 <div class="modal-body">
                     <p class="text-muted mb-3">
-                        This will assign an existing template to the custom task. The task will use the template's name but keep its custom values for other properties.
+                        This will assign an existing template to the custom task. You can modify the task values below. Values that differ from the template will be marked as [Custom].
                     </p>
 
                     <input type="hidden" id="assign-task-id" name="task_id">
@@ -167,48 +167,56 @@
                         </select>
                     </div>
 
-                    <!-- Comparison Section -->
+                    <!-- Editable Task Form -->
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="mb-3"><i class="fas fa-edit"></i> Current Task (After Assignment)</h6>
-                            <div class="p-3 bg-light rounded">
-                                <div class="mb-2">
-                                    <strong>Title:</strong> <span id="result-title"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <strong>Difficulty:</strong> <span id="result-difficulty"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <strong>Category:</strong> <span id="result-category"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <strong>Description:</strong> <span id="result-description"></span>
+                            <div class="mb-3">
+                                <label for="task-title" class="form-label">Task Title</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="task-title" name="title" required>
+                                    <span class="input-group-text" id="title-badge">[Custom]</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="mb-3"><i class="fas fa-copy"></i> Template Properties</h6>
-                            <div class="p-3 bg-light rounded">
-                                <div class="mb-2">
-                                    <strong>Title:</strong> <span id="template-title-display"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <strong>Difficulty:</strong> <span id="template-difficulty-display"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <strong>Category:</strong> <span id="template-category-display"></span>
-                                </div>
-                                <div class="mb-2">
-                                    <strong>Description:</strong> <span id="template-description-display"></span>
+                            <div class="mb-3">
+                                <label for="task-difficulty" class="form-label">Difficulty</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="task-difficulty" name="difficulty">
+                                        <option value="bronze">Bronze (1 point)</option>
+                                        <option value="silver">Silver (3 points)</option>
+                                        <option value="gold">Gold (5 points)</option>
+                                    </select>
+                                    <span class="input-group-text" id="difficulty-badge">[Custom]</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="task-description" class="form-label">Description</label>
+                        <div class="input-group">
+                            <textarea class="form-control" id="task-description" name="description" rows="3"></textarea>
+                            <span class="input-group-text" id="description-badge">[Custom]</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="task-category-id" class="form-label">Category</label>
+                        <div class="input-group">
+                            <select class="form-select" id="task-category-id" name="category_id" required>
+                                <% Category.all.order(:name).each do |category| %>
+                                    <option value="<%= category.id %>"><%= category.name %></option>
+                                <% end %>
+                            </select>
+                            <span class="input-group-text" id="category-badge">[Custom]</span>
                         </div>
                     </div>
 
                     <!-- Info -->
                     <div class="alert alert-info mt-3">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Note:</strong> Only the task title will be changed to match the template. All other properties (difficulty, category, description) will remain as custom values.
+                        <strong>Note:</strong> The task will be linked to the selected template. Values marked as [Custom] will be preserved, while [Default] values will use the template's properties.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -267,68 +275,94 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset template selection
             document.getElementById('template-select').value = '';
 
-            // Update current task display
-            updateCurrentTaskDisplay();
-            updateTemplateDisplay();
+            // Populate form with current task values
+            populateTaskForm();
+            updateBadges();
         });
 
         // Handle template selection
         document.getElementById('template-select').addEventListener('change', function() {
-            updateTemplateDisplay();
+            populateTaskForm();
+            updateBadges();
+        });
+
+        // Handle form field changes
+        ['task-title', 'task-description', 'task-difficulty', 'task-category-id'].forEach(fieldId => {
+            document.getElementById(fieldId).addEventListener('input', updateBadges);
+            document.getElementById(fieldId).addEventListener('change', updateBadges);
         });
     }
 
-    function updateCurrentTaskDisplay() {
+    function populateTaskForm() {
         const values = window.currentTaskValues || {};
-
-        // Get selected template values
         const selectedOption = document.getElementById('template-select').options[document.getElementById('template-select').selectedIndex];
+
         if (selectedOption && selectedOption.value) {
-            // Use template's name, but keep custom values for everything else
+            // Template selected - use template's title, keep custom values for others
             const templateTitle = selectedOption.getAttribute('data-title');
-            document.getElementById('result-title').textContent = templateTitle;
+            document.getElementById('task-title').value = templateTitle;
+            document.getElementById('task-difficulty').value = values.difficulty || '';
+            document.getElementById('task-category-id').value = values.categoryId || '';
+            document.getElementById('task-description').value = values.description || '';
         } else {
-            document.getElementById('result-title').textContent = values.title || '';
+            // No template selected - use all custom values
+            document.getElementById('task-title').value = values.title || '';
+            document.getElementById('task-difficulty').value = values.difficulty || '';
+            document.getElementById('task-category-id').value = values.categoryId || '';
+            document.getElementById('task-description').value = values.description || '';
         }
-
-        // Keep custom values for other properties
-        document.getElementById('result-difficulty').textContent = values.difficulty ? values.difficulty.charAt(0).toUpperCase() + values.difficulty.slice(1) : '';
-
-        // Get category name
-        const categorySelect = document.getElementById('template-category-id');
-        if (categorySelect) {
-            const categoryOption = Array.from(categorySelect.options).find(opt => opt.value === values.categoryId);
-            document.getElementById('result-category').textContent = categoryOption ? categoryOption.text : '';
-        }
-
-        document.getElementById('result-description').textContent = values.description || 'No description';
     }
 
-    function updateTemplateDisplay() {
+    function updateBadges() {
         const selectedOption = document.getElementById('template-select').options[document.getElementById('template-select').selectedIndex];
 
-        if (selectedOption && selectedOption.value) {
-            const templateTitle = selectedOption.getAttribute('data-title');
-            const templateDescription = selectedOption.getAttribute('data-description') || '';
-            const templateDifficulty = selectedOption.getAttribute('data-difficulty');
-            const templateCategoryId = selectedOption.getAttribute('data-category-id');
-
-            document.getElementById('template-title-display').textContent = templateTitle;
-            document.getElementById('template-difficulty-display').textContent = templateDifficulty ? templateDifficulty.charAt(0).toUpperCase() + templateDifficulty.slice(1) : '';
-            document.getElementById('template-description-display').textContent = templateDescription || 'No description';
-
-            // Get category name
-            const categorySelect = document.getElementById('template-category-id');
-            if (categorySelect) {
-                const categoryOption = Array.from(categorySelect.options).find(opt => opt.value === templateCategoryId);
-                document.getElementById('template-category-display').textContent = categoryOption ? categoryOption.text : '';
-            }
-        } else {
-            document.getElementById('template-title-display').textContent = 'Select a template...';
-            document.getElementById('template-difficulty-display').textContent = '';
-            document.getElementById('template-category-display').textContent = '';
-            document.getElementById('template-description-display').textContent = '';
+        if (!selectedOption || !selectedOption.value) {
+            // No template selected, all values are custom
+            setBadge('title-badge', '[Custom]', 'bg-info');
+            setBadge('difficulty-badge', '[Custom]', 'bg-info');
+            setBadge('category-badge', '[Custom]', 'bg-info');
+            setBadge('description-badge', '[Custom]', 'bg-info');
+            return;
         }
+
+        // Get current form values
+        const currentTitle = document.getElementById('task-title').value;
+        const currentDifficulty = document.getElementById('task-difficulty').value;
+        const currentCategoryId = document.getElementById('task-category-id').value;
+        const currentDescription = document.getElementById('task-description').value;
+
+        // Get template values
+        const templateTitle = selectedOption.getAttribute('data-title');
+        const templateDescription = selectedOption.getAttribute('data-description') || '';
+        const templateDifficulty = selectedOption.getAttribute('data-difficulty');
+        const templateCategoryId = selectedOption.getAttribute('data-category-id');
+
+        // Compare values and set badges
+        setBadge('title-badge',
+            currentTitle === templateTitle ? '[Default]' : '[Custom]',
+            currentTitle === templateTitle ? 'bg-secondary' : 'bg-info'
+        );
+
+        setBadge('difficulty-badge',
+            currentDifficulty === templateDifficulty ? '[Default]' : '[Custom]',
+            currentDifficulty === templateDifficulty ? 'bg-secondary' : 'bg-info'
+        );
+
+        setBadge('category-badge',
+            currentCategoryId === templateCategoryId ? '[Default]' : '[Custom]',
+            currentCategoryId === templateCategoryId ? 'bg-secondary' : 'bg-info'
+        );
+
+        setBadge('description-badge',
+            currentDescription === templateDescription ? '[Default]' : '[Custom]',
+            currentDescription === templateDescription ? 'bg-secondary' : 'bg-info'
+        );
+    }
+
+    function setBadge(badgeId, text, className) {
+        const badge = document.getElementById(badgeId);
+        badge.textContent = text;
+        badge.className = `input-group-text ${className}`;
     }
 });
 </script>

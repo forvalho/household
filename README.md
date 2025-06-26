@@ -12,6 +12,13 @@ A Sinatra-based web application for managing household chores and tasks among me
 
 ## Admin Features
 
+### Improved User Experience
+
+All admin actions now provide a seamless user experience by redirecting back to the page you came from:
+- **Smart Redirection**: After any admin action (create, update, delete), you'll be returned to the page you were working on
+- **Fallback Protection**: If the referring page is unavailable, you'll be redirected to the appropriate default admin page
+- **Consistent Behavior**: This works across all admin areas: members, templates, categories, settings, and task management
+
 ### Template Management for Custom Tasks
 
 Admins have two powerful options for managing custom tasks:

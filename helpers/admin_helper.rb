@@ -14,4 +14,13 @@ module AdminHelper
   def render_sidebar
     erb :'admin/_sidebar', layout: false
   end
+
+  def redirect_back_or_default(default_path)
+    referer = request.referer
+    if referer && referer.include?('/admin/')
+      redirect referer
+    else
+      redirect default_path
+    end
+  end
 end

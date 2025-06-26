@@ -66,7 +66,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error creating member: ' + member.errors.full_messages.join(', '))
     end
-    redirect '/admin/members'
+    redirect_back_or_default('/admin/members')
   end
 
   post '/members/:id' do
@@ -76,7 +76,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error updating member: ' + @member.errors.full_messages.join(', '))
     end
-    redirect '/admin/members'
+    redirect_back_or_default('/admin/members')
   end
 
   # Admin Management
@@ -92,7 +92,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error creating admin: ' + admin.errors.full_messages.join(', '))
     end
-    redirect '/admin/admins'
+    redirect_back_or_default('/admin/admins')
   end
 
   # Reporting
@@ -138,7 +138,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error creating task template')
     end
-    redirect '/admin/task-templates'
+    redirect_back_or_default('/admin/task-templates')
   end
 
   put '/task-templates/:id' do
@@ -153,7 +153,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error updating template: ' + template.errors.full_messages.join(', '))
     end
-    redirect '/admin/task-templates'
+    redirect_back_or_default('/admin/task-templates')
   end
 
   # Assign a task template to a member (admin only)
@@ -168,7 +168,7 @@ namespace '/admin' do
       task = template.create_task_for(member: member)
       set_flash('success', "Task '#{template.title}' assigned to #{member.name}!")
     end
-    redirect '/admin/dashboard'
+    redirect_back_or_default('/admin/dashboard')
   end
 
   # Admin can assign template to any member
@@ -186,7 +186,7 @@ namespace '/admin' do
     template = TaskTemplate.find(params[:id])
     template.destroy
     set_flash('success', 'Task template deleted!')
-    redirect '/admin/task-templates'
+    redirect_back_or_default('/admin/task-templates')
   end
 
   # Admin Settings
@@ -212,7 +212,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error creating category: ' + category.errors.full_messages.join(', '))
     end
-    redirect '/admin/categories'
+    redirect_back_or_default('/admin/categories')
   end
 
   put '/categories/:id' do
@@ -226,7 +226,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Error updating category: ' + category.errors.full_messages.join(', '))
     end
-    redirect '/admin/categories'
+    redirect_back_or_default('/admin/categories')
   end
 
   delete '/categories/:id' do
@@ -237,7 +237,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Cannot delete category with associated tasks or templates')
     end
-    redirect '/admin/categories'
+    redirect_back_or_default('/admin/categories')
   end
 
   post '/settings' do
@@ -246,7 +246,7 @@ namespace '/admin' do
     Setting.set('allow_member_signup', allow.to_s)
     settings.allow_member_signup = allow
     set_flash('success', 'Settings updated!')
-    redirect '/admin/settings'
+    redirect_back_or_default('/admin/settings')
   end
 
   post '/settings/avatar_styles' do
@@ -256,11 +256,11 @@ namespace '/admin' do
     # Prevent disabling any style in use
     if (in_use - enabled).any?
       set_flash('error', 'Cannot disable avatar styles that are currently in use by members.')
-      redirect '/admin/settings'
+      redirect_back_or_default('/admin/settings')
     end
     Setting.set('enabled_avatar_styles', enabled.to_json)
     set_flash('success', 'Avatar style settings updated!')
-    redirect '/admin/settings'
+    redirect_back_or_default('/admin/settings')
   end
 
   delete '/admin/tasks/:id/reject' do
@@ -272,7 +272,7 @@ namespace '/admin' do
     else
       set_flash('error', 'Task not found or not a custom task.')
     end
-    redirect '/admin/dashboard'
+    redirect_back_or_default('/admin/dashboard')
   end
 
   get '/custom-tasks' do

@@ -14,6 +14,8 @@
 - [x] Admin template assignment for custom tasks (assign existing template to custom task, preserving custom values)
 - [x] Admin template conversion for custom tasks (create new template from custom task)
 - [x] Test database cleaning improvements (DatabaseCleaner integration, removed seed data from test setup)
+- [x] Improved admin UX with referer-based redirection (all admin actions return to the page they came from)
+- [x] DRY refactoring of admin redirect logic (centralized redirect_back_or_default helper method)
 
 ## High Priority 🎯
 

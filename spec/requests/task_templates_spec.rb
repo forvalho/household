@@ -223,7 +223,11 @@ RSpec.describe 'Task Template Routes', type: :request do
       post '/admin/login', { username: 'admin', password: 'password123' }
       post '/tasks/assign-template', {
         task_id: task.id,
-        template_id: template.id
+        template_id: template.id,
+        title: template.title,
+        description: task.description,
+        difficulty: task.difficulty,
+        category_id: task.category_id
       }
 
       expect(last_response).to be_redirect
@@ -231,12 +235,12 @@ RSpec.describe 'Task Template Routes', type: :request do
       expect(last_response.body).to include('now uses template')
 
       task.reload
-      expect(task.title).to eq('Existing Template')  # Uses template's name
-      expect(task.description).to eq('Custom description')  # Keeps custom value
-      expect(task.difficulty).to eq('silver')  # Keeps custom value
-      expect(task.category).to eq(category)  # Keeps custom value
-      expect(task.task_template_id).to eq(template.id)  # Links to template
-      expect(task.custom_task?).to be false  # No longer custom since it has a template
+      expect(task.title).to eq('Existing Template')
+      expect(task.description).to eq('Custom description')
+      expect(task.difficulty).to eq('silver')
+      expect(task.category).to eq(category)
+      expect(task.task_template_id).to eq(template.id)
+      expect(task.custom_task?).to be false
     end
 
     it 'requires admin login' do
@@ -246,7 +250,11 @@ RSpec.describe 'Task Template Routes', type: :request do
 
       post '/tasks/assign-template', {
         task_id: task.id,
-        template_id: template.id
+        template_id: template.id,
+        title: template.title,
+        description: task.description,
+        difficulty: task.difficulty,
+        category_id: task.category_id
       }
 
       expect(last_response).to be_redirect

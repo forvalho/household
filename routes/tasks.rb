@@ -79,18 +79,30 @@ patch '/tasks/:id/assignee' do
   if new_member_id.blank?
     task.destroy
     set_flash('info', 'Task removed')
-    redirect '/dashboard'
+    if admin_logged_in?
+      redirect_back_or_default('/admin/dashboard')
+    else
+      redirect '/dashboard'
+    end
   end
 
   # If assignment doesn't change, just redirect
   if task.member_id == new_member_id.to_i
-    redirect '/dashboard'
+    if admin_logged_in?
+      redirect_back_or_default('/admin/dashboard')
+    else
+      redirect '/dashboard'
+    end
   end
 
   # Update assignment
   task.update(member_id: new_member_id)
   set_flash('success', 'Task assigned successfully')
-  redirect '/dashboard'
+  if admin_logged_in?
+    redirect_back_or_default('/admin/dashboard')
+  else
+    redirect '/dashboard'
+  end
 end
 
 # Assign an existing template to a custom task
@@ -100,15 +112,17 @@ post '/tasks/assign-template' do
   task = Task.find(params[:task_id])
   template = TaskTemplate.find(params[:template_id])
 
-  # Update the task to use the template's name but preserve custom values
+  # Update the task with the form values and link to template
   task.update!(
-    title: template.title,  # Only use template's name
-    task_template_id: template.id  # Link to template
-    # Keep all other values (description, difficulty, category) as they were
+    title: params[:title],
+    description: params[:description],
+    difficulty: params[:difficulty],
+    category: Category.find_by(id: params[:category_id]),
+    task_template_id: template.id
   )
 
-  set_flash('success', "Task now uses template '#{template.title}' but keeps custom values")
-  redirect '/admin/dashboard'
+  set_flash('success', "Task now uses template '#{template.title}'")
+  redirect_back_or_default('/admin/dashboard')
 end
 
 # Convert a task to a template
@@ -129,10 +143,10 @@ post '/tasks/convert-to-template' do
     # Link the original task to the new template
     task.update(task_template_id: template.id)
     set_flash('success', "Task '#{task.title}' converted to template successfully!")
-    redirect '/admin/dashboard'
+    redirect_back_or_default('/admin/dashboard')
   else
     set_flash('error', 'Error creating template: ' + template.errors.full_messages.join(', '))
-    redirect '/admin/dashboard'
+    redirect_back_or_default('/admin/dashboard')
   end
 end
 
