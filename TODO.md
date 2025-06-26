@@ -10,6 +10,10 @@
 - [x] Remove per-day grouping from Kanban board
 - [x] Reintegrate admin plugin back into main app
 - [x] Member profile pictures/avatars (with admin-configurable DiceBear styles)
+- [x] Category visual customization (icons and colors)
+- [x] Admin template assignment for custom tasks (assign existing template to custom task, preserving custom values)
+- [x] Admin template conversion for custom tasks (create new template from custom task)
+- [x] Test database cleaning improvements (DatabaseCleaner integration, removed seed data from test setup)
 
 ## High Priority 🎯
 
@@ -55,7 +59,6 @@
 - [ ] Member activity tracking and analytics
 
 ### UI/UX Improvements
-- [ ] Category visual customization (icons and colors)
 - [ ] Admin area redesign for improved usability
 - [ ] Mobile-responsive design improvements
 - [ ] Task template UI/UX enhancements

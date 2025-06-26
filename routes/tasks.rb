@@ -93,6 +93,24 @@ patch '/tasks/:id/assignee' do
   redirect '/dashboard'
 end
 
+# Assign an existing template to a custom task
+post '/tasks/assign-template' do
+  require_admin_login
+
+  task = Task.find(params[:task_id])
+  template = TaskTemplate.find(params[:template_id])
+
+  # Update the task to use the template's name but preserve custom values
+  task.update!(
+    title: template.title,  # Only use template's name
+    task_template_id: template.id  # Link to template
+    # Keep all other values (description, difficulty, category) as they were
+  )
+
+  set_flash('success', "Task now uses template '#{template.title}' but keeps custom values")
+  redirect '/admin/dashboard'
+end
+
 # Convert a task to a template
 post '/tasks/convert-to-template' do
   require_admin_login

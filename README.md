@@ -10,6 +10,26 @@ A Sinatra-based web application for managing household chores and tasks among me
 - **Task Completions**: Records when a `Member` completes a `Task`, awarding points based on difficulty.
 - **Leaderboard**: A ranked list of members based on points earned over a specific period.
 
+## Admin Features
+
+### Template Management for Custom Tasks
+
+Admins have two powerful options for managing custom tasks:
+
+1. **Assign Template**: Link an existing template to a custom task
+   - Changes the task's name to match the template
+   - Preserves all custom values (difficulty, category, description)
+   - Makes the task no longer custom (linked to template)
+   - Available in both admin dashboard and custom tasks page
+
+2. **Convert to Template**: Create a new template from a custom task
+   - Creates a new reusable template available to all members
+   - Links the original task to the new template
+   - Allows editing of template properties before creation
+   - Available in both admin dashboard and custom tasks page
+
+Both actions include modal dialogs for review and confirmation before committing changes.
+
 ## Member Dashboard Features
 
 - **Sidebar with Date Filter & Available Tasks**: The left sidebar contains a collapsible date filter (with presets like Today, This Week, Custom Range, etc.) and a collapsible list of available task templates. The sidebar is narrower for a modern look. The filter auto-submits on change, and custom ranges require both a start and end date. Only custom range params are included in the URL when selected.

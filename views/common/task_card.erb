@@ -25,18 +25,34 @@
             <!-- Actions: Assignee & Move To -->
             <div class="task-actions-container mb-2">
                 <% if admin_logged_in? && task.custom_task? %>
-                    <!-- Convert to Template Button for Custom Tasks (Admin Only) -->
-                    <button class="btn btn-sm btn-outline-info" type="button"
-                            data-bs-toggle="modal"
-                            data-bs-target="#convertToTemplateModal"
-                            data-task-id="<%= task.id %>"
-                            data-task-title="<%= task.title %>"
-                            data-task-difficulty="<%= task.difficulty %>"
-                            data-task-category="<%= task.category %>"
-                            data-task-description="<%= task.description %>">
-                        <i class="fas fa-save"></i>
-                        <span class="ms-1">Convert to Template</span>
-                    </button>
+                    <!-- Admin Actions for Custom Tasks -->
+                    <div class="btn-group btn-group-sm me-2">
+                        <!-- Assign Template Button -->
+                        <button class="btn btn-outline-warning" type="button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#assignTemplateModal"
+                                data-task-id="<%= task.id %>"
+                                data-task-title="<%= task.title %>"
+                                data-task-difficulty="<%= task.difficulty %>"
+                                data-task-category-id="<%= task.category_id %>"
+                                data-task-description="<%= task.description %>">
+                            <i class="fas fa-link"></i>
+                            <span class="ms-1">Assign Template</span>
+                        </button>
+
+                        <!-- Convert to Template Button -->
+                        <button class="btn btn-outline-info" type="button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#convertToTemplateModal"
+                                data-task-id="<%= task.id %>"
+                                data-task-title="<%= task.title %>"
+                                data-task-difficulty="<%= task.difficulty %>"
+                                data-task-category-id="<%= task.category_id %>"
+                                data-task-description="<%= task.description %>">
+                            <i class="fas fa-save"></i>
+                            <span class="ms-1">Convert to Template</span>
+                        </button>
+                    </div>
                 <% end %>
 
                 <!-- Assignee Dropdown -->

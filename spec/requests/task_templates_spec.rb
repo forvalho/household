@@ -3,8 +3,6 @@ require 'spec_helper'
 RSpec.describe 'Task Template Routes', type: :request do
   let(:admin) { Admin.create!(username: 'admin', password: 'password123') }
   let(:member) { Member.create!(name: 'Test Member') }
-  let(:kitchen_category) { Category.find_or_create_by!(name: 'Kitchen') }
-  let(:laundry_category) { Category.find_or_create_by!(name: 'Laundry') }
 
   before do
     # Clear any existing data
@@ -13,6 +11,7 @@ RSpec.describe 'Task Template Routes', type: :request do
     Member.destroy_all
     Admin.destroy_all
 
+    kitchen_category = Category.create!(name: 'Kitchen')
     TaskTemplate.create!(
       title: 'Test Template',
       description: 'Test description',
@@ -52,6 +51,7 @@ RSpec.describe 'Task Template Routes', type: :request do
       end
 
       it 'creates a new task template' do
+        laundry_category = Category.create!(name: 'Laundry')
         expect {
           post '/admin/task-templates', {
             title: 'New Template',
@@ -63,6 +63,7 @@ RSpec.describe 'Task Template Routes', type: :request do
       end
 
       it 'redirects back to templates page' do
+        laundry_category = Category.create!(name: 'Laundry')
         post '/admin/task-templates', {
           title: 'New Template',
           description: 'New description',
@@ -94,6 +95,7 @@ RSpec.describe 'Task Template Routes', type: :request do
       end
 
       it 'updates the task template' do
+        laundry_category = Category.create!(name: 'Laundry')
         put "/admin/task-templates/#{template.id}", {
           title: 'Updated Template',
           description: 'Updated description',
@@ -178,6 +180,78 @@ RSpec.describe 'Task Template Routes', type: :request do
         follow_redirect!
         expect(last_request.path).to eq('/dashboard')
       end
+    end
+  end
+
+  describe 'POST /tasks/convert-to-template' do
+    let!(:admin) { Admin.create!(username: 'admin', password: 'password123') }
+    let!(:member) { Member.create!(name: 'John Doe') }
+
+    it 'converts a task to template' do
+      category = Category.create!(name: 'Test Kitchen')
+      task = Task.create!(title: 'Custom Task', difficulty: 'silver', category: category, member: member)
+      post '/admin/login', { username: 'admin', password: 'password123' }
+      post '/tasks/convert-to-template', {
+        task_id: task.id,
+        title: 'New Template',
+        description: 'New description',
+        difficulty: 'bronze',
+        category_id: category.id
+      }
+
+      expect(last_response).to be_redirect
+      follow_redirect!
+      expect(last_response.body).to include('converted to template successfully')
+
+      template = TaskTemplate.last
+      expect(template.title).to eq('New Template')
+      expect(template.description).to eq('New description')
+      expect(template.difficulty).to eq('bronze')
+      expect(template.category).to eq(category)
+    end
+  end
+
+  describe 'POST /tasks/assign-template' do
+    let!(:admin) { Admin.create!(username: 'admin', password: 'password123') }
+    let!(:member) { Member.create!(name: 'John Doe') }
+
+    it 'assigns an existing template to a custom task' do
+      category = Category.create!(name: 'Test Kitchen')
+      task = Task.create!(title: 'Custom Task', difficulty: 'silver', category: category, member: member, description: 'Custom description')
+      template = TaskTemplate.create!(title: 'Existing Template', difficulty: 'gold', category: category, description: 'Template description')
+
+      post '/admin/login', { username: 'admin', password: 'password123' }
+      post '/tasks/assign-template', {
+        task_id: task.id,
+        template_id: template.id
+      }
+
+      expect(last_response).to be_redirect
+      follow_redirect!
+      expect(last_response.body).to include('now uses template')
+
+      task.reload
+      expect(task.title).to eq('Existing Template')  # Uses template's name
+      expect(task.description).to eq('Custom description')  # Keeps custom value
+      expect(task.difficulty).to eq('silver')  # Keeps custom value
+      expect(task.category).to eq(category)  # Keeps custom value
+      expect(task.task_template_id).to eq(template.id)  # Links to template
+      expect(task.custom_task?).to be false  # No longer custom since it has a template
+    end
+
+    it 'requires admin login' do
+      category = Category.create!(name: 'Test Kitchen')
+      task = Task.create!(title: 'Custom Task', difficulty: 'silver', category: category, member: member)
+      template = TaskTemplate.create!(title: 'Existing Template', difficulty: 'gold', category: category)
+
+      post '/tasks/assign-template', {
+        task_id: task.id,
+        template_id: template.id
+      }
+
+      expect(last_response).to be_redirect
+      follow_redirect!
+      expect(last_response.body).to include('login')
     end
   end
 end

@@ -12,6 +12,7 @@ require 'rack/test'
 require 'sinatra/base'
 require_relative '../app'
 require 'selenium/webdriver'
+require 'database_cleaner/active_record'
 
 # Load all helpers and models
 Dir[File.join(__dir__, '..', 'helpers', '*.rb')].each { |file| require file }
@@ -29,21 +30,16 @@ RSpec.configure do |config|
     App
   end
 
-  # Clean up the test database before each run
+  # Configure DatabaseCleaner
   config.before(:suite) do
-    TaskTemplate.destroy_all
-    TaskCompletion.destroy_all
-    Task.destroy_all
-    Member.destroy_all
-    Admin.destroy_all
+    DatabaseCleaner.strategy = :truncation
+    DatabaseCleaner.clean_with(:truncation)
   end
 
-  # Clean up between tests
-  config.after(:each) do
-    Task.destroy_all
-    Member.destroy_all
-    Admin.destroy_all
-    TaskCompletion.destroy_all
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
   end
 
   # Helper method for feature specs
