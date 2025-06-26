@@ -51,21 +51,6 @@ class Category < ActiveRecord::Base
     "fas fa-#{icon}"
   end
 
-  # Returns the display name with icon
-  def display_name_with_icon
-    "<i class=\"#{icon_class}\" style=\"color: #{color}\"></i> #{name}"
-  end
-
-  # Returns the display name with icon and color styling
-  def display_name_with_style
-    "<span style=\"color: #{color}\"><i class=\"#{icon_class}\"></i> #{name}</span>"
-  end
-
-  # Returns a badge with the category styling
-  def styled_badge
-    "<span class=\"badge\" style=\"background-color: #{color}; color: white;\"><i class=\"#{icon_class}\"></i> #{name}</span>"
-  end
-
   # Returns the category color with fallback
   def safe_color
     color.present? ? color : '#6c757d'
