@@ -1,3 +1,5 @@
+helpers AdminHelper
+
 # Task Management (for Admins)
 post '/tasks' do
   require_admin_login
