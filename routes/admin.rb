@@ -244,7 +244,6 @@ namespace '/admin' do
     # Checkbox only sends param if checked
     allow = params[:allow_member_signup] == 'true' || params[:allow_member_signup] == 'on'
     Setting.set('allow_member_signup', allow.to_s)
-    settings.allow_member_signup = allow
     set_flash('success', 'Settings updated!')
     redirect_back_or_default('/admin/settings')
   end

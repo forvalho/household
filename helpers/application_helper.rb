@@ -42,12 +42,6 @@ module ApplicationHelper
     @current_member ||= Member.find(session[:member_id]) if member_selected?
   end
 
-  def settings
-    @settings ||= OpenStruct.new(
-      allow_member_signup: Setting.get('allow_member_signup') == 'true'
-    )
-  end
-
   # Data helpers
   def format_date(date)
     date.strftime('%b %d, %Y')
