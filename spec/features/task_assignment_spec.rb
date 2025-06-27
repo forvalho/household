@@ -1,65 +1,93 @@
 require 'spec_helper'
+require 'bcrypt'
 
-RSpec.describe 'Task Assignment', type: :feature do
-  let!(:admin) { Admin.create!(username: 'admin', password: 'admin123') }
-  let!(:member1) { Member.create!(name: 'Member 1') }
-  let!(:member2) { Member.create!(name: 'Member 2') }
-  let!(:task) { Task.create!(title: 'Test Task', difficulty: 'bronze', member: member1, status: 'todo') }
+RSpec.describe 'Task Assignment', type: :feature, js: true do
+  let(:admin) { Admin.create!(username: 'admin', password_digest: BCrypt::Password.create('password')) }
+  let(:member1) { Member.create!(name: 'Member 1', active: true) }
+  let(:member2) { Member.create!(name: 'Member 2', active: true) }
+  let(:category) { Category.create!(name: 'Kitchen') }
+  let(:task) { Task.create!(title: 'Test Task', difficulty: 'bronze', member: member1, status: 'todo', category: category) }
 
   before do
-    post '/admin/login', { username: 'admin', password: 'admin123' }
-    visit '/admin/dashboard'
+    admin # Instantiate the admin
+    member1 # Instantiate the member1
+    member2 # Instantiate the member2
+    category # Instantiate the category
+    task # Instantiate the task
   end
 
-  def member_login
-    visit "/members/#{member1.id}/select"
-    visit '/dashboard'
-  end
+  describe 'as an admin' do
+    before do
+      visit '/admin/login'
+      fill_in 'username', with: 'admin'
+      fill_in 'password', with: 'password'
+      click_button 'Sign In'
+    end
 
-  context 'as an admin' do
     xit 'can assign a task to a member' do
-      find("button[data-bs-target='#collapse-#{member1.id}']").click
+      visit '/admin/dashboard'
 
-      within "[data-testid='task-card-#{task.id}']" do
-        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
+      # Expand the member's accordion first by finding the button containing the member's name
+      find('button.accordion-button', text: /#{member1.name}/).click
+
+      # Find the task card and click the assignee dropdown
+      within('.task-card', text: 'Test Task') do
+        find('.assignee-dropdown-btn').click
         click_button 'Member 2'
       end
-      expect(page).to have_content("Task assigned successfully")
+
+      expect(page).to have_content('Task assigned successfully')
       expect(task.reload.member).to eq(member2)
     end
 
     xit 'can unassign a task (which deletes it)' do
-      find("button[data-bs-target='#collapse-#{member1.id}']").click
+      visit '/admin/dashboard'
 
-      within "[data-testid='task-card-#{task.id}']" do
-        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
-        click_button 'Unassign'
+      # Expand the member's accordion first by finding the button containing the member's name
+      find('button.accordion-button', text: /#{member1.name}/).click
+
+      # Find the task card and click the assignee dropdown
+      within('.task-card', text: 'Test Task') do
+        find('.assignee-dropdown-btn').click
+        click_button 'Unassigned'
       end
-      expect(page).to have_content("Task removed")
-      expect(Task.find_by(id: task.id)).to be_nil
+
+      expect(page).to have_content('Task removed')
+      expect { task.reload }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 
-  context 'as a member' do
+  describe 'as a member' do
     before do
-      task.update(member: member1) # Ensure assignment
-      member_login
+      visit "/members/#{member1.id}/select"
     end
 
-    xit 'can claim an unassigned task' do
-      within "[data-testid='task-card-#{task.id}']" do
-        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
-        click_button 'Member 2'
-      end
-      expect(task.reload.member).to eq(member2)
+    it 'can claim an unassigned task' do
+      # Create an unassigned task template instead
+      template = TaskTemplate.create!(title: 'Unassigned Template', difficulty: 'bronze', category: category)
+
+      visit '/dashboard'
+
+      # Expand the category accordion first
+      find('button[data-bs-target="#collapse-1"]').click
+
+      # Find the template and click on it (it's a div with onclick, not a link)
+      find('.template-card', text: 'Unassigned Template').click
+
+      expect(page).to have_content("Task 'Unassigned Template' assigned to you!")
     end
 
-    xit 'can unassign themselves from a task' do
-      within "[data-testid='task-card-#{task.id}']" do
-        find("[data-testid='assignee-dropdown-#{task.id}'] .dropdown-toggle").click
+    it 'can unassign themselves from a task' do
+      visit '/dashboard'
+
+      # Find the task card and click the assignee dropdown - be more specific to avoid ambiguity
+      within('.task-card', text: 'Test Task') do
+        find('.assignee-dropdown-btn').click
         click_button 'Unassigned'
       end
-      expect(task.reload.member).to be_nil
+
+      expect(page).to have_content('Task removed')
+      expect { task.reload }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end

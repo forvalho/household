@@ -5,6 +5,9 @@ RSpec.describe 'Member Dashboard', type: :feature do
   let(:kitchen_category) { Category.find_or_create_by!(name: 'Kitchen') }
 
   before do
+    member # Instantiate the member
+    kitchen_category # Instantiate the category
+
     TaskTemplate.create!(
       title: 'Test Template',
       difficulty: 'silver',
@@ -12,20 +15,20 @@ RSpec.describe 'Member Dashboard', type: :feature do
     )
   end
 
-  xit 'displays the member dashboard' do
+  it 'displays the member dashboard' do
     visit "/members/#{member.id}/select"
-    expect(page).to have_content('Member Dashboard')
+    expect(page).to have_content("#{member.name}'s Tasks")
     expect(page).to have_content('Test Template')
   end
 
-  xit 'shows the member their assigned tasks' do
+  it 'shows the member their assigned tasks' do
     task = Task.create!(title: 'Assigned Task', member: member, difficulty: 'bronze', status: 'todo')
 
     visit "/members/#{member.id}/select"
     expect(page).to have_content('Assigned Task')
   end
 
-  xit 'allows a member to complete a task' do
+  it 'allows a member to complete a task' do
     task = Task.create!(title: 'Complete Me', member: member, difficulty: 'bronze', status: 'todo')
 
     visit "/members/#{member.id}/select"
@@ -35,30 +38,28 @@ RSpec.describe 'Member Dashboard', type: :feature do
       click_button 'Done'
     end
 
-    expect(page).to have_content('Task completed successfully!')
+    expect(page).to have_content('Task completed! +1 points')
     expect(task.reload.status).to eq('done')
   end
 
-  xit 'shows available task templates' do
+  it 'shows available task templates' do
     visit "/members/#{member.id}/select"
-    expect(page).to have_content('Available Task Templates')
     expect(page).to have_content('Test Template')
   end
 
-  xit 'allows a member to assign a task template to themselves' do
+  it 'allows a member to assign a task template to themselves', js: true do
     visit "/members/#{member.id}/select"
-
-    within '.task-templates' do
-      click_button 'Assign to Me'
-    end
-
-    expect(page).to have_content('Task assigned successfully!')
+    # Expand the Kitchen category accordion
+    find('button.accordion-button', text: 'Kitchen').click
+    # Click the template card to assign
+    find('.template-card', text: 'Test Template').click
+    expect(page).to have_content("Task 'Test Template' assigned to you!")
     expect(Task.where(member: member, title: 'Test Template')).to exist
   end
 
   it "supports date filtering for tasks", js: true do
     # Create a member and some tasks with different dates
-    member = Member.create!(name: "Test Member", avatar_url: "https://example.com/avatar.jpg")
+    member = Member.create!(name: "Date Filter Member", avatar_url: "https://example.com/avatar.jpg")
 
     # Create tasks for different dates
     today_task = Task.create!(

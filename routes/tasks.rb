@@ -30,7 +30,7 @@ put '/tasks/:id/status' do
 
   # Allow admin or the assigned member to move tasks
   unless admin_logged_in? || (member_selected? && task.member_id == current_member.id)
-    if request.xhr? || request.accept?('application/json')
+    if request.content_type == 'application/json'
       content_type :json
       halt 403, { success: false, message: 'Permission denied' }.to_json
     else

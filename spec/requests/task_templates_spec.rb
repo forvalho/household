@@ -116,8 +116,7 @@ RSpec.describe 'Task Template Routes', type: :request do
         login_as_admin(admin)
       end
 
-      # Temporarily skipped with xit
-      xit 'deletes the task template' do
+      it 'deletes the task template' do
         expect {
           delete "/admin/task-templates/#{template.id}"
         }.to change(TaskTemplate, :count).by(-1)

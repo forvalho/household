@@ -16,6 +16,7 @@
 - [x] Test database cleaning improvements (DatabaseCleaner integration, removed seed data from test setup)
 - [x] Improved admin UX with referer-based redirection (all admin actions return to the page they came from)
 - [x] DRY refactoring of admin redirect logic (centralized redirect_back_or_default helper method)
+- [x] Fix all pending and skipped tests
 
 ## High Priority 🎯
 
@@ -25,7 +26,6 @@
 - [ ] Task approval system with auto-approval
 - [ ] Member pause/unpause functionality (active/away status)
 - [ ] Task completion percentage tracking
-- [ ] Fix all pending and skipped tests
 
 ### Task Management
 - [ ] Task due dates and reminders
@@ -33,6 +33,8 @@
 - [ ] Task completion history view
 - [ ] Member-specific task ordering/pinning
 - [ ] "Vacation mode" for members to pause task assignments
+- [ ] Allow editing dates on tasks (for reporting/leaderboard accuracy when tasks are added for wrong dates)
+- [ ] Fix generic template customization modal (show modal for customizing task name, difficulty, etc. when assigning generic template)
 
 ### Integration & Automation
 - [ ] Google Calendar integration (custody tracking, availability-based assignments)

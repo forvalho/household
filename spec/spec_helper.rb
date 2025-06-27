@@ -13,6 +13,7 @@ require 'sinatra/base'
 require_relative '../app'
 require 'selenium/webdriver'
 require 'database_cleaner/active_record'
+require 'percy/capybara'
 
 ENV['SINATRA_ENV'] = 'test'
 ENV['RACK_ENV'] = 'test'

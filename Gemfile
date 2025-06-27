@@ -21,4 +21,5 @@ group :test do
   gem 'selenium-webdriver', '~> 4.0'
   gem 'simplecov', '~> 0.21.2', require: false
   gem 'database_cleaner-active_record', '~> 2.0'
+  gem 'percy-capybara', '~> 5.0'
 end
